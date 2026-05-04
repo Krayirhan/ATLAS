@@ -35,6 +35,16 @@ def _write_minimal_atlas_tree(root: Path) -> None:
                 "default_shell": "powershell",
                 "log_level": "info",
                 "environment": "local",
+                "ai": {
+                    "default_provider": "ollama",
+                    "ollama": {
+                        "base_url": "http://localhost:11434",
+                        "default_model": "qwen2.5:7b",
+                        "timeout_seconds": 300,
+                        "stream": False,
+                        "keep_alive": "30m",
+                    },
+                },
             }
         )
         + "\n",

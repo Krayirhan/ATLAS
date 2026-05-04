@@ -1,25 +1,33 @@
-# ATLAS — Next sprints
+# ATLAS - Next sprints
 
-## Completed in this batch (documentation)
+## Completed
 
-- **Sprint 25 —** V1 RC documentation & usage guide (README, KB, RC report).
-- **Sprint 26 —** Test coverage hardening (config, safety, MCP, registry, logs, reports, doctor).
-- **Sprint 27 —** Report depth, `audit v1-rc` polish, integration partition (critical vs optional), context plan notes for AI prep.
+- **Sprint 25:** V1 RC documentation and usage guide.
+- **Sprint 26:** Test coverage hardening.
+- **Sprint 27:** Report depth, `audit v1-rc` polish, integration partition.
+- **Sprint 27.5:** AI documentation, NotebookLM workflow, context contract, prompt policy, Ollama plan, security boundaries.
+- **Sprint 28:** **Ollama AI Layer Foundation + read-only `ai ask`** tamamlandi.
+- **Sprint 28.6:** Ollama warm-up, keep-alive, timeout hardening, context visibility.
 
-## Upcoming (do not start in this batch)
+## Upcoming
 
-- **Sprint 28 — AI Layer Foundation** — Provider interface skeleton, prompt composer, **read-only** `ai ask` design token; **no** file writes, **no** terminal execution, **no** orchestrator.
-- **Sprint 29 —** MemoryAgent / ProjectQAAgent.
-- **Sprint 30 —** PlannerAgent.
-- **Sprint 31 —** CodeReviewerAgent.
-- **Sprint 32 —** Tool approval design.
-- **Sprint 33 —** MainAgent alpha.
+- **Sprint 29 - MemoryAgent + ProjectQAAgent Alpha**
+  - read-only memory-backed Q&A
+  - daha iyi project status synthesis
+  - source-aware answer grounding
+- **Sprint 30 - PlannerAgent**
+- **Sprint 31 - CodeReviewerAgent**
+- **Sprint 32 - Tool approval design**
+- **Sprint 33 - MainAgent alpha**
 
-## V1.1 ideas (non-AI)
+## V2
 
-- MCP protocol compliance review for helpers.
-- Further report narrative depth and CI hooks (`ATLAS_REPORT_LIGHT` where needed).
+- Additional providers
+- controlled tool approval flow
+- richer memory synthesis
 
-## V2+ (explicitly not V1)
+## V3
 
-- LLM providers, RAG, autonomous coding agents, desktop UI — see README roadmap.
+- agent orchestration
+- optional RAG / indexing
+- broader autonomous workflows

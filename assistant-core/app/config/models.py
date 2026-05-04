@@ -11,6 +11,19 @@ from app.mcp.models import MCPMasterModel
 from app.projects.types import validate_project_type
 
 
+class OllamaSettings(BaseModel):
+    base_url: str = "http://localhost:11434"
+    default_model: str = "qwen2.5:7b"
+    timeout_seconds: int = 300
+    stream: bool = False
+    keep_alive: str = "30m"
+
+
+class AISettings(BaseModel):
+    default_provider: str = "ollama"
+    ollama: OllamaSettings = Field(default_factory=OllamaSettings)
+
+
 class AssistantSettings(BaseModel):
     """Runtime paths are normalized against discovered ATLAS root in loader."""
 
@@ -20,6 +33,7 @@ class AssistantSettings(BaseModel):
     default_shell: str = "powershell"
     log_level: str = "info"
     environment: str = "local"
+    ai: AISettings = Field(default_factory=AISettings)
 
     @field_validator("root", "workspace_root", "memory_db", mode="before")
     @classmethod
@@ -78,7 +92,9 @@ class SafetyPolicyModel(BaseModel):
 
 # Re-export MCP master model for single import site
 __all__ = [
+    "AISettings",
     "AssistantSettings",
+    "OllamaSettings",
     "ProjectEntry",
     "ProjectRegistryModel",
     "SafetyPolicyModel",

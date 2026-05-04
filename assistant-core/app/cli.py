@@ -7,6 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
+from app.commands.ai import ai_ask, ai_doctor, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -314,6 +315,32 @@ app.add_typer(audit, name="audit")
 @audit.command("v1-rc")
 def _audit_v1_rc() -> None:
     run_v1_rc_audit()
+
+
+ai = typer.Typer(help="Read-only AI layer")
+app.add_typer(ai, name="ai")
+
+
+@ai.command("doctor")
+def _ai_doctor() -> None:
+    ai_doctor()
+
+
+@ai.command("ask")
+def _ai_ask(
+    question: str = typer.Argument(...),
+    project: str = typer.Option(..., "--project"),
+    provider: str | None = typer.Option(None, "--provider"),
+    show_context: bool = typer.Option(False, "--show-context"),
+) -> None:
+    ai_ask(question=question, project=project, provider=provider, show_context=show_context)
+
+
+@ai.command("warmup")
+def _ai_warmup(
+    provider: str | None = typer.Option("ollama", "--provider"),
+) -> None:
+    ai_warmup(provider=provider)
 
 
 @app.command("onboard")

@@ -1,9 +1,22 @@
-# ATLAS — Current status
+# ATLAS - Current status
 
-- **Release:** **V1 RC — GO** (control plane only; no AI runtime in V1).
-- **Root:** `E:\ATLAS` (canonical). **`D:\ATLAS` is not an operational root.**
-- **Pilot / self-project:** **ATLAS**. **BenimFormum is not the pilot** and is not a V1 requirement.
-- **Sprints 25–27 (batch):** Documentation + usage guide, pytest coverage hardening, report/audit/context polish — all **pre–AI Layer** work.
-- **Sprint 28:** Planned start of **AI Layer Foundation** (interfaces / read-only ask design); **no** provider wiring or autonomous agents in that sprint’s baseline scope without an explicit scope change.
-- **Tests:** See latest `python -m pytest -q` from `assistant-core` (recent batch: **34 passed**).
-- **Doctor / audit:** `doctor`, `doctor --full`, and `audit v1-rc` are the authoritative health and RC signals on a given machine.
+- **Release:** **V1 RC - GO**.
+- **Root:** `E:\ATLAS` canonical. `D:\ATLAS` operational root degildir.
+- **Pilot / self-project:** **ATLAS**. **BenimFormum** bu sprint kapsaminda degil.
+- **Sprints 25-27:** Dokumantasyon, pytest coverage hardening, report/audit/context polish tamamlandi.
+- **Sprint 27.5:** AI documentation, NotebookLM workflow, context contract, prompt policy, Ollama integration plan ve security boundaries tamamlandi.
+- **Sprint 28:** **Tamamlandi.** Read-only **Ollama AI Layer Foundation** eklendi:
+  - `app/ai/*`
+  - `python -m app.cli ai doctor`
+  - `python -m app.cli ai ask`
+  - default provider `ollama`
+  - fallback/test provider `mock`
+- **Sprint 28.6:** Runtime hardening uygulandi:
+  - `timeout_seconds` 300s
+  - `keep_alive` 30m
+  - `ai warmup`
+  - context karakter limitleri ve gorunurlugu
+- **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
+- **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest system-health report. Tum repo taranmiyor.
+- **Tests:** `assistant-core` altinda pytest suiti genisletildi; AI config/provider/context/CLI testleri eklendi.
+- **Doctor / audit:** `doctor --full`, `ai doctor`, `audit v1-rc` ana saglik sinyalleridir.

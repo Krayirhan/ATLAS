@@ -18,6 +18,13 @@ ATLAS is a **local-first**, **security-first**, and **token-aware** personal **d
 | **Health** | `python -m app.cli doctor` / `doctor --full` |
 | **Audit** | `python -m app.cli audit v1-rc` |
 
+## AI Layer Preparation
+
+- **Sprint 28** will start the **Ollama**-backed, **read-only** AI layer (`ai doctor`, `ai ask`); see `workspace/knowledge-base/ATLAS/13-sprint-28-ai-layer-foundation-plan.md`.
+- **NotebookLM is not a runtime dependency** of ATLAS; it is used for **manual** summarization and markdown drops under `workspace/notebooklm-exports`, then **`notebooklm import`** into the knowledge-base.
+- **AI context** is assembled from the **ATLAS knowledge-base**, registry, memory (via repository), and reports — see `11-ai-context-contract.md` and `16-ai-source-index.md`.
+- The **first shipped AI surface** remains **read-only advisory**: no file writes, no terminal execution, no MCP/tool calls from the AI completion path.
+
 ## Core capabilities
 
 - Python **CLI** (`assistant-core`, Typer)
@@ -109,14 +116,15 @@ python -m app.cli config validate
 |-------|--------|
 | **V1** | Control plane: safety, registry, memory, reports, doctor, MCP config generation |
 | **V1.1** | Test/report depth, MCP protocol prep, polish — **no** LLM product |
-| **V2** | AI layer: LLM providers, read-only `ai ask`, MemoryAgent, PlannerAgent, CodeReviewerAgent |
+| **V2** | AI layer: **Ollama** (default local) LLM, read-only `ai ask`, MemoryAgent, PlannerAgent, CodeReviewerAgent |
 | **V3** | Desktop UI, chat panel, tool-approval UX, token usage dashboards |
 
 ### Forward-looking sprint map (documentation only)
 
 - **Sprints 25–27:** V1 stabilization (docs, tests, reports) — **no AI runtime**.
-- **Sprint 28:** AI Layer Foundation (interfaces, prompt composer, read-only ask).
-- **Sprint 29:** MemoryAgent / ProjectQAAgent.
+- **Sprint 27.5:** AI documentation, NotebookLM workflow & templates, context contract — **no AI code**.
+- **Sprint 28:** **Ollama** AI layer foundation + read-only **`ai ask`** (see KB `13-…`).
+- **Sprint 29:** MemoryAgent / ProjectQAAgent (read-only alpha).
 - **Sprint 30:** PlannerAgent.
 - **Sprint 31:** CodeReviewerAgent.
 - **Sprint 32:** Tool approval design.

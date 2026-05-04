@@ -50,6 +50,7 @@ def load_assistant_settings(config_root: Path | None = None) -> AssistantSetting
         "default_shell": raw.get("default_shell", "powershell"),
         "log_level": raw.get("log_level", "info"),
         "environment": raw.get("environment", "local"),
+        "ai": raw.get("ai", {}),
     }
     model = AssistantSettings.model_validate(data)
     if not _is_under(model.root, model.workspace_root):
