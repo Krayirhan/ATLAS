@@ -1,0 +1,27 @@
+{
+  "projects": [
+    {
+      "name": "ATLAS",
+      "type": "python-cli",
+      "root": "E:\\ATLAS",
+      "knowledge": "E:\\ATLAS\\workspace\\knowledge-base\\ATLAS",
+      "build_command": "",
+      "test_command": "python -m pytest -q",
+      "lint_command": "",
+      "status_command": "python -m app.cli doctor --full",
+      "command_workdir": "E:\\ATLAS\\assistant-core",
+      "forbidden_changes": [
+        "Do not access D:\\ATLAS while D: drive is unhealthy",
+        "Do not write to D: drive",
+        "Do not use BenimFormum as the current pilot project",
+        "Do not read .env files",
+        "Do not read private keys, SSH keys, keystores, or browser profiles",
+        "Do not add unrestricted terminal execution",
+        "Do not add git push automation",
+        "Do not add production deploy automation",
+        "Do not enable full disk MCP access",
+        "Do not implement autonomous coding agents in V1"
+      ]
+    }
+  ]
+}

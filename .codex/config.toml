@@ -1,0 +1,7 @@
+[mcp_servers]
+workspace-filesystem.command = "npx"
+workspace-filesystem.args = ["-y", "@modelcontextprotocol/server-filesystem", "E:\\ATLAS\\workspace"]
+project-memory-mcp.command = "python"
+project-memory-mcp.args = ["-m", "placeholder"]
+safe-terminal-mcp.command = "python"
+safe-terminal-mcp.args = ["-m", "placeholder"]

@@ -1,0 +1,14 @@
+# {{ project_name }} Agent Rules
+
+- Project type: {{ project_type }}
+- Root: {{ project_root }}
+{% if knowledge_path %}- Knowledge-base: {{ knowledge_path }}{% endif %}
+- Follow ATLAS safety and local-first principles.
+
+## Forbidden changes
+
+{% for item in forbidden_changes %}
+- {{ item }}
+{% else %}
+- (none listed)
+{% endfor %}

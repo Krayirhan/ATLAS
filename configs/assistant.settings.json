@@ -1,0 +1,8 @@
+﻿{
+  "root": "E:\\ATLAS",
+  "workspace_root": "E:\\ATLAS\\workspace",
+  "memory_db": "E:\\ATLAS\\workspace\\memory\\assistant.db",
+  "default_shell": "powershell",
+  "log_level": "info",
+  "environment": "local"
+}

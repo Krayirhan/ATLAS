@@ -1,0 +1,13 @@
+# Copilot Instructions for {{ project_name }}
+
+- Keep changes minimal and reversible.
+- Respect local-first constraints.
+- Avoid risky commands and secrets.
+
+## Forbidden changes
+
+{% for item in forbidden_changes %}
+- {{ item }}
+{% else %}
+- (none listed)
+{% endfor %}

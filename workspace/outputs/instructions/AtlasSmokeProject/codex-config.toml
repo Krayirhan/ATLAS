@@ -1,0 +1,4 @@
+[project]
+name = "AtlasSmokeProject"
+type = "python-cli"
+root = "E:/ATLAS/assistant-core"

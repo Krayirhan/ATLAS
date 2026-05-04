@@ -1,0 +1,4 @@
+[project]
+name = "AtlasSprint678"
+type = "python-cli"
+root = "E:/ATLAS/assistant-core"

@@ -1,0 +1,39 @@
+﻿{
+  "allowed_workspace_roots": [
+    "E:\\ATLAS\\workspace"
+  ],
+  "blocked_paths": [
+    "C:\\Users",
+    "C:\\Windows",
+    "AppData",
+    "D:\\ATLAS"
+  ],
+  "blocked_file_patterns": [
+    ".env",
+    "*.pem",
+    "*.key",
+    "*.keystore",
+    "*.jks",
+    "id_rsa",
+    "id_ed25519"
+  ],
+  "blocked_commands": [
+    "del",
+    "rmdir",
+    "format",
+    "shutdown",
+    "git reset --hard",
+    "git clean -fd",
+    "git push --force",
+    "Remove-Item -Recurse",
+    "Invoke-Expression"
+  ],
+  "approval_required_commands": [
+    "gradlew.bat",
+    "npm install",
+    "pip install",
+    "git commit",
+    "git push",
+    "docker run"
+  ]
+}

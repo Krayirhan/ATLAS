@@ -1,0 +1,29 @@
+﻿# Secrets and sensitive files
+.env
+*.env
+*.pem
+*.key
+*.keystore
+*.jks
+id_rsa
+id_ed25519
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs and local artifacts
+logs/**/*.log
+logs/**/*.jsonl
+*.tmp
+*.bak
+*.bak.*
+
+# Python build / test
+.pytest_cache/
+*.egg-info/
+assistant-core/atlas_assistant_core.egg-info/
+
+# Local SQLite (re-create with memory init)
+workspace/memory/*.db

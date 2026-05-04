@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "workspace-filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "E:\\ATLAS\\workspace"
+      ]
+    },
+    "project-memory-mcp": {
+      "command": "python",
+      "args": [
+        "E:\\ATLAS\\mcp-servers\\project-memory-mcp\\server.py",
+        "read_project_registry"
+      ]
+    },
+    "safe-terminal-mcp": {
+      "command": "python",
+      "args": [
+        "E:\\ATLAS\\mcp-servers\\safe-terminal-mcp\\server.py",
+        "preview",
+        "--type",
+        "status"
+      ]
+    }
+  }
+}

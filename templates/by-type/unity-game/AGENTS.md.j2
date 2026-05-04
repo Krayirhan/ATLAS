@@ -1,0 +1,16 @@
+# {{ project_name }} Agent Rules
+
+> **Profile:** `unity-game` — respect `Assets/` layout; avoid editor-only hacks in runtime code.
+
+- Project type: {{ project_type }}
+- Root: {{ project_root }}
+{% if knowledge_path %}- Knowledge-base: {{ knowledge_path }}{% endif %}
+- Follow ATLAS safety and local-first principles.
+
+## Forbidden changes
+
+{% for item in forbidden_changes %}
+- {{ item }}
+{% else %}
+- (none listed)
+{% endfor %}

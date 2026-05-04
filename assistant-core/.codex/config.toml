@@ -1,0 +1,4 @@
+[project]
+name = "ATLAS"
+type = "python-cli"
+root = "E:\ATLAS"
