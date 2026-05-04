@@ -47,12 +47,42 @@ def collect_integration_issues(name: str) -> list[str]:
     return issues
 
 
-def integrations_check(name: str) -> None:
-    """Verify Cursor/Copilot/Codex integration files and forbidden-change reflection."""
-    console = Console()
+def _optional_tooling_issue(msg: str) -> bool:
+    """Copilot/Codex/Cursor files missing are optional when AGENTS.md exists (Sprint 27)."""
+    m = msg.lower()
+    if "missing integration file:" in m:
+        return any(x in m for x in (".github", ".codex", ".cursor"))
+    if "missing .cursor/rules directory" in m or "no .mdc files under" in m:
+        return True
+    return False
+
+
+def partition_integration_issues(name: str) -> tuple[list[str], list[str]]:
+    """Split issues into (critical, optional). Optional is non-blocking for `integrations check`."""
     issues = collect_integration_issues(name)
-    if issues:
-        for issue in issues:
+    project = next((p for p in load_project_registry().projects if p.name == name), None)
+    if not project:
+        return issues, []
+    base = instruction_check_root(project)
+    has_agents = (base / "AGENTS.md").is_file()
+    critical: list[str] = []
+    optional: list[str] = []
+    for msg in issues:
+        if has_agents and _optional_tooling_issue(msg):
+            optional.append(msg)
+        else:
+            critical.append(msg)
+    return critical, optional
+
+
+def integrations_check(name: str) -> None:
+    """Verify integration files; critical failures exit 1, optional gaps print as warnings only."""
+    console = Console()
+    critical, optional = partition_integration_issues(name)
+    for msg in optional:
+        console.print(f"[yellow]{msg}[/yellow]")
+    if critical:
+        for issue in critical:
             console.print(f"[red]{issue}[/red]")
         raise typer.Exit(1)
     console.print("[green]integrations check OK[/green]")

@@ -6,6 +6,8 @@ from pathlib import Path
 from app.config.loader import load_project_registry
 from app.projects import registry as reg
 
+from support_registry import write_atlas_only_registry
+
 
 def test_validate_project_command_workdir(isolated_atlas: Path) -> None:
     root = isolated_atlas
@@ -26,3 +28,20 @@ def test_load_registry_with_status_command(isolated_atlas: Path) -> None:
     p = model.projects[0]
     assert p.status_command.startswith("python")
     assert str(p.command_workdir).endswith("assistant-core")
+
+
+def test_atlas_registry_has_no_smoke_or_benimformum(isolated_atlas: Path) -> None:
+    root = isolated_atlas
+    write_atlas_only_registry(root)
+    model = load_project_registry(root / "configs")
+    names = [p.name for p in model.projects]
+    assert "ATLAS" in names
+    assert "AtlasSmokeProject" not in names
+    assert "BenimFormum" not in names
+
+
+def test_project_validate_atlas_ok(isolated_atlas: Path) -> None:
+    root = isolated_atlas
+    write_atlas_only_registry(root)
+    issues = reg.validate_project("ATLAS", config_root=root / "configs")
+    assert not issues

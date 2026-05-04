@@ -102,4 +102,4 @@ def logs_project(project: str, last: int = 10) -> None:
         console.print(f"(no log lines matched project {project!r})")
         return
     for _, rec in slice_:
-        console.print(json.dumps(_scrub(rec), ensure_ascii=False))
+        console.print(json.dumps(_scrub(rec), ensure_ascii=False), markup=False, highlight=False)

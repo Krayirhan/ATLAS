@@ -34,3 +34,21 @@ def test_blocked_file_patterns(isolated_atlas: Path) -> None:
     assert hit2
     hit3, _ = is_blocked_path(Path("leaf.pem"), p)
     assert hit3
+
+
+def test_d_atlas_path_blocked_when_configured(isolated_atlas: Path) -> None:
+    p = _policy(isolated_atlas)
+    hit, _ = is_blocked_path(Path("D:/ATLAS/workspace/foo.txt"), p)
+    assert hit
+
+
+def test_blocked_commands_nonempty(isolated_atlas: Path) -> None:
+    p = _policy(isolated_atlas)
+    assert len(p.blocked_commands) >= 5
+
+
+def test_invoke_expression_blocked(isolated_atlas: Path) -> None:
+    from app.safety.command_guard import check_command
+
+    p = _policy(isolated_atlas)
+    assert check_command("Invoke-Expression { Write-Host 1 }", p)["blocked"]

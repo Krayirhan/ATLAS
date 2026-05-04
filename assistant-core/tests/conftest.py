@@ -71,6 +71,7 @@ def _write_minimal_atlas_tree(root: Path) -> None:
                     "git clean -fd",
                     "git push --force",
                     "Remove-Item -Recurse",
+                    "Invoke-Expression",
                     "format",
                 ],
                 "approval_required_commands": ["pip install"],
@@ -102,3 +103,16 @@ def isolated_atlas(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator
     _write_minimal_atlas_tree(root)
     monkeypatch.setenv("ATLAS_ROOT", str(root))
     yield root
+
+
+@pytest.fixture
+def isolated_atlas_with_memory(isolated_atlas: Path) -> Path:
+    import os
+
+    from typer.testing import CliRunner
+
+    from app.cli import app
+
+    r = CliRunner().invoke(app, ["memory", "init"], env={**os.environ, "ATLAS_ROOT": str(isolated_atlas)})
+    assert r.exit_code == 0, r.output
+    return isolated_atlas

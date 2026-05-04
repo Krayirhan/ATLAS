@@ -1,9 +1,9 @@
 # ATLAS — Risk list
 
-1. **D: volume health** — `D:` is treated as unhealthy; avoid reads/writes there; stale `D:\ATLAS` references in old docs or caches are a confusion risk.
-2. **MCP helper scripts** — Bundled `project-memory-mcp` / `safe-terminal-mcp` are not guaranteed to implement full stdio MCP protocol; treat as local helpers only.
-3. **Safe-terminal** — Any future “real run” path must stay behind explicit approvals; V1 stays preview-first.
-4. **Context manager** — Token estimates may be heuristic, not exact provider token counts.
-5. **Reports** — Many report types are structured outlines; depth hardening is ongoing (V1.1+).
-6. **Test coverage** — Core paths are covered; expand as features grow.
-7. **V2 agent orchestrator** — Explicitly out of V1 scope (separate program increment).
+1. **`D:` volume / `D:\ATLAS` confusion** — Operational work must stay on **`E:\ATLAS`**; stale docs or shortcuts referencing `D:\ATLAS` create misconfiguration risk.
+2. **MCP helpers vs real servers** — Bundled scripts may not implement full MCP stdio semantics; treat as local helpers only.
+3. **Safe-terminal** — Any future “real run” must remain gated; V1 stays preview-first.
+4. **Context budgets** — Token fields are **planned**, not exact LLM meter readings.
+5. **Report / audit depth** — Improved in Sprint 27; still not a substitute for human release review.
+6. **Nested automation** — Report generation can probe `doctor`/`pytest`; CI may set `ATLAS_REPORT_LIGHT=1` to skip nested subprocesses.
+7. **V2+ scope creep** — Agents, routers, RAG, and desktop UI remain **explicitly out of V1**.

@@ -57,6 +57,9 @@ class ContextPlan:
     skip: List[str] = field(default_factory=list)
     rationale: List[str] = field(default_factory=list)
     risks: List[str] = field(default_factory=list)
+    planned_read_order: List[str] = field(default_factory=list)
+    token_budget_note: str = ""
+    ai_layer_note: str = ""
 
 
 def normalize_task(task: str) -> str:
@@ -75,6 +78,8 @@ def build_plan(project_name: str, task: str) -> ContextPlan:
             project_name=project_name,
             token_budget=budget,
             risks=[f"Unknown project: {project_name}"],
+            token_budget_note="Token budget is planned only (no LLM calls in V1).",
+            ai_layer_note="Resolve registry entry before Sprint 28 AI work.",
         )
 
     ws = get_workspace_dir()
@@ -147,6 +152,20 @@ def build_plan(project_name: str, task: str) -> ContextPlan:
         skip.append(str(proj.root / "… entire project tree"))
         risks.append("If answers need code, escalate task type to code_review.")
 
+    planned_read_order = [
+        "1. Project registry entry (authoritative name, paths, commands).",
+        "2. SQLite memory (assistant.db) — project row, status, decisions (if initialized).",
+        f"3. Knowledge base markdown under `{kb}` (summary first, then deeper files by task).",
+        "4. Latest reports under `workspace/outputs/reports/...` (manual selection; avoid bulk).",
+        "5. Targeted source files under project root only when summaries are insufficient.",
+    ]
+    token_budget_note = (
+        "Token budget is planned/heuristic for ordering reads; ATLAS V1 does not call LLMs or count real tokens."
+    )
+    ai_layer_note = (
+        "Sprint 28+ AI Layer is expected to consume these plans as read-only input before any `ai ask` or agents."
+    )
+
     return ContextPlan(
         task=t,
         project_name=project_name,
@@ -155,4 +174,7 @@ def build_plan(project_name: str, task: str) -> ContextPlan:
         skip=skip,
         rationale=rationale,
         risks=risks,
+        planned_read_order=planned_read_order,
+        token_budget_note=token_budget_note,
+        ai_layer_note=ai_layer_note,
     )
