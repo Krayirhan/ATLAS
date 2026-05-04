@@ -16,6 +16,11 @@
   - `keep_alive` 30m
   - `ai warmup`
   - context karakter limitleri ve gorunurlugu
+- **Sprint 29:** **Tamamlandi.** Read-only ilk agent katmani eklendi:
+  - `MemoryAgent`
+  - `ProjectQAAgent`
+  - `python -m app.cli ai memory --project ATLAS`
+  - `python -m app.cli ai ask-agent --project ATLAS ...`
 - **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
 - **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest system-health report. Tum repo taranmiyor.
 - **Tests:** `assistant-core` altinda pytest suiti genisletildi; AI config/provider/context/CLI testleri eklendi.

@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_ask, ai_doctor, ai_warmup
+from app.commands.ai import ai_ask, ai_ask_agent, ai_doctor, ai_memory, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -341,6 +341,32 @@ def _ai_warmup(
     provider: str | None = typer.Option("ollama", "--provider"),
 ) -> None:
     ai_warmup(provider=provider)
+
+
+@ai.command("memory")
+def _ai_memory(
+    project: str = typer.Option(..., "--project"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_memory(project=project, show_sources=show_sources, as_json=as_json)
+
+
+@ai.command("ask-agent")
+def _ai_ask_agent(
+    question: str = typer.Argument(...),
+    project: str = typer.Option(..., "--project"),
+    provider: str | None = typer.Option(None, "--provider"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    show_context: bool = typer.Option(False, "--show-context"),
+) -> None:
+    ai_ask_agent(
+        question=question,
+        project=project,
+        provider=provider,
+        show_sources=show_sources,
+        show_context=show_context,
+    )
 
 
 @app.command("onboard")

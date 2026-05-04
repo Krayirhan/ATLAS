@@ -25,6 +25,12 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
   - `keep_alive`
   - `300s` timeout
   - bounded context visibility
+- Sprint 29 agents alpha:
+  - `MemoryAgent`
+  - `ProjectQAAgent`
+  - `ai memory`
+  - `ai ask-agent`
+  - still read-only, no write / command / MCP execution
 
 ---
 
@@ -60,7 +66,7 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
 
 ## Next sprint recommendation
 
-- **Sprint 29 - MemoryAgent + ProjectQAAgent Alpha**
+- **Sprint 30 - PlannerAgent Alpha**
 
 ---
 

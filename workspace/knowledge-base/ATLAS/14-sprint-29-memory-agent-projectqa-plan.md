@@ -1,44 +1,56 @@
-# Sprint 29 — MemoryAgent + ProjectQAAgent Alpha
+# Sprint 29 - MemoryAgent + ProjectQAAgent Alpha
 
 ## Purpose
 
-Add two **thin, read-only** helpers that sit on the Sprint 28 AI foundation:
+Add two thin, read-only helpers on top of the Sprint 28 AI layer:
 
-- **MemoryAgent** — answers questions about **SQLite memory** content (project status, decisions) using repository APIs, not raw SQL in prompts.
-- **ProjectQAAgent** — answers **project definition** questions (registry, knowledge-base headings, recent reports) with citations to paths/sections.
+- `MemoryAgent`
+- `ProjectQAAgent`
 
 ## What they are not
 
-- **Not** autonomous coding agents.  
-- **Not** planners or patch appliers.  
-- **Not** tool runners or terminal executors.
+- Not autonomous coding agents
+- Not planners or patch appliers
+- Not tool runners or terminal executors
 
-They remain **read-only** and return **natural language** (and optional structured JSON for CLI display).
+They stay read-only and return natural language plus safe source metadata.
 
 ## Relationship to context loader
 
-Both agents use the **same context contract** (`11-ai-context-contract.md`) and **source index** (`16-ai-source-index.md`). They specialize **which slices** get higher weight in the prompt (memory vs KB vs reports).
+Both agents reuse the same approved source contract as Sprint 28. They do not scan the whole repo. They weight memory, KB, and recent reports differently depending on the task.
 
 ## Sources
 
-- Registry + memory repository summaries + KB markdown + curated report excerpts — same allowed set as Sprint 28.
+- Registry
+- memory repository summaries
+- KB markdown
+- curated recent reports
 
-## CLI examples (planned — Sprint 29)
+Same allowed set as Sprint 28, with the same blocked-source rules.
+
+## CLI examples (implemented in Sprint 29)
 
 ```text
-python -m app.cli ai ask --project ATLAS "Son kararlar neler?"
-python -m app.cli ai status --project ATLAS
+python -m app.cli ai memory --project ATLAS
+python -m app.cli ai ask-agent --project ATLAS --provider mock "ATLAS su an ne durumda?"
+python -m app.cli ai ask-agent --project ATLAS --provider ollama "Sprint 30'a gecilebilir mi?"
 ```
 
-*(Exact flags subject to Sprint 29 UX pass; may map to agent mode behind `--mode`.)*
+## Outcome
+
+- `MemoryAgent` produces a bounded read-only project snapshot.
+- `ProjectQAAgent` answers project questions from approved sources only.
+- Existing `ai ask` flow remains intact.
+- Agent surface stays read-only: no file writes, no terminal execution, no git, no MCP tool calls.
 
 ## Out of scope
 
-- Terminal, file write, git, MCP tool calls.
-- Planner loops and code patch application.
-- Multi-step autonomous workflows.
+- Terminal, file write, git, MCP tool calls
+- Planner loops and code patch application
+- Multi-step autonomous workflows
 
 ## Exit criteria (alpha)
 
-- Documented behavior + tests for memory-only and KB-only questions.
-- Fails closed when question would require blocked sources.
+- Documented behavior and tests for memory-only and KB-only questions
+- Fails closed when a question would require blocked sources
+- CLI commands `ai memory` and `ai ask-agent` available

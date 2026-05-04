@@ -8,17 +8,14 @@
 - **Sprint 27.5:** AI documentation, NotebookLM workflow, context contract, prompt policy, Ollama plan, security boundaries.
 - **Sprint 28:** **Ollama AI Layer Foundation + read-only `ai ask`** tamamlandi.
 - **Sprint 28.6:** Ollama warm-up, keep-alive, timeout hardening, context visibility.
+- **Sprint 29:** **MemoryAgent + ProjectQAAgent Alpha** tamamlandi.
 
 ## Upcoming
 
-- **Sprint 29 - MemoryAgent + ProjectQAAgent Alpha**
-  - read-only memory-backed Q&A
-  - daha iyi project status synthesis
-  - source-aware answer grounding
-- **Sprint 30 - PlannerAgent**
-- **Sprint 31 - CodeReviewerAgent**
-- **Sprint 32 - Tool approval design**
-- **Sprint 33 - MainAgent alpha**
+- **Sprint 30 - PlannerAgent Alpha**
+- **Sprint 31 - CodeReviewerAgent Alpha**
+- **Sprint 32 - ToolApproval Design**
+- **Sprint 33 - MainAgent Alpha**
 
 ## V2
 

@@ -41,3 +41,21 @@ python -m app.cli ai ask --project ATLAS --provider mock "ATLAS su an ne durumda
 ```powershell
 ollama pull qwen2.5:7b
 ```
+
+## Agents Alpha
+
+Sprint 29 ile `MemoryAgent` ve `ProjectQAAgent` Alpha geldi.
+
+- Read-only agentlardir.
+- Kod yazmazlar.
+- Dosya degistirmezler.
+- Terminal calistirmazlar.
+- Git/MCP tool cagrisi yapmazlar.
+
+Kullanim:
+
+```powershell
+python -m app.cli ai memory --project ATLAS
+python -m app.cli ai ask-agent --project ATLAS --provider mock "ATLAS su an ne durumda?"
+python -m app.cli ai ask-agent --project ATLAS --provider ollama "Sprint 30'a gecilebilir mi?"
+```
