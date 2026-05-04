@@ -21,6 +21,19 @@
   - `ProjectQAAgent`
   - `python -m app.cli ai memory --project ATLAS`
   - `python -m app.cli ai ask-agent --project ATLAS ...`
+- **Sprint 30:** **Tamamlandi.** Read-only plan katmani eklendi:
+  - `PlannerAgent`
+  - `python -m app.cli ai plan --project ATLAS --goal "..."`
+  - objective / scope / risks / acceptance criteria / test plan uretimi
+- **Sprint 31:** **Tamamlandi.** Read-only review katmani eklendi:
+  - `CodeReviewerAgent`
+  - `python -m app.cli ai review --project ATLAS --scope safety`
+  - scope bazli bounded file review
+  - structured findings / recommendations / test suggestions
+- **Sprint 32:** **Tamamlandi.** Preview-only approval tasarimi eklendi:
+  - `ToolApprovalAgent`
+  - `python -m app.cli ai approval command --project ATLAS --cmd "..."`
+  - blocked / approval_required / preview_allowed / safe_readonly karar modeli
 - **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
 - **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest system-health report. Tum repo taranmiyor.
 - **Tests:** `assistant-core` altinda pytest suiti genisletildi; AI config/provider/context/CLI testleri eklendi.

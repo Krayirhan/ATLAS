@@ -31,6 +31,23 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
   - `ai memory`
   - `ai ask-agent`
   - still read-only, no write / command / MCP execution
+- Sprint 30 planner alpha:
+  - `PlannerAgent`
+  - `ai plan`
+  - bounded sprint planning only
+  - explicit approval required before implementation
+- Sprint 31 code review alpha:
+  - `CodeReviewerAgent`
+  - `ai review`
+  - scope-based bounded file review only
+  - structured findings, recommendations, and test suggestions
+  - still read-only, no write / command / MCP execution
+- Sprint 32 tool approval design:
+  - `ToolApprovalAgent`
+  - `ai approval command`
+  - preview-only decision layer
+  - blocked / approval_required / preview_allowed / safe_readonly statuses
+  - still no command execution, no file write, no MCP execution
 
 ---
 
@@ -66,7 +83,7 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
 
 ## Next sprint recommendation
 
-- **Sprint 30 - PlannerAgent Alpha**
+- **Sprint 33 - MainAgent Alpha**
 
 ---
 

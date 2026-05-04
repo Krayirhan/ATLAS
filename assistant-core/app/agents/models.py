@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Literal
 
 
 @dataclass(slots=True)
@@ -66,6 +66,139 @@ class ProjectQAResult:
     project_name: str
     status: str
     answer: str
+    sources: list[AgentContextSource]
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class PlannedFileImpact:
+    path: str
+    reason: str
+
+
+@dataclass(slots=True)
+class PlanRisk:
+    title: str
+    detail: str
+
+
+@dataclass(slots=True)
+class PlanAcceptanceCriterion:
+    text: str
+
+
+@dataclass(slots=True)
+class PlanTestStep:
+    text: str
+
+
+@dataclass(slots=True)
+class SprintPlanSection:
+    title: str
+    items: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class SprintPlan:
+    sprint_name: str
+    objective: str
+    scope: list[str]
+    out_of_scope: list[str]
+    expected_files: list[PlannedFileImpact]
+    risks: list[PlanRisk]
+    acceptance_criteria: list[PlanAcceptanceCriterion]
+    test_plan: list[PlanTestStep]
+    validation_commands: list[str]
+    next_dependency: str
+
+
+@dataclass(slots=True)
+class PlannerRequest:
+    project_name: str
+    goal: str
+    provider: str | None = None
+    max_sprints: int = 1
+    include_files: bool = True
+    include_risks: bool = True
+    include_tests: bool = True
+    language: str = "tr"
+    constraints: list[str] = field(default_factory=list)
+    show_sources: bool = False
+    as_json: bool = False
+
+
+@dataclass(slots=True)
+class PlannerResult:
+    agent_name: str
+    project_name: str
+    goal: str
+    status: str
+    plan_summary: str
+    proposed_sprints: list[SprintPlan]
+    risks: list[PlanRisk]
+    assumptions: list[str]
+    out_of_scope: list[str]
+    sources: list[AgentContextSource]
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+ReviewScope = Literal["safety", "ai-layer", "config", "mcp", "tests", "docs", "architecture", "all-light"]
+ReviewSeverity = Literal["critical", "high", "medium", "low", "info"]
+
+
+@dataclass(slots=True)
+class ReviewRecommendation:
+    title: str
+    text: str
+
+
+@dataclass(slots=True)
+class ReviewTestSuggestion:
+    text: str
+
+
+@dataclass(slots=True)
+class CodeReviewFinding:
+    severity: ReviewSeverity
+    category: str
+    title: str
+    description: str
+    affected_file: str
+    evidence: str
+    recommendation: str
+    test_suggestion: str
+
+
+@dataclass(slots=True)
+class CodeReviewRequest:
+    project_name: str
+    scope: ReviewScope
+    provider: str | None = None
+    files: list[str] = field(default_factory=list)
+    focus: str = ""
+    max_files: int = 12
+    max_chars_per_file: int = 2000
+    include_tests: bool = True
+    include_security: bool = True
+    include_architecture: bool = True
+    language: str = "tr"
+    constraints: list[str] = field(default_factory=list)
+    show_sources: bool = False
+    as_json: bool = False
+
+
+@dataclass(slots=True)
+class CodeReviewResult:
+    agent_name: str
+    project_name: str
+    scope: ReviewScope
+    status: str
+    summary: str
+    findings: list[CodeReviewFinding]
+    recommendations: list[ReviewRecommendation]
+    test_suggestions: list[ReviewTestSuggestion]
     sources: list[AgentContextSource]
     warnings: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)

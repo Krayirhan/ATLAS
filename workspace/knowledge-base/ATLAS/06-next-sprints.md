@@ -9,13 +9,17 @@
 - **Sprint 28:** **Ollama AI Layer Foundation + read-only `ai ask`** tamamlandi.
 - **Sprint 28.6:** Ollama warm-up, keep-alive, timeout hardening, context visibility.
 - **Sprint 29:** **MemoryAgent + ProjectQAAgent Alpha** tamamlandi.
+- **Sprint 30:** **PlannerAgent Alpha** tamamlandi.
+- **Sprint 31:** **CodeReviewerAgent Alpha** tamamlandi.
+- **Sprint 32:** **ToolApproval Design** tamamlandi.
 
 ## Upcoming
 
-- **Sprint 30 - PlannerAgent Alpha**
-- **Sprint 31 - CodeReviewerAgent Alpha**
-- **Sprint 32 - ToolApproval Design**
 - **Sprint 33 - MainAgent Alpha**
+- **Sprint 34 - SecurityAuditorAgent**
+- **Sprint 35 - DocumentationAgent**
+- **Sprint 36 - ReportAgent**
+- **Sprint 37 - IntegrationAgent**
 
 ## V2
 

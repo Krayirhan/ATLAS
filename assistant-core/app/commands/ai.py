@@ -8,8 +8,12 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from app.agents.code_reviewer_agent import CodeReviewerAgent
 from app.agents.memory_agent import MemoryAgent
-from app.agents.models import ProjectQARequest
+from app.agents.tool_approval_agent import ToolApprovalAgent
+from app.agents.models import CodeReviewRequest, PlannerRequest, ProjectQARequest
+from app.approval.models import ProposedCommand
+from app.agents.planner_agent import PlannerAgent
 from app.agents.project_qa_agent import ProjectQAAgent
 from app.ai.context_loader import AIContextError
 from app.ai.models import AIRequest
@@ -101,7 +105,7 @@ def ai_memory(
         raise typer.Exit(1) from exc
 
     if as_json:
-        console.print(
+        typer.echo(
             json.dumps(
                 {
                     "project_name": snapshot.project_name,
@@ -180,3 +184,235 @@ def ai_ask_agent(
         for warning in result.warnings:
             console.print(f"- {warning}")
     console.print(result.answer)
+
+
+def ai_plan(
+    goal: str = typer.Option(..., "--goal", help="Planning goal"),
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    provider: str | None = typer.Option(None, "--provider", help="Override provider: mock | ollama"),
+    max_sprints: int = typer.Option(1, "--max-sprints"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    console = Console()
+    agent = PlannerAgent()
+    try:
+        result = agent.plan(
+            PlannerRequest(
+                project_name=project,
+                goal=goal,
+                provider=provider,
+                max_sprints=max_sprints,
+                show_sources=show_sources,
+                as_json=as_json,
+            )
+        )
+    except (AIContextError, AIProviderError) as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {
+                    "agent_name": result.agent_name,
+                    "project_name": result.project_name,
+                    "goal": result.goal,
+                    "status": result.status,
+                    "plan_summary": result.plan_summary,
+                    "warnings": result.warnings,
+                    "sources": [
+                        {
+                            "type": source.source_type,
+                            "label": source.label,
+                            "path": source.path,
+                            "char_count": source.char_count,
+                        }
+                        for source in result.sources
+                    ],
+                    "proposed_sprints": [
+                        {
+                            "sprint_name": sprint.sprint_name,
+                            "objective": sprint.objective,
+                            "scope": sprint.scope,
+                            "out_of_scope": sprint.out_of_scope,
+                            "expected_files": [{"path": item.path, "reason": item.reason} for item in sprint.expected_files],
+                            "risks": [{"title": item.title, "detail": item.detail} for item in sprint.risks],
+                            "acceptance_criteria": [item.text for item in sprint.acceptance_criteria],
+                            "test_plan": [item.text for item in sprint.test_plan],
+                            "validation_commands": sprint.validation_commands,
+                            "next_dependency": sprint.next_dependency,
+                        }
+                        for sprint in result.proposed_sprints
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if show_sources:
+        console.print("[bold]Sources[/bold]")
+        for source in result.sources:
+            console.print(f"- {source.source_type}: {source.label} -> {source.path} ({source.char_count} chars)")
+    if result.warnings:
+        console.print("[bold]Warnings[/bold]")
+        for warning in result.warnings:
+            console.print(f"- {warning}")
+    console.print(result.plan_summary)
+
+
+def ai_review(
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    scope: str = typer.Option(..., "--scope", help="Review scope"),
+    provider: str | None = typer.Option(None, "--provider", help="Override provider: mock | ollama"),
+    files: list[str] = typer.Option([], "--file", help="Optional extra file path(s) under ATLAS root"),
+    max_files: int = typer.Option(12, "--max-files"),
+    max_chars_per_file: int = typer.Option(2000, "--max-chars-per-file"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    console = Console()
+    agent = CodeReviewerAgent()
+    try:
+        result = agent.review(
+            CodeReviewRequest(
+                project_name=project,
+                scope=scope,
+                provider=provider,
+                files=files,
+                max_files=max_files,
+                max_chars_per_file=max_chars_per_file,
+                show_sources=show_sources,
+                as_json=as_json,
+            )
+        )
+    except (AIContextError, AIProviderError) as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {
+                    "agent_name": result.agent_name,
+                    "project_name": result.project_name,
+                    "scope": result.scope,
+                    "status": result.status,
+                    "summary": result.summary,
+                    "warnings": result.warnings,
+                    "metadata": result.metadata,
+                    "findings": [
+                        {
+                            "severity": item.severity,
+                            "category": item.category,
+                            "title": item.title,
+                            "description": item.description,
+                            "affected_file": item.affected_file,
+                            "evidence": item.evidence,
+                            "recommendation": item.recommendation,
+                            "test_suggestion": item.test_suggestion,
+                        }
+                        for item in result.findings
+                    ],
+                    "recommendations": [{"title": item.title, "text": item.text} for item in result.recommendations],
+                    "test_suggestions": [item.text for item in result.test_suggestions],
+                    "sources": [
+                        {
+                            "type": source.source_type,
+                            "label": source.label,
+                            "path": source.path,
+                            "char_count": source.char_count,
+                        }
+                        for source in result.sources
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if show_sources:
+        console.print("[bold]Sources[/bold]")
+        for source in result.sources:
+            console.print(f"- {source.source_type}: {source.label} -> {source.path} ({source.char_count} chars)")
+    if result.warnings:
+        console.print("[bold]Warnings[/bold]")
+        for warning in result.warnings:
+            console.print(f"- {warning}")
+    console.print(result.summary)
+
+
+def ai_approval_command(
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    cmd: str = typer.Option(..., "--cmd", help="Command string to evaluate"),
+    reason: str = typer.Option("", "--reason", help="Why the action was proposed"),
+    source_agent: str = typer.Option("", "--source-agent", help="Agent or component proposing the action"),
+    as_json: bool = typer.Option(False, "--json", help="Render decision as JSON"),
+) -> None:
+    console = Console()
+    agent = ToolApprovalAgent()
+    decision = agent.evaluate_command(
+        ProposedCommand(
+            project_name=project,
+            command=cmd,
+            reason=reason,
+            source_agent=source_agent,
+        )
+    )
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {
+                    "status": decision.status,
+                    "risk_level": decision.risk_level,
+                    "reason": decision.reason,
+                    "approval_required": decision.approval_required,
+                    "blocked": decision.blocked,
+                    "safe_preview": decision.safe_preview,
+                    "suggested_next_step": decision.suggested_next_step,
+                    "audit_metadata": decision.audit_metadata,
+                    "findings": [
+                        {"severity": item.severity, "category": item.category, "detail": item.detail}
+                        for item in decision.findings
+                    ],
+                    "requirements": [
+                        {"requirement_type": item.requirement_type, "detail": item.detail}
+                        for item in decision.requirements
+                    ],
+                    "preview": {
+                        "summary": decision.preview.summary,
+                        "command_preview": decision.preview.command_preview,
+                        "working_directory": decision.preview.working_directory,
+                    }
+                    if decision.preview
+                    else None,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    console.print(f"[bold]Status[/bold]: {decision.status}")
+    console.print(f"[bold]Risk[/bold]: {decision.risk_level}")
+    console.print(f"[bold]Reason[/bold]: {decision.reason}")
+    console.print("[bold]Preview only[/bold]: command is not executed.")
+    if decision.findings:
+        console.print("[bold]Findings[/bold]")
+        for item in decision.findings:
+            console.print(f"- [{item.severity}] {item.category}: {item.detail}")
+    if decision.requirements:
+        console.print("[bold]Requirements[/bold]")
+        for item in decision.requirements:
+            console.print(f"- {item.requirement_type}: {item.detail}")
+    if decision.preview:
+        console.print("[bold]Preview[/bold]")
+        console.print(f"- {decision.preview.summary}")
+        if decision.preview.command_preview:
+            console.print(f"- command: {decision.preview.command_preview}")
+        if decision.preview.working_directory:
+            console.print(f"- working_directory: {decision.preview.working_directory}")
+    console.print(f"[bold]Next step[/bold]: {decision.suggested_next_step}")

@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_ask, ai_ask_agent, ai_doctor, ai_memory, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_memory, ai_plan, ai_review, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -366,6 +366,69 @@ def _ai_ask_agent(
         provider=provider,
         show_sources=show_sources,
         show_context=show_context,
+    )
+
+
+@ai.command("plan")
+def _ai_plan(
+    goal: str = typer.Option(..., "--goal"),
+    project: str = typer.Option(..., "--project"),
+    provider: str | None = typer.Option(None, "--provider"),
+    max_sprints: int = typer.Option(1, "--max-sprints"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_plan(
+        goal=goal,
+        project=project,
+        provider=provider,
+        max_sprints=max_sprints,
+        show_sources=show_sources,
+        as_json=as_json,
+    )
+
+
+@ai.command("review")
+def _ai_review(
+    project: str = typer.Option(..., "--project"),
+    scope: str = typer.Option(..., "--scope"),
+    provider: str | None = typer.Option(None, "--provider"),
+    files: list[str] = typer.Option([], "--file"),
+    max_files: int = typer.Option(12, "--max-files"),
+    max_chars_per_file: int = typer.Option(2000, "--max-chars-per-file"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_review(
+        project=project,
+        scope=scope,
+        provider=provider,
+        files=files,
+        max_files=max_files,
+        max_chars_per_file=max_chars_per_file,
+        show_sources=show_sources,
+        as_json=as_json,
+    )
+
+
+approval = typer.Typer(help="Preview-only approval workflow")
+ai.add_typer(approval, name="approval")
+
+
+@approval.command("command")
+def _ai_approval_command(
+    project: str = typer.Option(..., "--project"),
+    cmd: str = typer.Option(..., "--cmd"),
+    reason: str = typer.Option("", "--reason"),
+    source_agent: str = typer.Option("", "--source-agent"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_approval_command(
+        project=project,
+        cmd=cmd,
+        reason=reason,
+        source_agent=source_agent,
+        as_json=as_json,
     )
 
 
