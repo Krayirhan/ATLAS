@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import json
+import sys
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from app.agents.code_reviewer_agent import CodeReviewerAgent
+from app.agents.main_agent import MainAgent
 from app.agents.memory_agent import MemoryAgent
 from app.agents.tool_approval_agent import ToolApprovalAgent
-from app.agents.models import CodeReviewRequest, PlannerRequest, ProjectQARequest
+from app.agents.models import CodeReviewRequest, MainAgentRequest, PlannerRequest, ProjectQARequest
 from app.approval.models import ProposedCommand
 from app.agents.planner_agent import PlannerAgent
 from app.agents.project_qa_agent import ProjectQAAgent
@@ -20,6 +22,15 @@ from app.ai.models import AIRequest
 from app.ai.providers.base import AIProviderError
 from app.ai.providers.mock_provider import MockAIProvider
 from app.ai.service import AIService
+
+
+def _safe_console_text(text: str) -> str:
+    encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        text.encode(encoding)
+        return text
+    except UnicodeEncodeError:
+        return text.encode(encoding, errors="replace").decode(encoding, errors="replace")
 
 
 def ai_doctor() -> None:
@@ -183,7 +194,7 @@ def ai_ask_agent(
         console.print("[bold]Warnings[/bold]")
         for warning in result.warnings:
             console.print(f"- {warning}")
-    console.print(result.answer)
+    console.print(_safe_console_text(result.answer))
 
 
 def ai_plan(
@@ -416,3 +427,85 @@ def ai_approval_command(
         if decision.preview.working_directory:
             console.print(f"- working_directory: {decision.preview.working_directory}")
     console.print(f"[bold]Next step[/bold]: {decision.suggested_next_step}")
+
+
+def ai_main(
+    user_message: str = typer.Argument(..., help="User request for MainAgent"),
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    provider: str | None = typer.Option(None, "--provider", help="Override provider: mock | ollama"),
+    mode: str = typer.Option("auto", "--mode", help="answer|plan|review|approval|auto"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    show_routing: bool = typer.Option(False, "--show-routing"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    console = Console()
+    agent = MainAgent()
+    try:
+        result = agent.handle(
+            MainAgentRequest(
+                project_name=project,
+                user_message=user_message,
+                provider=provider,
+                preferred_mode=mode,
+                show_sources=show_sources,
+                show_routing=show_routing,
+            )
+        )
+    except (AIContextError, AIProviderError) as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {
+                    "agent_name": result.agent_name,
+                    "project_name": result.project_name,
+                    "task_type": result.task_type,
+                    "response_mode": result.response_mode,
+                    "route": result.metadata.get("route", {}),
+                    "answer": result.answer,
+                    "summary": result.summary,
+                    "warnings": result.warnings,
+                    "metadata": result.metadata,
+                    "sources": [
+                        {
+                            "type": source.source_type,
+                            "label": source.label,
+                            "path": source.path,
+                            "char_count": source.char_count,
+                        }
+                        for source in result.sources
+                    ],
+                    "safety": {
+                        "read_only": result.safety.read_only if result.safety else True,
+                        "can_write_files": result.safety.can_write_files if result.safety else False,
+                        "can_run_commands": result.safety.can_run_commands if result.safety else False,
+                        "can_call_tools": result.safety.can_call_tools if result.safety else False,
+                        "approval_token_production": result.safety.approval_token_production if result.safety else False,
+                    },
+                    "sub_results": result.sub_results,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    if show_routing:
+        route = result.route
+        console.print("[bold]Routing[/bold]")
+        console.print(f"- task_type: {route.task_type}")
+        console.print(f"- selected_agents: {', '.join(route.selected_agents)}")
+        console.print(f"- reason: {route.reason}")
+        console.print(f"- confidence: {route.confidence}")
+        console.print(f"- requires_approval_check: {route.requires_approval_check}")
+    if show_sources:
+        console.print("[bold]Sources[/bold]")
+        for source in result.sources:
+            console.print(f"- {source.source_type}: {source.label} -> {source.path} ({source.char_count} chars)")
+    if result.warnings:
+        console.print("[bold]Warnings[/bold]")
+        for warning in result.warnings:
+            console.print(f"- {warning}")
+    console.print(_safe_console_text(result.answer))

@@ -48,6 +48,11 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
   - preview-only decision layer
   - blocked / approval_required / preview_allowed / safe_readonly statuses
   - still no command execution, no file write, no MCP execution
+- Sprint 33 main agent alpha:
+  - `MainAgent`
+  - `ai main`
+  - deterministic routing across memory / QA / planner / review / approval agents
+  - still no command execution, no file write, no MCP execution
 
 ---
 
@@ -83,7 +88,7 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
 
 ## Next sprint recommendation
 
-- **Sprint 33 - MainAgent Alpha**
+- **Sprint 34 - SecurityAuditorAgent**
 
 ---
 

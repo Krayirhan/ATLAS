@@ -34,6 +34,10 @@
   - `ToolApprovalAgent`
   - `python -m app.cli ai approval command --project ATLAS --cmd "..."`
   - blocked / approval_required / preview_allowed / safe_readonly karar modeli
+- **Sprint 33:** **Tamamlandi.** Ilk koordinasyon katmani eklendi:
+  - `MainAgent`
+  - `python -m app.cli ai main --project ATLAS "..."`
+  - deterministic routing + bounded sub-agent orchestration
 - **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
 - **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest system-health report. Tum repo taranmiyor.
 - **Tests:** `assistant-core` altinda pytest suiti genisletildi; AI config/provider/context/CLI testleri eklendi.

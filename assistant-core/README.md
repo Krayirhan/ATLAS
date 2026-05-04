@@ -67,6 +67,27 @@ python -m app.cli ai approval command --project ATLAS --cmd "git reset --hard"
 python -m app.cli ai approval command --project ATLAS --cmd "git push"
 ```
 
+## MainAgent Alpha
+
+Sprint 33 ile `MainAgent` Alpha geldi.
+
+- Alt agentlari koordine eder.
+- Read-only calisir.
+- Kod yazmaz.
+- Dosya degistirmez.
+- Terminal calistirmaz.
+- Git/MCP tool cagrisi yapmaz.
+- `ToolApprovalAgent` uzerinden sadece preview/risk degerlendirmesi yapar.
+
+Komut ornekleri:
+
+```powershell
+python -m app.cli ai main --project ATLAS --provider mock "ATLAS şu an ne durumda?"
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "Sprint 34 için plan çıkar"
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "git reset --hard güvenli mi?"
+python -m app.cli ai main --project ATLAS --provider ollama "AI layer güvenli mi?"
+```
+
 ### Ollama onkosulu
 
 - Default endpoint: `http://localhost:11434`

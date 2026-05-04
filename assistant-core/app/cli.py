@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_memory, ai_plan, ai_review, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_main, ai_memory, ai_plan, ai_review, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -428,6 +428,27 @@ def _ai_approval_command(
         cmd=cmd,
         reason=reason,
         source_agent=source_agent,
+        as_json=as_json,
+    )
+
+
+@ai.command("main")
+def _ai_main(
+    user_message: str = typer.Argument(...),
+    project: str = typer.Option(..., "--project"),
+    provider: str | None = typer.Option(None, "--provider"),
+    mode: str = typer.Option("auto", "--mode"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    show_routing: bool = typer.Option(False, "--show-routing"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_main(
+        user_message=user_message,
+        project=project,
+        provider=provider,
+        mode=mode,
+        show_sources=show_sources,
+        show_routing=show_routing,
         as_json=as_json,
     )
 

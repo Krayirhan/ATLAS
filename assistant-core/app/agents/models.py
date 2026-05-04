@@ -202,3 +202,74 @@ class CodeReviewResult:
     sources: list[AgentContextSource]
     warnings: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+AgentTaskType = Literal[
+    "project_status",
+    "project_question",
+    "sprint_plan",
+    "code_review",
+    "security_review",
+    "approval_check",
+    "documentation_question",
+    "report_question",
+    "unknown",
+]
+AgentResponseMode = Literal["answer", "plan", "review", "approval_preview", "mixed", "refusal_or_warning"]
+
+
+@dataclass(slots=True)
+class AgentRouteDecision:
+    task_type: AgentTaskType
+    selected_agents: list[str]
+    reason: str
+    confidence: float
+    requires_approval_check: bool
+    blocked_by_policy: bool = False
+
+
+@dataclass(slots=True)
+class AgentOrchestrationStep:
+    step_name: str
+    agent_name: str
+    purpose: str
+    status: str
+    summary: str
+
+
+@dataclass(slots=True)
+class AgentSafetySummary:
+    read_only: bool
+    can_write_files: bool
+    can_run_commands: bool
+    can_call_tools: bool
+    approval_token_production: bool = False
+
+
+@dataclass(slots=True)
+class MainAgentRequest:
+    project_name: str
+    user_message: str
+    provider: str | None = None
+    preferred_mode: str = "auto"
+    allow_multi_agent: bool = True
+    show_sources: bool = False
+    show_routing: bool = False
+    language: str = "tr"
+    constraints: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class MainAgentResult:
+    agent_name: str
+    project_name: str
+    task_type: AgentTaskType
+    response_mode: AgentResponseMode
+    route: AgentRouteDecision
+    answer: str
+    summary: str
+    sources: list[AgentContextSource]
+    warnings: list[str] = field(default_factory=list)
+    safety: AgentSafetySummary | None = None
+    sub_results: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
