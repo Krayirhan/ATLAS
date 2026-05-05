@@ -31,6 +31,37 @@ python -m app.cli ai ask --project ATLAS "ATLAS su an ne durumda?"
 python -m app.cli ai ask --project ATLAS --provider mock "ATLAS su an ne durumda?"
 ```
 
+## Agents Alpha
+
+Sprint 29 ile `MemoryAgent` ve `ProjectQAAgent` Alpha geldi.
+
+- Read-only agentlardir.
+- Kod yazmazlar.
+- Dosya degistirmezler.
+- Terminal calistirmazlar.
+- Git/MCP tool cagrisi yapmazlar.
+
+```powershell
+python -m app.cli ai memory --project ATLAS
+python -m app.cli ai ask-agent --project ATLAS --provider mock "ATLAS su an ne durumda?"
+python -m app.cli ai ask-agent --project ATLAS --provider ollama "Sprint 30'a gecilebilir mi?"
+```
+
+## PlannerAgent Alpha
+
+Sprint 30 ile `PlannerAgent` Alpha geldi.
+
+- Read-only plan uretir.
+- Kod yazmaz.
+- Dosya degistirmez.
+- Terminal calistirmaz.
+- Git/MCP tool cagrisi yapmaz.
+
+```powershell
+python -m app.cli ai plan --project ATLAS --provider mock --goal "Sprint 31 icin CodeReviewerAgent planla"
+python -m app.cli ai plan --project ATLAS --provider ollama --goal "ATLAS icin test coverage sprinti planla"
+```
+
 ## CodeReviewerAgent Alpha
 
 Sprint 31 ile `CodeReviewerAgent` Alpha geldi.
@@ -41,8 +72,6 @@ Sprint 31 ile `CodeReviewerAgent` Alpha geldi.
 - Terminal calistirmaz.
 - Git/MCP tool cagrisi yapmaz.
 - Scope bazli sinirli dosya okur.
-
-Komut ornekleri:
 
 ```powershell
 python -m app.cli ai review --project ATLAS --provider mock --scope safety
@@ -58,8 +87,6 @@ Sprint 32 ile `ToolApprovalAgent` geldi.
 - Sadece karar ve preview uretir.
 - `blocked`, `approval_required`, `preview_allowed`, `safe_readonly` kararlarini verir.
 - Kullanici onayi olmadan hicbir tool calismaz.
-
-Komut ornekleri:
 
 ```powershell
 python -m app.cli ai approval command --project ATLAS --cmd "python -m pytest -q"
@@ -79,13 +106,28 @@ Sprint 33 ile `MainAgent` Alpha geldi.
 - Git/MCP tool cagrisi yapmaz.
 - `ToolApprovalAgent` uzerinden sadece preview/risk degerlendirmesi yapar.
 
-Komut ornekleri:
+```powershell
+python -m app.cli ai main --project ATLAS --provider mock "ATLAS su an ne durumda?"
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "Sprint 34 icin plan cikar"
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "git reset --hard guvenli mi?"
+python -m app.cli ai main --project ATLAS --provider ollama "AI layer guvenli mi?"
+```
+
+## SecurityAuditorAgent
+
+Sprint 34 ile `SecurityAuditorAgent` geldi.
+
+- Read-only guvenlik denetimi uretir.
+- Dosya degistirmez.
+- Terminal calistirmaz.
+- Git/MCP tool cagrisi yapmaz.
+- Agent capability, MCP, approval, context, secret ve docs guvenligini denetler.
 
 ```powershell
-python -m app.cli ai main --project ATLAS --provider mock "ATLAS şu an ne durumda?"
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "Sprint 34 için plan çıkar"
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "git reset --hard güvenli mi?"
-python -m app.cli ai main --project ATLAS --provider ollama "AI layer güvenli mi?"
+python -m app.cli ai security-audit --project ATLAS --provider mock --scope all-light
+python -m app.cli ai security-audit --project ATLAS --provider mock --scope agents --show-sources
+python -m app.cli ai security-audit --project ATLAS --provider mock --scope mcp
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "ATLAS guvenli mi?"
 ```
 
 ### Ollama onkosulu
@@ -97,39 +139,4 @@ python -m app.cli ai main --project ATLAS --provider ollama "AI layer güvenli m
 
 ```powershell
 ollama pull qwen2.5:7b
-```
-
-## Agents Alpha
-
-Sprint 29 ile `MemoryAgent` ve `ProjectQAAgent` Alpha geldi.
-
-- Read-only agentlardir.
-- Kod yazmazlar.
-- Dosya degistirmezler.
-- Terminal calistirmazlar.
-- Git/MCP tool cagrisi yapmazlar.
-
-Kullanim:
-
-```powershell
-python -m app.cli ai memory --project ATLAS
-python -m app.cli ai ask-agent --project ATLAS --provider mock "ATLAS su an ne durumda?"
-python -m app.cli ai ask-agent --project ATLAS --provider ollama "Sprint 30'a gecilebilir mi?"
-```
-
-## PlannerAgent Alpha
-
-Sprint 30 ile `PlannerAgent` Alpha geldi.
-
-- Read-only plan uretir.
-- Kod yazmaz.
-- Dosya degistirmez.
-- Terminal calistirmaz.
-- Git/MCP tool cagrisi yapmaz.
-
-Komut ornekleri:
-
-```powershell
-python -m app.cli ai plan --project ATLAS --provider mock --goal "Sprint 31 için CodeReviewerAgent planla"
-python -m app.cli ai plan --project ATLAS --provider ollama --goal "ATLAS için test coverage sprinti planla"
 ```

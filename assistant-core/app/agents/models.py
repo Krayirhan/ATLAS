@@ -273,3 +273,112 @@ class MainAgentResult:
     safety: AgentSafetySummary | None = None
     sub_results: list[dict[str, Any]] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+SecurityAuditScope = Literal["agents", "mcp", "secrets", "approval", "context", "docs", "all-light"]
+SecurityAuditSeverity = Literal["critical", "high", "medium", "low", "info"]
+SecurityAuditDecision = Literal["GO", "CONDITIONAL", "NO-GO"]
+SecurityAuditCategory = Literal[
+    "agent-capability",
+    "mcp-exposure",
+    "secret-exposure",
+    "path-safety",
+    "approval-policy",
+    "command-safety",
+    "prompt-logging",
+    "context-source",
+    "documentation",
+    "tests",
+    "configuration",
+]
+
+
+@dataclass(slots=True)
+class SecurityControlCheck:
+    name: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class AgentCapabilityCheck:
+    agent_name: str
+    read_only: bool
+    can_write_files: bool
+    can_run_commands: bool
+    can_call_tools: bool
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class MCPExposureCheck:
+    target: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class SecretExposureCheck:
+    target: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class ApprovalPolicyCheck:
+    check_name: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class SecurityAuditFinding:
+    severity: SecurityAuditSeverity
+    category: SecurityAuditCategory
+    title: str
+    description: str
+    affected_file: str
+    evidence: str
+    recommendation: str
+    test_suggestion: str
+
+
+@dataclass(slots=True)
+class SecurityAuditRequest:
+    project_name: str
+    scope: SecurityAuditScope
+    provider: str | None = None
+    include_agents: bool = True
+    include_mcp: bool = True
+    include_safety_policy: bool = True
+    include_approval_policy: bool = True
+    include_context_sources: bool = True
+    include_docs: bool = True
+    max_files: int = 16
+    max_chars_per_file: int = 2000
+    language: str = "tr"
+    constraints: list[str] = field(default_factory=list)
+    show_sources: bool = False
+    as_json: bool = False
+
+
+@dataclass(slots=True)
+class SecurityAuditResult:
+    agent_name: str
+    project_name: str
+    scope: SecurityAuditScope
+    status: str
+    decision: SecurityAuditDecision
+    summary: str
+    findings: list[SecurityAuditFinding]
+    controls: list[SecurityControlCheck]
+    agent_capabilities: list[AgentCapabilityCheck]
+    mcp_exposure: list[MCPExposureCheck]
+    secret_exposure: list[SecretExposureCheck]
+    approval_policy: list[ApprovalPolicyCheck]
+    recommendations: list[str]
+    test_suggestions: list[str]
+    sources: list[AgentContextSource]
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)

@@ -13,10 +13,10 @@
 - **Sprint 31:** **CodeReviewerAgent Alpha** tamamlandi.
 - **Sprint 32:** **ToolApproval Design** tamamlandi.
 - **Sprint 33:** **MainAgent Alpha** tamamlandi.
+- **Sprint 34:** **SecurityAuditorAgent** tamamlandi.
 
 ## Upcoming
 
-- **Sprint 34 - SecurityAuditorAgent**
 - **Sprint 35 - DocumentationAgent**
 - **Sprint 36 - ReportAgent**
 - **Sprint 37 - IntegrationAgent**

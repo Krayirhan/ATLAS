@@ -1,44 +1,18 @@
 # ATLAS - Current status
 
-- **Release:** **V1 RC - GO**.
+- **Release:** **V1 RC - GO**
 - **Root:** `E:\ATLAS` canonical. `D:\ATLAS` operational root degildir.
 - **Pilot / self-project:** **ATLAS**. **BenimFormum** bu sprint kapsaminda degil.
-- **Sprints 25-27:** Dokumantasyon, pytest coverage hardening, report/audit/context polish tamamlandi.
-- **Sprint 27.5:** AI documentation, NotebookLM workflow, context contract, prompt policy, Ollama integration plan ve security boundaries tamamlandi.
-- **Sprint 28:** **Tamamlandi.** Read-only **Ollama AI Layer Foundation** eklendi:
-  - `app/ai/*`
-  - `python -m app.cli ai doctor`
-  - `python -m app.cli ai ask`
-  - default provider `ollama`
-  - fallback/test provider `mock`
-- **Sprint 28.6:** Runtime hardening uygulandi:
-  - `timeout_seconds` 300s
-  - `keep_alive` 30m
-  - `ai warmup`
-  - context karakter limitleri ve gorunurlugu
-- **Sprint 29:** **Tamamlandi.** Read-only ilk agent katmani eklendi:
-  - `MemoryAgent`
-  - `ProjectQAAgent`
-  - `python -m app.cli ai memory --project ATLAS`
-  - `python -m app.cli ai ask-agent --project ATLAS ...`
-- **Sprint 30:** **Tamamlandi.** Read-only plan katmani eklendi:
-  - `PlannerAgent`
-  - `python -m app.cli ai plan --project ATLAS --goal "..."`
-  - objective / scope / risks / acceptance criteria / test plan uretimi
-- **Sprint 31:** **Tamamlandi.** Read-only review katmani eklendi:
-  - `CodeReviewerAgent`
-  - `python -m app.cli ai review --project ATLAS --scope safety`
-  - scope bazli bounded file review
-  - structured findings / recommendations / test suggestions
-- **Sprint 32:** **Tamamlandi.** Preview-only approval tasarimi eklendi:
-  - `ToolApprovalAgent`
-  - `python -m app.cli ai approval command --project ATLAS --cmd "..."`
-  - blocked / approval_required / preview_allowed / safe_readonly karar modeli
-- **Sprint 33:** **Tamamlandi.** Ilk koordinasyon katmani eklendi:
-  - `MainAgent`
-  - `python -m app.cli ai main --project ATLAS "..."`
-  - deterministic routing + bounded sub-agent orchestration
+- **Sprint 28:** Read-only Ollama AI layer tamamlandi.
+- **Sprint 28.6:** Warm-up, keep-alive, timeout ve context visibility hardening tamamlandi.
+- **Sprint 29:** `MemoryAgent` ve `ProjectQAAgent` tamamlandi.
+- **Sprint 30:** `PlannerAgent` tamamlandi.
+- **Sprint 31:** `CodeReviewerAgent` tamamlandi.
+- **Sprint 32:** `ToolApprovalAgent` ve preview-only approval workflow tamamlandi.
+- **Sprint 33:** `MainAgent` tamamlandi.
+- **Sprint 34:** `SecurityAuditorAgent` tamamlandi:
+  - `python -m app.cli ai security-audit --project ATLAS --scope all-light`
+  - agent capability / MCP / approval / context / docs bounded audit
 - **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
-- **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest system-health report. Tum repo taranmiyor.
-- **Tests:** `assistant-core` altinda pytest suiti genisletildi; AI config/provider/context/CLI testleri eklendi.
+- **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest report metadata. Tum repo taranmiyor.
 - **Doctor / audit:** `doctor --full`, `ai doctor`, `audit v1-rc` ana saglik sinyalleridir.

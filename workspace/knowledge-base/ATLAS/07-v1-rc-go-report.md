@@ -1,7 +1,7 @@
 # ATLAS V1 RC GO Report
 
 **Title:** ATLAS V1 RC GO Report  
-**Date:** 2026-05-04  
+**Date:** 2026-05-05  
 **Canonical root:** `E:\ATLAS`  
 **Self-project:** **ATLAS** (`python-cli`)
 
@@ -9,60 +9,27 @@
 
 ## Executive summary
 
-V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI katmani read-only sinirlarla eklendi. Bu ekleme control-plane kapsamiyla uyumlu: file-writing AI, terminal execution AI, tool-calling AI ve orchestration halen kapsam disi.
+V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile AI layer, Sprint 29-34 ile read-only agent katmanlari eklendi. Control-plane guvenlik siniri korunuyor: file-writing AI, terminal execution AI, MCP tool calling AI ve autonomous apply flow halen kapsam disi.
 
 ---
 
-## Sprint 28 outcome
+## Sprint outcomes
 
-- `app/ai/*` read-only AI package eklendi.
-- `ai doctor` ve `ai ask` CLI komutlari eklendi.
-- Varsayilan provider `ollama`, test/fallback provider `mock`.
-- Context yukleme sadece izinli registry, memory, KB ve report kaynaklariyla sinirli.
-- Prompt tam loglanmiyor; audit metadata ile sinirli.
-- Sprint 28.6 runtime hardening:
-  - warm-up command
-  - `keep_alive`
-  - `300s` timeout
-  - bounded context visibility
-- Sprint 29 agents alpha:
-  - `MemoryAgent`
-  - `ProjectQAAgent`
-  - `ai memory`
-  - `ai ask-agent`
-  - still read-only, no write / command / MCP execution
-- Sprint 30 planner alpha:
-  - `PlannerAgent`
-  - `ai plan`
-  - bounded sprint planning only
-  - explicit approval required before implementation
-- Sprint 31 code review alpha:
-  - `CodeReviewerAgent`
-  - `ai review`
-  - scope-based bounded file review only
-  - structured findings, recommendations, and test suggestions
-  - still read-only, no write / command / MCP execution
-- Sprint 32 tool approval design:
-  - `ToolApprovalAgent`
-  - `ai approval command`
-  - preview-only decision layer
-  - blocked / approval_required / preview_allowed / safe_readonly statuses
-  - still no command execution, no file write, no MCP execution
-- Sprint 33 main agent alpha:
-  - `MainAgent`
-  - `ai main`
-  - deterministic routing across memory / QA / planner / review / approval agents
-  - still no command execution, no file write, no MCP execution
+- Sprint 28: `app/ai/*`, `ai doctor`, `ai ask`, default `ollama`, fallback `mock`
+- Sprint 28.6: `ai warmup`, `keep_alive`, `300s` timeout, bounded context visibility
+- Sprint 29: `MemoryAgent`, `ProjectQAAgent`, `ai memory`, `ai ask-agent`
+- Sprint 30: `PlannerAgent`, `ai plan`
+- Sprint 31: `CodeReviewerAgent`, `ai review`
+- Sprint 32: `ToolApprovalAgent`, `ai approval command`
+- Sprint 33: `MainAgent`, `ai main`
+- Sprint 34: `SecurityAuditorAgent`, `ai security-audit`
 
----
-
-## Registry and root status
-
-- Primary entry: **ATLAS** at `E:\ATLAS`
-- Knowledge base: `E:\ATLAS\workspace\knowledge-base\ATLAS`
-- `command_workdir`: `E:\ATLAS\assistant-core`
-- `D:\ATLAS` kullanilmiyor.
-- **BenimFormum** pilot proje degil.
+Sprint 34 bounded checks:
+- agent capability
+- MCP exposure
+- approval policy
+- context safety
+- docs alignment
 
 ---
 
@@ -70,8 +37,10 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
 
 - `python -m pytest -q` geciyor.
 - `python -m app.cli doctor --full` geciyor.
+- `python -m app.cli config validate` geciyor.
+- `python -m app.cli project validate ATLAS` geciyor.
+- `python -m app.cli ai doctor` geciyor.
 - `python -m app.cli audit v1-rc` verdict: **GO**.
-- `python -m app.cli ai doctor` ile provider durumu gorulebiliyor.
 
 ---
 
@@ -88,7 +57,7 @@ V1 Release Candidate durumu **GO** olarak korunuyor. Sprint 28 ile ilk gercek AI
 
 ## Next sprint recommendation
 
-- **Sprint 34 - SecurityAuditorAgent**
+- **Sprint 35 - DocumentationAgent**
 
 ---
 
