@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_main, ai_memory, ai_plan, ai_review, ai_security_audit, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_main, ai_memory, ai_plan, ai_review, ai_security_audit, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -471,6 +471,27 @@ def _ai_main(
         show_sources=show_sources,
         show_routing=show_routing,
         as_json=as_json,
+    )
+
+
+@ai.command("docs-audit")
+def _ai_docs_audit(
+    project: str = typer.Option(..., "--project"),
+    scope: str = typer.Option(..., "--scope"),
+    provider: str | None = typer.Option(None, "--provider"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+    max_files: int = typer.Option(16, "--max-files"),
+    max_chars_per_file: int = typer.Option(2000, "--max-chars-per-file"),
+) -> None:
+    ai_docs_audit(
+        project=project,
+        scope=scope,
+        provider=provider,
+        show_sources=show_sources,
+        as_json=as_json,
+        max_files=max_files,
+        max_chars_per_file=max_chars_per_file,
     )
 
 

@@ -7,6 +7,7 @@ from dataclasses import asdict
 
 from app.agents.base import BaseAgent
 from app.agents.code_reviewer_agent import CodeReviewerAgent
+from app.agents.documentation_agent import DocumentationAgent
 from app.agents.memory_agent import MemoryAgent
 from app.agents.models import (
     AgentContextSource,
@@ -16,6 +17,7 @@ from app.agents.models import (
     AgentRunResult,
     AgentSafetySummary,
     CodeReviewRequest,
+    DocumentationAuditRequest,
     MainAgentRequest,
     MainAgentResult,
     PlannerRequest,
@@ -44,6 +46,7 @@ class MainAgent(BaseAgent):
         review_agent: CodeReviewerAgent | None = None,
         security_agent: SecurityAuditorAgent | None = None,
         approval_agent: ToolApprovalAgent | None = None,
+        documentation_agent: DocumentationAgent | None = None,
     ) -> None:
         self._memory_agent = memory_agent or MemoryAgent()
         self._qa_agent = qa_agent or ProjectQAAgent(memory_agent=self._memory_agent)
@@ -51,6 +54,7 @@ class MainAgent(BaseAgent):
         self._review_agent = review_agent or CodeReviewerAgent(memory_agent=self._memory_agent)
         self._security_agent = security_agent or SecurityAuditorAgent()
         self._approval_agent = approval_agent or ToolApprovalAgent()
+        self._documentation_agent = documentation_agent or DocumentationAgent()
 
     def run(self, request: AgentRunRequest) -> AgentRunResult:
         result = self.handle(
@@ -83,7 +87,7 @@ class MainAgent(BaseAgent):
         response_mode = "answer"
 
         try:
-            if route.task_type in {"project_question", "project_status", "documentation_question", "report_question", "unknown"}:
+            if route.task_type in {"project_question", "project_status", "report_question", "unknown"}:
                 snapshot = self._memory_agent.snapshot(request.project_name)
                 qa = self._qa_agent.answer(
                     ProjectQARequest(
@@ -111,6 +115,23 @@ class MainAgent(BaseAgent):
                         AgentOrchestrationStep("answer-question", qa.agent_name, "Project QA", qa.status, qa.answer[:240]),
                     ]
                 )
+            elif route.task_type == "documentation_question":
+                doc_scope = self._documentation_scope(request.user_message.lower())
+                doc_result = self._documentation_agent.audit(
+                    DocumentationAuditRequest(
+                        project_name=request.project_name,
+                        scope=doc_scope,
+                        provider=request.provider,
+                        show_sources=request.show_sources,
+                    )
+                )
+                sources = doc_result.sources
+                warnings.extend(doc_result.warnings)
+                answer = doc_result.summary
+                summary = f"Documentation audit handled via DocumentationAgent ({doc_scope})."
+                response_mode = "review"
+                sub_results.append({"agent_name": doc_result.agent_name, "status": doc_result.status, "summary": doc_result.summary[:240]})
+                steps.append(AgentOrchestrationStep("documentation-audit", doc_result.agent_name, "Bounded documentation audit", doc_result.status, doc_result.summary[:240]))
             elif route.task_type == "sprint_plan":
                 result = self._planner_agent.plan(
                     PlannerRequest(
@@ -290,12 +311,22 @@ class MainAgent(BaseAgent):
                 requires_approval_check=False,
                 blocked_by_policy=False,
             )
-        if any(word in message for word in ("dokuman", "readme", "rapor", "report")):
-            task = "report_question" if any(word in message for word in ("rapor", "report")) else "documentation_question"
+        if any(word in message for word in ("dokuman", "readme", "notebooklm", "roadmap", "sprint doküman", "sprint dokuman")):
+            task = "documentation_question"
+            return AgentRouteDecision(
+                task_type=task,
+                selected_agents=["documentation-agent"],
+                reason="Documentation audit keywords detected.",
+                confidence=0.88,
+                requires_approval_check=False,
+                blocked_by_policy=False,
+            )
+        if any(word in message for word in ("rapor", "report")):
+            task = "report_question"
             return AgentRouteDecision(
                 task_type=task,
                 selected_agents=["memory-agent", "project-qa-agent"],
-                reason="Documentation/report keywords detected.",
+                reason="Report keywords detected.",
                 confidence=0.75,
                 requires_approval_check=False,
                 blocked_by_policy=False,
@@ -361,6 +392,21 @@ class MainAgent(BaseAgent):
         if "docs" in message or "readme" in message:
             return "docs"
         return "ai-layer"
+
+    def _documentation_scope(self, message: str) -> str:
+        if "notebooklm" in message:
+            return "notebooklm"
+        if "roadmap" in message or "sprint" in message:
+            return "roadmap"
+        if "agent" in message:
+            return "agents"
+        if "readme" in message:
+            return "readme"
+        if "release" in message or "checklist" in message:
+            return "release"
+        if "kb" in message or "knowledge" in message:
+            return "knowledge-base"
+        return "all-light"
 
     def _security_scope(self, message: str) -> str:
         if "mcp" in message:

@@ -382,3 +382,111 @@ class SecurityAuditResult:
     sources: list[AgentContextSource]
     warnings: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# DocumentationAgent models (Sprint 35)
+# ---------------------------------------------------------------------------
+
+DocumentationAuditScope = Literal[
+    "readme",
+    "knowledge-base",
+    "notebooklm",
+    "roadmap",
+    "agents",
+    "release",
+    "all-light",
+]
+DocumentationAuditSeverity = Literal["critical", "high", "medium", "low", "info"]
+DocumentationAuditDecision = Literal["GO", "CONDITIONAL", "NO-GO"]
+DocumentationAuditCategory = Literal[
+    "missing-doc",
+    "outdated-doc",
+    "roadmap-mismatch",
+    "sprint-status-mismatch",
+    "command-doc-missing",
+    "security-doc-gap",
+    "notebooklm-doc-gap",
+    "ai-agent-doc-gap",
+    "release-doc-gap",
+    "wording",
+    "consistency",
+]
+
+
+@dataclass(slots=True)
+class DocumentationFinding:
+    severity: DocumentationAuditSeverity
+    category: DocumentationAuditCategory
+    title: str
+    description: str
+    affected_file: str
+    evidence: str
+    recommendation: str
+
+
+@dataclass(slots=True)
+class DocumentationSourceCheck:
+    label: str
+    path: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class DocumentationRoadmapCheck:
+    check_name: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class DocumentationConsistencyCheck:
+    check_name: str
+    status: str
+    detail: str
+
+
+@dataclass(slots=True)
+class DocumentationRecommendation:
+    title: str
+    text: str
+
+
+@dataclass(slots=True)
+class DocumentationAuditRequest:
+    project_name: str
+    scope: DocumentationAuditScope
+    provider: str | None = None
+    include_readme: bool = True
+    include_knowledge_base: bool = True
+    include_notebooklm: bool = True
+    include_roadmap: bool = True
+    include_agent_docs: bool = True
+    include_release_docs: bool = True
+    max_files: int = 16
+    max_chars_per_file: int = 2000
+    language: str = "tr"
+    constraints: list[str] = field(default_factory=list)
+    show_sources: bool = False
+    as_json: bool = False
+
+
+@dataclass(slots=True)
+class DocumentationAuditResult:
+    agent_name: str
+    project_name: str
+    scope: DocumentationAuditScope
+    status: str
+    decision: DocumentationAuditDecision
+    summary: str
+    findings: list[DocumentationFinding]
+    source_checks: list[DocumentationSourceCheck]
+    roadmap_checks: list[DocumentationRoadmapCheck]
+    consistency_checks: list[DocumentationConsistencyCheck]
+    recommendations: list[DocumentationRecommendation]
+    missing_docs: list[str]
+    outdated_docs: list[str]
+    sources: list[AgentContextSource]
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)

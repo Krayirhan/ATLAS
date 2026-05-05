@@ -34,6 +34,7 @@ ATLAS is a local-first, security-first developer AI control plane. It centralize
 - Sprint 32: ToolApproval design
 - Sprint 33: MainAgent alpha
 - Sprint 34: SecurityAuditorAgent
+- Sprint 35: DocumentationAgent
 
 ## SecurityAuditorAgent
 
@@ -43,6 +44,19 @@ ATLAS is a local-first, security-first developer AI control plane. It centralize
 - `python -m app.cli ai main --project ATLAS --provider mock --show-routing "ATLAS guvenli mi?"`
 
 SecurityAuditorAgent read-only calisir. Dosya degistirmez, terminal calistirmaz, Git/MCP tool cagrisi yapmaz. Agent capability, MCP exposure, approval policy, context source ve secret-risk sinirlarini denetler.
+
+## DocumentationAgent
+
+Sprint 35 ile `DocumentationAgent` geldi. Read-only dokümantasyon audit'i üretir.
+README, KB, NotebookLM workflow, roadmap, agent sprint dokümanları ve release dokümanlarını kontrol eder.
+Dosya değiştirmez. Terminal çalıştırmaz. Git/MCP tool çağırmaz.
+
+```powershell
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope notebooklm --show-sources
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope agents
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "README guncel mi?"
+```
 
 ## Repo
 

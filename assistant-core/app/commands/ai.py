@@ -10,11 +10,19 @@ from rich.console import Console
 from rich.table import Table
 
 from app.agents.code_reviewer_agent import CodeReviewerAgent
+from app.agents.documentation_agent import DocumentationAgent
 from app.agents.main_agent import MainAgent
 from app.agents.memory_agent import MemoryAgent
 from app.agents.security_auditor_agent import SecurityAuditorAgent
 from app.agents.tool_approval_agent import ToolApprovalAgent
-from app.agents.models import CodeReviewRequest, MainAgentRequest, PlannerRequest, ProjectQARequest, SecurityAuditRequest
+from app.agents.models import (
+    CodeReviewRequest,
+    DocumentationAuditRequest,
+    MainAgentRequest,
+    PlannerRequest,
+    ProjectQARequest,
+    SecurityAuditRequest,
+)
 from app.approval.models import ProposedCommand
 from app.agents.planner_agent import PlannerAgent
 from app.agents.project_qa_agent import ProjectQAAgent
@@ -609,3 +617,101 @@ def ai_main(
         for warning in result.warnings:
             console.print(f"- {warning}")
     console.print(_safe_console_text(result.answer))
+
+
+def ai_docs_audit(
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    scope: str = typer.Option(..., "--scope", help="Documentation audit scope: readme|knowledge-base|notebooklm|roadmap|agents|release|all-light"),
+    provider: str | None = typer.Option(None, "--provider", help="Override provider: mock | ollama"),
+    show_sources: bool = typer.Option(False, "--show-sources"),
+    as_json: bool = typer.Option(False, "--json"),
+    max_files: int = typer.Option(16, "--max-files"),
+    max_chars_per_file: int = typer.Option(2000, "--max-chars-per-file"),
+) -> None:
+    console = Console()
+    agent = DocumentationAgent()
+    try:
+        result = agent.audit(
+            DocumentationAuditRequest(
+                project_name=project,
+                scope=scope,
+                provider=provider,
+                show_sources=show_sources,
+                as_json=as_json,
+                max_files=max_files,
+                max_chars_per_file=max_chars_per_file,
+            )
+        )
+    except (AIContextError, AIProviderError) as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    if as_json:
+        typer.echo(
+            json.dumps(
+                {
+                    "agent_name": result.agent_name,
+                    "project_name": result.project_name,
+                    "scope": result.scope,
+                    "status": result.status,
+                    "decision": result.decision,
+                    "summary": result.summary,
+                    "warnings": result.warnings,
+                    "metadata": result.metadata,
+                    "findings": [
+                        {
+                            "severity": item.severity,
+                            "category": item.category,
+                            "title": item.title,
+                            "description": item.description,
+                            "affected_file": item.affected_file,
+                            "evidence": item.evidence,
+                            "recommendation": item.recommendation,
+                        }
+                        for item in result.findings
+                    ],
+                    "source_checks": [
+                        {"label": item.label, "path": item.path, "status": item.status, "detail": item.detail}
+                        for item in result.source_checks
+                    ],
+                    "roadmap_checks": [
+                        {"check_name": item.check_name, "status": item.status, "detail": item.detail}
+                        for item in result.roadmap_checks
+                    ],
+                    "consistency_checks": [
+                        {"check_name": item.check_name, "status": item.status, "detail": item.detail}
+                        for item in result.consistency_checks
+                    ],
+                    "recommendations": [
+                        {"title": item.title, "text": item.text}
+                        for item in result.recommendations
+                    ],
+                    "missing_docs": result.missing_docs,
+                    "outdated_docs": result.outdated_docs,
+                    "sources": [
+                        {
+                            "type": source.source_type,
+                            "label": source.label,
+                            "path": source.path,
+                            "char_count": source.char_count,
+                        }
+                        for source in result.sources
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
+
+    console.print(f"[bold]Decision[/bold]: {result.decision}")
+    console.print(f"[bold]Scope[/bold]: {result.scope}")
+    if show_sources:
+        console.print("[bold]Sources[/bold]")
+        for source in result.sources:
+            console.print(f"- {source.source_type}: {source.label} -> {source.path} ({source.char_count} chars)")
+    if result.warnings:
+        console.print("[bold]Warnings[/bold]")
+        for warning in result.warnings:
+            console.print(f"- {warning}")
+    console.print(_safe_console_text(result.summary))

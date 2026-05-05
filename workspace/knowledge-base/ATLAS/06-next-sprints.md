@@ -14,15 +14,17 @@
 - **Sprint 32:** **ToolApproval Design** tamamlandi.
 - **Sprint 33:** **MainAgent Alpha** tamamlandi.
 - **Sprint 34:** **SecurityAuditorAgent** tamamlandi.
+- **Sprint 35:** **DocumentationAgent** tamamlandi.
 
 ## Upcoming
 
-- **Sprint 35 - DocumentationAgent**
 - **Sprint 36 - ReportAgent**
 - **Sprint 37 - IntegrationAgent**
 - **Sprint 38 - TestWriterAgent**
 - **Sprint 39 - BugFixAgent**
 - **Sprint 40 - CodeBuilderAgent**
+- **Sprint 41 - Git Hygiene & Line Ending Policy**
+- **Sprint 42 - V2 Tool Execution Approval Beta hazirligi**
 
 ## V2
 
@@ -35,3 +37,4 @@
 - agent orchestration
 - optional RAG / indexing
 - broader autonomous workflows
+

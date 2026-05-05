@@ -298,6 +298,7 @@ class SecurityAuditorAgent(BaseAgent):
 
     def _check_agent_capabilities(self):
         from app.agents.code_reviewer_agent import CodeReviewerAgent
+        from app.agents.documentation_agent import DocumentationAgent
         from app.agents.main_agent import MainAgent
         from app.agents.memory_agent import MemoryAgent
         from app.agents.planner_agent import PlannerAgent
@@ -314,6 +315,7 @@ class SecurityAuditorAgent(BaseAgent):
             CodeReviewerAgent(),
             ToolApprovalAgent(),
             MainAgent(),
+            DocumentationAgent(),
             self,
         ]
         for agent in agents:

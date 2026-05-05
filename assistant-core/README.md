@@ -140,3 +140,26 @@ python -m app.cli ai main --project ATLAS --provider mock --show-routing "ATLAS 
 ```powershell
 ollama pull qwen2.5:7b
 ```
+
+## DocumentationAgent
+
+Sprint 35 ile `DocumentationAgent` geldi.
+
+- Read-only dokümantasyon audit'i üretir.
+- Dosya değiştirmez.
+- Terminal çalıştırmaz.
+- Git/MCP tool çağırmaz.
+- README, KB, NotebookLM workflow, roadmap, agent sprint dokümanları ve release dokümanlarını kontrol eder.
+- GO / CONDITIONAL / NO-GO kararı üretir.
+
+```powershell
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope readme --show-sources
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope notebooklm
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope agents
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope roadmap
+python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light --json
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "README guncel mi?"
+python -m app.cli ai main --project ATLAS --provider mock --show-routing "Dokumantasyon tutarli mi?"
+```
+

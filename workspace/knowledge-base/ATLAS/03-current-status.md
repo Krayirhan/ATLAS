@@ -13,6 +13,11 @@
 - **Sprint 34:** `SecurityAuditorAgent` tamamlandi:
   - `python -m app.cli ai security-audit --project ATLAS --scope all-light`
   - agent capability / MCP / approval / context / docs bounded audit
+- **Sprint 35:** `DocumentationAgent` tamamlandi:
+  - `python -m app.cli ai docs-audit --project ATLAS --scope all-light`
+  - README / KB / NotebookLM workflow / roadmap / agent sprint docs bounded audit
+  - MainAgent routing: "README guncel mi?" → DocumentationAgent
 - **AI guvenlik siniri:** dosya yazan AI yok, terminal run yok, MCP tool call yok, git action yok, prompt tam loglama yok.
 - **Context kaynaklari:** registry + memory status + secili KB dosyalari + latest report metadata. Tum repo taranmiyor.
 - **Doctor / audit:** `doctor --full`, `ai doctor`, `audit v1-rc` ana saglik sinyalleridir.
+
