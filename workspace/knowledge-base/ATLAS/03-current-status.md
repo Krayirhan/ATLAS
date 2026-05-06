@@ -11,6 +11,7 @@
 - **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
 - **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
 - **Sprint 40 status:** completed PCControlAdapter MVP; dry-run/preview PC plan generation available.
+- **Sprint 41 status:** completed ConversationLoop MVP; text-first conversational loop with safe responses.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -32,6 +33,7 @@ These modules are preserved as the core technical foundation:
 - **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
 - **IntentRouter foundation:** `app/actions/intent_router.py` parses text into `IntentResult`, `ActionCandidate`, and `PermissionDecision` preview output.
 - **PCControlAdapter foundation:** `app/control` layer builds dry-run PC control plans safely without unrestricted terminal execution.
+- **ConversationLoop foundation:** `app/conversation` package coordinates IntentRouter, PermissionManager, and PCControlAdapter into an in-memory session loop.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -103,7 +105,7 @@ This is still non-executing. No adapter, browser action, media action, or termin
 
 ## D) Missing Personal Assistant Runtime Layers
 
-These are not implemented yet and are the focus of Sprint 40+:
+These are not implemented yet and are the focus of Sprint 42+:
 
 - ActionRouter runtime
 - SkillRegistry
@@ -117,7 +119,6 @@ These are not implemented yet and are the focus of Sprint 40+:
 - Speech-to-text adapter
 - Text-to-speech adapter
 - Wake word listener
-- ConversationLoop
 - Desktop tray / permission panel
 - Permission UI
 - Durable action audit log
@@ -209,8 +210,25 @@ Not implemented:
 - Real application launch.
 - Home control.
 - Voice layer.
-- ConversationLoop.
+
+## Sprint 41 Status
+
+Sprint 41 is complete as the first conversational state loop implementation.
+
+Completed:
+
+- `app/conversation` package added to orchestrate user interactions.
+- `ai chat` CLI command added.
+- In-memory conversation state managing intents and clarifications.
+- Safe Turkish response generation.
+- Test coverage for action preview, clarification, confirmation, and blocked paths.
+
+Not implemented:
+
+- Execution of actions.
+- Voice runtime.
+- Routine execution.
 
 ## Next Sprint
 
-Sprint 41 should be **ConversationLoop MVP**. It should provide a text-first conversational state loop for processing user input and returning previews/results safely.
+Sprint 42 should be **Personal Memory & Preferences**. It should introduce privacy-first storage for user settings and history.

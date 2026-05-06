@@ -857,3 +857,53 @@ def ai_pc_preview(
     console.print(f"[bold]Result Message[/bold]: {result.message}")
     if result.data:
         console.print(f"[bold]Data[/bold]: {json.dumps(result.data, indent=2, ensure_ascii=False)}")
+
+
+def ai_chat(
+    user_text: str,
+    project: str,
+    source: str = "text",
+    session_id: str | None = None,
+    as_json: bool = False,
+    show_state: bool = False,
+    reset_session: bool = False,
+) -> None:
+    """Run the conversational loop MVP for ATLAS."""
+    from app.conversation.loop import ConversationLoop
+    from app.actions.types import ActionSource
+    
+    console = Console()
+    
+    # Map source
+    try:
+        source_enum = ActionSource(source)
+    except ValueError:
+        source_enum = ActionSource.TEXT
+        
+    loop = ConversationLoop()
+    
+    if reset_session and session_id:
+        loop.reset_session(session_id)
+        if not as_json:
+            console.print(f"[green]Session {session_id} reset.[/green]")
+            return
+            
+    response = loop.handle_text(
+        message=user_text,
+        project_name=project,
+        session_id=session_id,
+        source=source_enum
+    )
+    
+    if as_json:
+        print(response.model_dump_json(indent=2))
+        return
+        
+    console.print(f"[bold]ATLAS[/bold]: {response.assistant_message}")
+    
+    if show_state:
+        state = loop.get_state(response.session_id)
+        console.print(f"\n[dim]State: intent={state.last_intent}, action={state.last_action}[/dim]")
+        console.print(f"[dim]Pending clarification: {state.pending_clarification}[/dim]")
+        console.print(f"[dim]Pending confirmation: {state.pending_confirmation}[/dim]")
+

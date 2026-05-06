@@ -20,6 +20,7 @@
 - **Sprint 38:** PermissionManager & Action Approval Flow.
 - **Sprint 39:** IntentRouter MVP.
 - **Sprint 40:** PC Control Adapter MVP.
+- **Sprint 41:** ConversationLoop MVP.
 
 ## Sprint 36 - Completed
 
@@ -177,9 +178,7 @@ The former near-term developer roadmap remains parked:
 - Destructive actions blocked.
 - Adapter evaluates permissions and returns dry-run plans.
 
-## Active Personal Assistant Roadmap
-
-### Sprint 41 - ConversationLoop MVP
+## Sprint 41 - Completed
 
 **Amac:** Text-first conversation loop ve future voice loop davranisini tasarlamak.
 
@@ -203,6 +202,8 @@ The former near-term developer roadmap remains parked:
 - User can cancel before execution.
 - Confirmation turn stale action'a baglanmaz.
 - New command cannot accidentally confirm old action.
+
+## Active Personal Assistant Roadmap
 
 ### Sprint 42 - Personal Memory & Preferences
 

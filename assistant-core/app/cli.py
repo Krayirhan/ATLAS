@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_plan, ai_review, ai_security_audit, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -507,6 +507,27 @@ def _ai_pc_preview(
         show_plan=show_plan,
         as_json=as_json,
         dry_run=dry_run,
+    )
+
+
+@ai.command("chat")
+def _ai_chat(
+    user_text: str = typer.Argument(..., help="User message for the assistant"),
+    project: str = typer.Option(..., "--project"),
+    source: str = typer.Option("text", "--source"),
+    session_id: str | None = typer.Option(None, "--session-id"),
+    as_json: bool = typer.Option(False, "--json"),
+    show_state: bool = typer.Option(False, "--show-state"),
+    reset_session: bool = typer.Option(False, "--reset-session"),
+) -> None:
+    ai_chat(
+        user_text=user_text,
+        project=project,
+        source=source,
+        session_id=session_id,
+        as_json=as_json,
+        show_state=show_state,
+        reset_session=reset_session,
     )
 
 
