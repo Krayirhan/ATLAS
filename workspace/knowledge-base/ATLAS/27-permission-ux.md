@@ -2,87 +2,192 @@
 
 ## Purpose
 
-Permission UX defines how ATLAS explains, previews, confirms, blocks, and audits actions.
+Permission UX defines how ATLAS explains, previews, confirms, blocks, cancels, and audits actions. Sprint 37 adds the canonical risk and confirmation matrix used by future `PermissionManager` work in Sprint 38.
 
 ## Core Rule
 
-No medium, high, blocked, unknown, destructive, ambiguous, or voice-risky action should execute without the correct permission outcome.
+No medium, high, blocked, unknown, ambiguous, destructive, privacy-sensitive, or voice-risky action should execute without the correct permission outcome.
 
-## Risk Handling
+## Risk Level to Confirmation Matrix
 
-### Low Risk
+| Risk level | Example action | Preview | Confirmation | Execution policy |
+|---|---|---|---|---|
+| `safe_readonly` | `pc.system_info`, `file.search`, `device.state_query` | Optional but preferred | No | Future adapter may read; audit required |
+| `low` | `pc.open_app`, `pc.open_folder`, `browser.search`, media control | Optional; required if privacy-sensitive | Usually no | Auto only after later policy; audit required |
+| `medium` | `reminder.create`, `routine.run`, `device.turn_on` | Required | Explicit confirm | No execution without user approval |
+| `high` | `pc.shutdown`, `device.open_door`, high-impact routine | Required | Explicit confirm + warning | May remain deferred; no execution after timeout |
+| `blocked` | `file.delete`, `secret.read`, unrestricted shell | Block explanation only | No | Never execute; suggest safe alternative |
+| `ambiguous` | "Isigi ac" with no room/device | Clarification only | No | No action candidate until clarified |
+| `unknown` | Unclassified request | None/action-safe answer | No | No action execution |
 
-Examples:
-
-- read system info
-- media play/pause
-- open known app
-- file search preview
-
-Policy:
-
-- preview optional
-- safe auto only in later phases
-- audit still required
-
-### Medium Risk
+## Low Risk
 
 Examples:
 
-- open folder with user data
-- browser search with personal query
-- create reminder
-- run routine with non-destructive steps
-- device brightness change
+- Read system info.
+- Media play/pause.
+- Open known app.
+- Open known folder.
+- File search preview.
 
 Policy:
 
-- explicit confirmation required
-- show action target and expected result
-- allow cancel
+- Preview optional in early text flows, but still useful for user trust.
+- Safe auto-execution can be considered only after later policy and audit hardening.
+- Voice-source low-risk actions may use lightweight repeat-back when confidence is low.
+- Audit is still required.
 
-### High Risk
+## Medium Risk
 
 Examples:
 
-- routine with multiple state-changing steps
-- device power action
-- action that can interrupt work
-- action involving privacy-sensitive data
+- Create reminder.
+- Run routine with non-destructive steps.
+- Turn on/off a known device.
+- Change brightness.
+- Change thermostat setpoint.
 
 Policy:
 
-- explicit confirmation required
-- clear warning required
-- no vague confirmation text
-- no execution after timeout
+- Explicit confirmation required.
+- Show action target, expected result, and state change.
+- Allow cancel.
+- No confirmation means no execution.
+- Voice-source medium action must repeat the understood action and target.
 
-### Blocked
+## High Risk
 
 Examples:
 
-- secret file reading
-- full disk access
-- destructive file delete
-- shutdown without special policy
-- registry edit
-- admin command
-- home/device write before DeviceRegistry and PermissionManager are ready
+- Put PC to sleep, lock, or shut down.
+- Unlock/open a device.
+- Disable security device.
+- Run high-impact routine.
+- Any action that can interrupt work or affect physical safety.
 
 Policy:
 
-- no execution
-- explain why blocked
-- suggest safe alternative if possible
+- Explicit confirmation required.
+- Clear warning required.
+- No vague confirmation copy.
+- No execution after timeout.
+- Early ATLAS versions may defer or block many high-risk actions even with confirmation.
+
+## Blocked
+
+Examples:
+
+- Secret file reading.
+- Full disk scan.
+- Destructive file delete/overwrite.
+- App install/uninstall.
+- Registry edit.
+- Unrestricted shell execution.
+- Credential read.
+
+Policy:
+
+- No execution.
+- Do not ask for confirmation as if execution is possible.
+- Explain the blocked reason.
+- Suggest safe alternative when possible.
+
+Blocked copy examples:
+
+| Situation | User-facing copy |
+|---|---|
+| File delete | `Bu islem ATLAS MVP'de engelli: dosya silme veri kaybi riski tasir. Dosyayi bulup konumunu gosterebilirim.` |
+| Secret read | `Bu istegi calistiramam: secret veya kimlik bilgisi okumak ATLAS policy tarafindan engellenir.` |
+| Full disk scan | `Tum diski tarayamam. Belirli bir klasor veya proje kapsami secersen arama onizlemesi yapabilirim.` |
+| Unrestricted shell | `Sinirsiz terminal komutu calistiramam. Guvenli, onizlemeli bir action tasarimi gerekir.` |
+
+## Voice-Source Action Rules
+
+Voice commands are treated more conservatively because STT may mishear the target or action.
+
+| Voice action type | Rule |
+|---|---|
+| `safe_readonly` | May answer/read in future; repeat-back if confidence is low |
+| `low` | May require lightweight confirmation when target or confidence is weak |
+| `medium` | Must repeat target/action and require explicit confirmation |
+| `high` | Must repeat target/action, show warning, and require explicit confirmation |
+| `blocked` | Must not execute; explain block |
+| `ambiguous` | Ask clarification; safe default is no action |
+
+Turkish voice confirmation examples:
+
+| Action | Confirmation copy |
+|---|---|
+| `device.turn_on` | `Salon isigini acacagim. Onayliyor musun?` |
+| `routine.run` | `Calisma modu rutinini baslatacagim. Bu islem ekran ve cihaz ayarlarini degistirebilir. Onayliyor musun?` |
+| `pc.shutdown` | `Bilgisayari kapatma istegi algiladim. Bu calismanizi kesebilir. Gercekten kapatmak istiyor musun?` |
+| `device.set_temperature` | `Salon termostatini 22 dereceye ayarlayacagim. Onayliyor musun?` |
+
+## Ambiguous Intent Rules
+
+Ambiguous intent does not create an executable action.
+
+Rules:
+
+- If room is missing for a device action, ask which room.
+- If device alias maps to multiple devices, ask which device.
+- If folder name maps to multiple folders, show candidates.
+- If command could mean media, app, or device action, ask user to choose.
+- If confidence is below threshold, ask a clarification question or answer safely.
+- Safe default is always `no_action`.
+
+Clarification copy examples:
+
+| User command | Response |
+|---|---|
+| `Isigi ac` | `Hangi isigi acmami istersin? Salon, calisma odasi veya yatak odasi?` |
+| `Klasoru ac` | `Hangi klasoru acmami istersin? Belgeler, Indirilenler veya proje klasoru?` |
+| `Sesi ayarla` | `Sesi hangi seviyeye ayarlayayim?` |
+| `Rutini baslat` | `Hangi rutini baslatmamı istersin? Calisma modu, oyun modu veya uyku modu?` |
 
 ## Confirmation Channels
 
 | Channel | Status | Notes |
 |---|---|---|
-| CLI | current/foundation | Can show preview and ask manual confirmation in future |
-| Desktop panel | future | Preferred for PC/home actions |
-| Voice confirmation | future | Must handle misrecognition and timeout |
-| Mobile confirmation | future | Requires secure bridge and auth model |
+| CLI | Foundation | Can show preview and ask manual confirmation in future |
+| Desktop panel | Future | Preferred for PC/home actions |
+| Voice confirmation | Future | Must handle misrecognition, timeout, and cancel |
+| Mobile confirmation | Future | Requires secure bridge and authentication |
+
+## Confirmation Prompt Requirements
+
+Prompts must show:
+
+- action type
+- target
+- risk level
+- expected result
+- state change
+- reversibility
+- warnings
+- confirmation choices
+- cancel option
+
+No prompt should hide the concrete target behind vague wording.
+
+Turkish prompt examples:
+
+| Risk | Prompt |
+|---|---|
+| medium | `Hatirlatici olusturulacak: yarin 09:00 - ilac. Onayliyor musun?` |
+| medium | `Salon isigini acacagim. Bu fiziksel cihaz durumunu degistirir. Onayliyor musun?` |
+| high | `Bilgisayari uyku moduna alacagim. Devam eden isler etkilenebilir. Onayliyor musun?` |
+| blocked | `Bu islem engelli: registry degisikligi ATLAS tarafindan calistirilmaz.` |
+
+## Timeout and Cancel
+
+Rules:
+
+- Pending confirmation expires.
+- Expired confirmation cancels the action.
+- User can cancel at any point before execution.
+- Stale pending action cannot be confirmed by an unrelated later utterance.
+- New command should clear or explicitly supersede pending confirmation.
 
 ## Irreversible Action Policy
 
@@ -90,42 +195,27 @@ Irreversible or hard-to-undo actions are high or blocked by default.
 
 Examples:
 
-- delete file
-- overwrite file
-- shutdown
-- install/uninstall
-- registry edit
-- device action with physical consequence
+- Delete file.
+- Overwrite file.
+- Shutdown.
+- Install/uninstall.
+- Registry edit.
+- Device action with physical consequence.
 
-Such actions require a stricter policy and may remain blocked for early assistant versions.
-
-## Voice Misrecognition Policy
-
-Voice-originated actions are treated more conservatively:
-
-- low-risk action can preview or ask lightweight confirmation
-- medium/high action must repeat understood target and action
-- ambiguous target asks clarification
-- no action after silence timeout
-- cancel command stops pending action
-
-## Timeout and Cancel
-
-Rules:
-
-- pending confirmation expires.
-- expired confirmation cancels action.
-- user can cancel at any point before execution.
-- stale pending action cannot be confirmed by an unrelated later utterance.
+Early ATLAS versions should keep destructive actions blocked, not merely high-risk.
 
 ## Audit Trail
 
 Every permission decision records:
 
 - raw user goal
+- interpreted intent
 - interpreted action
 - source channel
+- confidence
+- target
 - risk level
+- preview
 - decision
 - confirmation channel
 - confirmation status
@@ -133,16 +223,6 @@ Every permission decision records:
 - result status
 - timestamp
 
-## UX Copy Requirements
+## Sprint 38 Dependency
 
-Permission prompts must show:
-
-- action name
-- target
-- risk
-- expected result
-- whether reversible
-- confirmation choices
-- cancel option
-
-No prompt should hide the concrete target behind vague wording.
+Sprint 38 should turn this UX contract into `PermissionManager & Action Approval Flow`. It should still avoid real PC/home execution until the approval gate is testable.

@@ -12,7 +12,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 |---|---|
 | Product direction | Personal control assistant foundation |
 | Release baseline | V1 RC - GO for the existing local control plane |
-| Sprint focus | Sprint 36 - Product Realignment & Assistant Architecture |
+| Sprint focus | Sprint 37 - Action Architecture & Intent Schema completed; Sprint 38 next |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
@@ -107,6 +107,7 @@ Baseline rules:
 These modules are preserved as core or foundation infrastructure:
 
 - `app/ai`: local LLM runtime, Ollama provider, mock provider, context loader, prompt composer, AI service.
+- `app/actions`: Sprint 37 schema-only intent/action/risk/result contracts; no execution or adapter code.
 - `MemoryAgent`: project-memory foundation; will evolve toward personal memory.
 - `ProjectQAAgent`: project QA foundation; will evolve toward personal knowledge QA.
 - `PlannerAgent`: planning foundation; will be repositioned as routine/task planning.
@@ -135,7 +136,7 @@ Developer-oriented automation must not become the default roadmap again unless e
 | Sprint | Focus |
 |---|---|
 | Sprint 36 | Product Realignment & Assistant Architecture |
-| Sprint 37 | Action Architecture & Intent Schema |
+| Sprint 37 | Action Architecture & Intent Schema - completed contract |
 | Sprint 38 | PermissionManager & Action Approval Flow |
 | Sprint 39 | IntentRouter MVP |
 | Sprint 40 | PC Control Adapter MVP |
@@ -158,8 +159,6 @@ Developer-oriented automation must not become the default roadmap again unless e
 - Text-to-speech adapter
 - Wake word listener
 - Conversation loop
-- Intent schema
-- Action schema
 - IntentRouter
 - ActionRouter
 - SkillRegistry
@@ -174,7 +173,7 @@ Developer-oriented automation must not become the default roadmap again unless e
 
 ## Next Sprint
 
-Sprint 37 should be **Action Architecture & Intent Schema**. It should define the first canonical action model, risk model, intent examples, and testable acceptance criteria before any PC control or voice runtime implementation begins.
+Sprint 38 should be **PermissionManager & Action Approval Flow**. It should consume the Sprint 37 intent/action schema and implement preview, confirm, deny, cancel, block, and audit-ready permission decisions before any PC control or home control execution begins.
 
 ## Repo
 

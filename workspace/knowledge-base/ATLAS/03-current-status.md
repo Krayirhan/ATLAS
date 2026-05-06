@@ -7,6 +7,7 @@
 - **Assistant core:** `E:\ATLAS\assistant-core`.
 - **Knowledge base:** `E:\ATLAS\workspace\knowledge-base\ATLAS`.
 - **Product direction after Sprint 36:** local-first personal control assistant foundation.
+- **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -24,6 +25,7 @@ These modules are preserved as the core technical foundation:
 - **MainAgent:** deterministic read-only coordinator; future assistant coordinator.
 - **ToolApprovalAgent:** preview-only approval foundation; future basis for PermissionManager.
 - **SecurityAuditorAgent:** bounded security audit; future basis for PC/home/privacy safety review.
+- **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts only.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -34,6 +36,7 @@ Current AI safety boundary:
 - no git automation
 - no approval token production
 - no full prompt logging
+- no action adapter execution
 
 ## B) Parked DevTools Layer
 
@@ -46,33 +49,75 @@ These modules remain available as support infrastructure, but they are no longer
 
 Parked does not mean deleted. It means these items must not drive the personal assistant roadmap.
 
-## C) Missing Personal Assistant Layers
+## C) Completed Personal Assistant Architecture Contracts
 
-These are not implemented yet and are the focus of Sprint 37+:
+Sprint 37 completed the first canonical contract layer:
 
+- Intent category list.
+- `IntentResult` schema.
+- `ActionCandidate` schema.
+- Action source values.
+- Action type list.
+- Risk model: `safe_readonly`, `low`, `medium`, `high`, `blocked`.
+- `ActionPreview` dry-run/preview contract.
+- `ActionResult` status contract.
+- `ClarificationRequest` model.
+- Ambiguous intent fallback rules.
+- 90 Turkish command examples in `32-intent-action-schema.md`.
+
+These are schema and documentation artifacts. They do not execute actions.
+
+## D) Missing Personal Assistant Runtime Layers
+
+These are not implemented yet and are the focus of Sprint 38+:
+
+- Permission UX runtime / `PermissionManager`
+- IntentRouter runtime
+- ActionRouter runtime
+- SkillRegistry
+- PC control adapter
+- Browser/media/file adapter execution
+- Routine engine
+- Personal memory and preferences runtime
+- Device registry
+- Room model
+- Home control adapter
 - Voice layer
 - Speech-to-text adapter
 - Text-to-speech adapter
 - Wake word listener
 - ConversationLoop
-- Intent schema
-- Action schema
-- IntentRouter
-- ActionRouter
-- SkillRegistry
-- Permission UX / PermissionManager
-- PC control adapter
-- Routine engine
-- Personal memory and preferences
-- Device registry
-- Room model
-- Home control adapter
 - Desktop tray / permission panel
 - Notification / reminder / calendar assistant
 - Mobile bridge
 
 ## Sprint 36 Status
 
-Sprint 36 is a documentation and architecture sprint. It does not add Python logic, agent code, CLI commands, tests, voice runtime, PC control runtime, or home automation runtime.
+Sprint 36 was a documentation and architecture sprint. It did not add Python application logic, agent code, CLI commands, tests, voice runtime, PC control runtime, or home automation runtime.
 
-Sprint 36 success means ATLAS is realigned around the personal control assistant target and the next roadmap starts with action/intent/permission architecture.
+Sprint 36 success means ATLAS is realigned around the personal control assistant target and the roadmap starts with action/intent/permission architecture.
+
+## Sprint 37 Status
+
+Sprint 37 is complete as a schema and documentation sprint.
+
+Completed:
+
+- `32-intent-action-schema.md` was added.
+- `25-assistant-architecture.md`, `26-action-architecture.md`, and `27-permission-ux.md` now describe the intent/action/permission flow.
+- `app/actions` defines schema-only models and enums.
+- `tests/test_action_models.py` validates the model contract.
+
+Not implemented:
+
+- Real action execution.
+- Adapter implementation.
+- PC control.
+- Home control.
+- PermissionManager runtime.
+- Voice runtime.
+- ConversationLoop.
+
+## Next Sprint
+
+Sprint 38 should be **PermissionManager & Action Approval Flow**. It should consume the Sprint 37 schema and implement preview/confirm/block decision flow before any adapter execution begins.

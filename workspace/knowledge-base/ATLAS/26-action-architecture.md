@@ -2,105 +2,306 @@
 
 ## Purpose
 
-The action architecture defines how ATLAS turns user intent into safe, previewable, auditable actions.
+The action architecture defines how ATLAS turns user intent into safe, previewable, auditable actions. Sprint 37 makes the Intent and Action contracts canonical. It does not implement real PC, home, voice, terminal, file, or adapter execution.
 
-## Action Lifecycle
+## Lifecycle
 
 ```text
-intent -> action candidate -> validation -> risk classification -> preview -> confirmation/block -> adapter execution -> result/audit
+User Input
+  -> IntentResult
+  -> ActionCandidate
+  -> RiskClassifier
+  -> ActionPreview
+  -> Confirmation / Block
+  -> Adapter Execution
+  -> ActionResult
+  -> Audit
 ```
 
 No action should execute directly from natural language.
 
+## Intent Schema
+
+Intent answers: "What type of request is the user making?"
+
+| Field | Type | Purpose |
+|---|---|---|
+| `intent_id` | string | Unique intent instance id |
+| `category` | enum | Canonical intent category |
+| `confidence` | float | 0.0-1.0 classifier confidence |
+| `language` | string | Expected first value: `tr`; text fallback may use `en` |
+| `raw_text` | string | Original user input |
+| `normalized_text` | string | Normalized command text |
+| `entities` | object | Extracted app, folder, room, device, time, value, etc. |
+| `target` | string | Primary target if known |
+| `action_candidate` | enum/null | Candidate action type if unambiguous |
+| `ambiguity_reason` | string | Why clarification is required |
+| `requires_clarification` | boolean | True when target/action is unclear |
+| `safety_notes` | list | Safety, privacy, or policy notes |
+
+### Intent Categories
+
+| Category | Meaning |
+|---|---|
+| `conversation.question` | General answer-only question |
+| `conversation.status` | Assistant or system status question |
+| `personal.memory_query` | Ask remembered preference or personal note |
+| `personal.preference_set` | Store/update a preference |
+| `pc.open_app` | Open known local application |
+| `pc.open_folder` | Open known folder |
+| `pc.system_info` | Read system information |
+| `pc.media_control` | Play/pause/next/previous media |
+| `pc.volume_control` | Set or toggle system volume |
+| `browser.search` | Search/open browser query |
+| `file.search` | Search files with preview |
+| `routine.create` | Define a routine |
+| `routine.run` | Run a routine |
+| `routine.preview` | Preview routine steps |
+| `reminder.create` | Create reminder |
+| `calendar.query` | Read calendar information |
+| `device.state_query` | Read device state |
+| `device.turn_on` | Turn on device |
+| `device.turn_off` | Turn off device |
+| `device.set_brightness` | Set device brightness |
+| `device.set_temperature` | Set thermostat/temperature |
+| `unknown` | Cannot classify safely |
+| `ambiguous` | Multiple plausible targets/actions |
+| `blocked` | Requested action is forbidden |
+
 ## Action Schema
 
-Canonical fields:
+Action answers: "What would ATLAS do if the request is approved?"
+
+| Field | Type | Purpose |
+|---|---|---|
+| `action_id` | string | Unique action instance id |
+| `action_type` | enum | Namespaced action type |
+| `target` | string | App, folder, file, device, routine, query, etc. |
+| `parameters` | object | Structured parameters for future adapter |
+| `source` | enum | `text`, `voice`, `routine`, `schedule`, `main_agent`, `manual`, `unknown` |
+| `user_goal` | string | Original user goal |
+| `intent_category` | enum | Source intent category |
+| `risk_level` | enum | `safe_readonly`, `low`, `medium`, `high`, `blocked` |
+| `requires_confirmation` | boolean | Whether explicit confirmation is required |
+| `dry_run_supported` | boolean | Whether preview can be generated without execution |
+| `reversible` | boolean | Whether the result can be undone |
+| `expected_result` | string | Human-readable expected outcome |
+| `blocked_reason` | string | Required when action is blocked |
+| `confirmation_prompt` | string | Prompt shown before approval |
+| `audit_metadata` | object | Routing, policy, confidence, and timestamp metadata |
+
+## Action Sources
+
+| Source | Meaning | Risk implication |
+|---|---|---|
+| `text` | User typed command | Baseline risk |
+| `voice` | Voice/STT command | Medium/high requires repeated confirmation |
+| `routine` | Routine child action | Risk aggregates into routine risk |
+| `schedule` | Scheduled trigger | Requires prior explicit setup and audit |
+| `main_agent` | Planned by MainAgent | Must still go through permission |
+| `manual` | User-selected UI action | Still risk-classified |
+| `unknown` | Missing source | Conservative handling |
+
+## Action Type Inventory
+
+### Safe Read-Only
+
+| Action type | Description | Confirmation |
+|---|---|---|
+| `pc.system_info` | Read local system status | No |
+| `file.search` | Search files and show preview | No |
+| `device.state_query` | Read device state | No |
+| `calendar.query` | Read calendar information | No |
+| `routine.preview` | Preview routine steps | No |
+| `reminder.preview` | Preview reminder details | No |
+
+### Low-Risk Safe Actions
+
+| Action type | Description | Confirmation |
+|---|---|---|
+| `pc.open_app` | Open known application | Usually no; preview/log |
+| `pc.open_folder` | Open known folder | Usually no; preview/log |
+| `browser.search` | Search/open browser query | Usually no; privacy-sensitive query may escalate |
+| `pc.media.play_pause` | Toggle media playback | No |
+| `pc.media.next` | Next media item | No |
+| `pc.media.previous` | Previous media item | No |
+| `pc.volume.set` | Set volume to a numeric value | Usually no; high volume may warn |
+| `pc.volume.mute_toggle` | Toggle mute | No |
+
+### Medium-Risk Actions
+
+| Action type | Description | Confirmation |
+|---|---|---|
+| `reminder.create` | Create reminder | Yes |
+| `routine.create` | Create routine definition | Yes |
+| `routine.run` | Run routine with non-destructive steps | Yes |
+| `device.turn_on` | Turn on device | Yes |
+| `device.turn_off` | Turn off device | Yes |
+| `device.set_brightness` | Set brightness | Yes |
+| `device.set_temperature` | Set temperature | Yes |
+
+### High-Risk Actions
+
+| Action type | Description | Confirmation |
+|---|---|---|
+| `pc.sleep` | Put PC to sleep | Yes + warning |
+| `pc.lock` | Lock PC | Yes + warning |
+| `pc.shutdown` | Shut down PC | Yes + warning; may remain deferred |
+| `device.unlock` | Unlock device | Yes + warning; likely blocked early |
+| `device.open_door` | Open door/gate | Yes + warning; likely blocked early |
+| `device.disable_security` | Disable security device | Yes + warning; likely blocked early |
+| `routine.run_high_impact` | Run high-impact routine | Yes + warning |
+
+### Blocked
+
+| Action type | Reason |
+|---|---|
+| `file.delete` | Destructive file operation |
+| `file.overwrite` | Data loss risk |
+| `app.install` | System change and security risk |
+| `app.uninstall` | System change and data loss risk |
+| `registry.edit` | Windows stability/security risk |
+| `shell.execute_unrestricted` | Unbounded terminal execution |
+| `credential.read` | Credential access |
+| `secret.read` | Secret access |
+| `full_disk_scan` | Privacy and scope risk |
+| `destructive_system_change` | Broad unsafe system change |
+
+## Risk Model
+
+| Risk level | Meaning | Execution policy |
+|---|---|---|
+| `safe_readonly` | Reads information only; no state change | Allowed to preview/read in future adapter; audit required |
+| `low` | Reversible or low-impact action | Preview/log; auto only after later policy |
+| `medium` | Changes local or physical state | Explicit confirmation required |
+| `high` | Work disruption, physical, privacy, or irreversible impact | Explicit confirmation + detailed warning required |
+| `blocked` | Forbidden or out of MVP policy | No execution; show blocked reason |
+
+### Risk Inputs
+
+Risk classification must consider:
+
+- Reversibility.
+- Physical-world effect.
+- System state change.
+- File/data loss risk.
+- Privacy exposure.
+- Financial or security effect.
+- Voice-source misrecognition risk.
+- Low confidence.
+- Ambiguous target.
+- Required user confirmation.
+
+## Dry-Run and Preview Contract
+
+`ActionPreview` fields:
 
 | Field | Purpose |
 |---|---|
-| `action_id` | Unique action instance id |
-| `action_type` | Namespaced action type |
-| `target` | App, folder, file, device, routine, browser query, etc. |
-| `parameters` | Structured parameters |
-| `risk_level` | `low`, `medium`, `high`, or `blocked` |
-| `requires_confirmation` | Whether explicit user confirmation is required |
-| `dry_run_supported` | Whether preview can validate without execution |
-| `reversible` | Whether action can be undone |
-| `source` | CLI, text, voice, desktop, mobile |
-| `user_goal` | Original user goal |
-| `expected_result` | What should happen if action succeeds |
-| `audit_metadata` | Decision, timestamp, routing, confidence, policy metadata |
+| `action_id` | Matches candidate action |
+| `summary` | Human-readable summary |
+| `target` | Concrete target |
+| `parameters_preview` | Sanitized parameter view |
+| `risk_level` | Final risk |
+| `will_change_state` | Whether state changes |
+| `requires_confirmation` | Whether confirmation is required |
+| `reversible` | Whether undo is possible |
+| `estimated_effect` | What will happen |
+| `warnings` | Safety/privacy warnings |
+| `safe_to_execute` | True only after policy permits |
+| `blocked_reason` | Required when blocked |
 
-## Action Types
+Rules:
 
-Initial action type examples:
+- Medium/high action cannot execute without preview.
+- Voice-source medium/high action must repeat understood action and target.
+- Ambiguous target does not produce an executable action.
+- Blocked action preview only explains the block.
 
-| Action type | Description | Default risk |
-|---|---|---|
-| `pc.open_app` | Open a known local application | low |
-| `pc.open_folder` | Open a folder path | low/medium |
-| `pc.media.play_pause` | Toggle media playback | low |
-| `pc.system_info` | Read system information | low |
-| `browser.search` | Open/search a query in browser | low/medium |
-| `routine.run` | Run a named routine | medium by default |
-| `reminder.create` | Create local reminder | low/medium |
-| `device.turn_on` | Turn on a device | medium/high |
-| `device.turn_off` | Turn off a device | medium/high |
-| `device.set_brightness` | Set brightness for a device | medium |
+## ActionResult Contract
 
-## Risk Levels
+`ActionResult` fields:
 
-| Risk level | Meaning | Handling |
-|---|---|---|
-| `low` | Read-only, reversible, or low-impact action | preview optional; auto only in later phases |
-| `medium` | Changes local state or visible environment | explicit confirmation |
-| `high` | Could disrupt work, privacy, home devices, or irreversible state | explicit confirmation plus warning |
-| `blocked` | Forbidden or too risky | no execution |
+| Field | Purpose |
+|---|---|
+| `action_id` | Matches candidate action |
+| `status` | Lifecycle status |
+| `executed` | Whether adapter actually executed |
+| `dry_run` | Whether result is preview-only |
+| `message` | User-readable result summary |
+| `result_data` | Structured adapter result |
+| `error_code` | Stable error code |
+| `error_message` | Detailed error text |
+| `audit_metadata` | Decision/result metadata |
+| `started_at` | Runtime start timestamp |
+| `finished_at` | Runtime finish timestamp |
 
-## Intent to Action Rules
+Status values:
 
-- Unknown intent does not produce executable action.
-- Ambiguous target asks clarification.
-- Voice-originated action uses stricter confirmation.
-- Home/device action requires device id, room, capability, and current state when available.
-- Routine action previews all child actions before execution.
+- `planned`
+- `previewed`
+- `awaiting_confirmation`
+- `approved`
+- `denied`
+- `blocked`
+- `executed`
+- `failed`
+- `cancelled`
+- `skipped`
 
-## Dry-Run and Preview
+## Clarification Contract
 
-Dry-run should answer:
+Ambiguous commands produce `ClarificationRequest` instead of `ActionCandidate`.
 
-- What action would run?
-- What target would be affected?
-- What parameters would be used?
-- What risk level applies?
-- Is confirmation required?
-- Is the action reversible?
-- What could go wrong?
+| Field | Purpose |
+|---|---|
+| `reason` | Why clarification is needed |
+| `missing_fields` | Required fields not known |
+| `candidate_targets` | Possible targets |
+| `suggested_questions` | Questions the assistant may ask |
+| `safe_default` | Must be `no_action` |
 
-## Result Model
+Example:
 
-Every action returns:
+```text
+User: "Isigi ac"
+Missing: room, device_id
+Assistant: "Hangi isigi acmami istersin? Salon, calisma odasi veya yatak odasi?"
+Safe default: no_action
+```
 
-- `status`: `success`, `cancelled`, `blocked`, `failed`, `needs_confirmation`, `needs_clarification`
-- `summary`
-- `details`
-- `audit_id`
-- `warnings`
-- `next_step`
+## Adapter Execution Boundary
 
-## Initial Blocked Categories
+Adapters are future execution components. Sprint 37 defines only their input/output contract.
 
-- file delete
-- recursive delete
-- shutdown/restart
-- app install
-- registry edit
-- admin command
-- git destructive command
-- full disk read/write
-- secret file read
-- home/device write without registry and permission
+Rules:
 
-## Sprint 37 Focus
+- Adapters accept only approved actions.
+- Adapters do not classify natural language.
+- Adapters do not override permission decisions.
+- Blocked actions never reach adapters.
+- Medium/high actions require `ActionPreview` and confirmation first.
+- Adapter results must become `ActionResult`.
 
-Sprint 37 should define the schema and examples only. It should not implement PC control, voice runtime, home control, or new CLI execution commands.
+## Sprint 37 Non-Execution Rule
+
+Sprint 37 does not implement:
+
+- PC control execution.
+- Home/device execution.
+- Windows app launch.
+- PowerShell or terminal executor.
+- STT/TTS/wake word runtime.
+- Conversation loop.
+- File delete/move/run execution.
+- New CLI execution command.
+
+## Sprint Dependencies
+
+| Dependency | Why it matters |
+|---|---|
+| Sprint 38 - PermissionManager & Action Approval Flow | Consumes risk, preview, confirmation, blocked-action contracts |
+| Sprint 39 - IntentRouter MVP | Produces `IntentResult` and action candidates from text |
+| Sprint 40 - PC Control Adapter MVP | Executes only approved low/safe PC actions |
+| Sprint 43 - RoutineEngine MVP | Uses action preview and risk aggregation |
+| Sprint 47 - Home Control Adapter Design | Depends on DeviceRegistry, room model, and approval policy |

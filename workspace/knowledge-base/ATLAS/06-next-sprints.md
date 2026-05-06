@@ -15,37 +15,59 @@
 - **Sprint 33:** MainAgent Alpha.
 - **Sprint 34:** SecurityAuditorAgent.
 - **Sprint 35:** DocumentationAgent.
+- **Sprint 36:** Product Realignment & Assistant Architecture.
+- **Sprint 37:** Action Architecture & Intent Schema.
 
-## Sprint 36
-
-### Sprint 36 - Product Realignment & Assistant Architecture
+## Sprint 36 - Completed
 
 **Amac:** ATLAS product direction'i personal control assistant hedefiyle yeniden hizalamak.
 
-**Kapsam:**
+**Sonuc:**
 
-- README ve KB hedef tanimi.
-- Completed core / parked devtools / missing personal layers ayrimi.
-- Action, assistant, permission, voice, PC control, home control, personal memory docs.
-- Developer-agent roadmap'in park edilmesi.
+- README and KB product direction updated.
+- Completed core / parked devtools / missing personal layers separation documented.
+- Assistant, action, permission, voice, PC control, home control, and personal memory architecture docs created.
+- Developer-agent roadmap parked.
 
-**Kapsam disi:**
+## Sprint 37 - Completed
 
-- Python app logic.
-- Yeni CLI komutu.
-- Yeni agent.
-- Voice, PC control, home control runtime.
+**Amac:** Assistant commands icin canonical intent ve action modelini tanimlamak.
 
-**Acceptance criteria:**
+**Tamamlanan kapsam:**
 
-- README yeni product vision'i yansitir.
-- `03-current-status.md` uc sinifi gosterir.
-- `24`-`31` mimari dokumanlari olusur.
-- Final validation komutlari calisir.
+- Intent category list.
+- Canonical `IntentResult` fields.
+- Canonical `ActionCandidate` fields.
+- Action source values.
+- Action type inventory by risk group.
+- Risk model: `safe_readonly`, `low`, `medium`, `high`, `blocked`.
+- Dry-run / `ActionPreview` contract.
+- `ActionResult` status contract.
+- `ClarificationRequest` model.
+- Ambiguous intent fallback rules.
+- 90 Turkish command examples in `32-intent-action-schema.md`.
+- Schema-only `app/actions` package and unit tests.
+
+**Kapsam disi kalanlar:**
+
+- PC control execution.
+- Home/device execution.
+- Windows app launch implementation.
+- Voice/STT/TTS/wake word runtime.
+- Conversation loop implementation.
+- Adapter execution.
+- New CLI execution command.
+
+**Acceptance criteria status:**
+
+- Intent and action schema are defined.
+- Unknown/ambiguous/blocked inputs do not produce executable actions.
+- Medium/high actions require confirmation by contract.
+- Blocked actions are non-executable by contract.
 
 ## Parked Developer Roadmap
 
-The former near-term roadmap is parked:
+The former near-term developer roadmap remains parked:
 
 - IntegrationAgent as a generic devtools integration agent.
 - TestWriterAgent.
@@ -57,31 +79,7 @@ The former near-term roadmap is parked:
 
 `IntegrationAgent` can return only if it is re-scoped as Device/Service Integration for personal assistant use. Tool execution approval returns as personal Action Approval, not autonomous developer execution.
 
-## New Personal Assistant Roadmap
-
-### Sprint 37 - Action Architecture & Intent Schema
-
-**Amac:** Assistant commands için canonical intent ve action modelini tanimlamak.
-
-**Kapsam:**
-
-- Intent examples.
-- `ActionSchema` fields.
-- action types and targets.
-- risk fields.
-- expected result model.
-
-**Kapsam disi:**
-
-- PC control execution.
-- Voice runtime.
-- Home/device execution.
-
-**Acceptance criteria:**
-
-- `pc.open_app`, `pc.open_folder`, `browser.search`, `routine.run`, `device.turn_on` gibi action types tanimli.
-- Her action risk, confirmation, dry-run, reversible, expected result alanlarini tarif eder.
-- Unknown intent default olarak no execution olur.
+## Active Personal Assistant Roadmap
 
 ### Sprint 38 - PermissionManager & Action Approval Flow
 
@@ -89,72 +87,85 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- low/medium/high/blocked risk policy.
-- confirmation channels.
-- irreversible action policy.
-- action preview.
-- audit metadata.
+- `ActionCandidate` to `ActionPreview` flow.
+- Risk to confirmation matrix implementation.
+- Medium/high confirmation contract.
+- Blocked action handling.
+- Deny/cancel/timeout states.
+- Audit metadata for permission decisions.
+- CLI/text-safe preview flow if needed, without real adapter execution.
 
 **Kapsam disi:**
 
-- Gercek action execution.
+- Real PC control execution.
+- Home/device execution.
 - Desktop panel implementation.
 - Voice confirmation runtime.
+- Autonomous developer tool execution.
 
 **Acceptance criteria:**
 
 - Medium risk explicit confirm ister.
 - High risk clear warning ister.
-- Blocked action calismaz.
-- Voice-originated risky action daha konservatif ele alinir.
+- Blocked action calismaz and cannot reach adapters.
+- Ambiguous action produces clarification, not approval.
+- Voice-originated risky action has stricter confirmation rule.
+- Permission decision emits audit-ready metadata.
 
 ### Sprint 39 - IntentRouter MVP
 
-**Amac:** User input'i structured intent'e ceviren MVP routing tasarimini yapmak.
+**Amac:** User input'i structured `IntentResult`'a ceviren MVP routing tasarimini ve testlerini yapmak.
 
 **Kapsam:**
 
-- text command classification.
-- confidence model.
-- ambiguous command fallback.
+- Text command classification.
+- Confidence model.
+- Entity extraction basics.
+- Ambiguous command fallback.
 - MainAgent relationship.
+- Unknown/blocked routing.
 
 **Kapsam disi:**
 
 - STT.
 - PC adapter execution.
+- Home/device execution.
 
 **Acceptance criteria:**
 
 - IntentRouter unknown/ambiguous komutu action'a cevirmez.
-- MainAgent, IntentRouter ve ActionRouter sorumluluklari ayrilir.
+- Intent categories match Sprint 37 schema.
+- MainAgent, IntentRouter, and ActionRouter responsibilities remain separate.
 
 ### Sprint 40 - PC Control Adapter MVP
 
-**Amac:** Windows icin safe PC control adapter MVP'sini tasarlamak ve sonraki implementasyona hazirlamak.
+**Amac:** Windows icin safe PC control adapter MVP'sini tasarlamak ve implementasyona baslamak.
 
 **Kapsam:**
 
-- app open.
-- folder open.
-- system info.
-- media play/pause.
-- volume control.
-- browser search.
-- file search preview.
+- App open.
+- Folder open.
+- System info.
+- Media play/pause.
+- Volume control.
+- Browser search.
+- File search preview.
+- Adapter-level dry-run and result contract.
 
 **Kapsam disi:**
 
-- delete file.
-- shutdown.
-- install app.
-- registry edit.
-- admin commands.
+- Delete file.
+- Shutdown execution.
+- Install/uninstall app.
+- Registry edit.
+- Admin commands.
+- Unrestricted shell execution.
 
 **Acceptance criteria:**
 
-- Her MVP action risk, dry-run, approval, test approach ile tanimlidir.
+- Her MVP action risk, dry-run, approval, and test approach ile tanimlidir.
 - Destructive actions blocked/deferred listesinde kalir.
+- Adapter accepts only approved actions.
 
 ### Sprint 41 - ConversationLoop MVP
 
@@ -162,21 +173,24 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- session state.
-- cancel/interrupt.
-- confirmation turn.
-- result response.
-- fallback to text.
+- Session state.
+- Cancel/interrupt.
+- Confirmation turn.
+- Stale confirmation prevention.
+- Result response.
+- Fallback to text.
 
 **Kapsam disi:**
 
 - Wake word.
 - TTS runtime.
+- Home action execution.
 
 **Acceptance criteria:**
 
 - User can cancel before execution.
 - Confirmation turn stale action'a baglanmaz.
+- New command cannot accidentally confirm old action.
 
 ### Sprint 42 - Personal Memory & Preferences
 
@@ -184,23 +198,24 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- preferences.
-- device aliases.
-- room names.
-- routine definitions.
-- safe command history summaries.
-- forget/delete.
+- Preferences.
+- Device aliases.
+- Room names.
+- Routine definitions.
+- Safe command history summaries.
+- Forget/delete.
 
 **Kapsam disi:**
 
-- raw log ingestion.
-- browser profile read.
-- secret storage.
+- Raw log ingestion.
+- Browser profile read.
+- Secret storage.
 
 **Acceptance criteria:**
 
 - Sensitive memory policy tanimli.
 - Forget/delete akisi tanimli.
+- Memory writes require policy and audit.
 
 ### Sprint 43 - RoutineEngine MVP
 
@@ -208,23 +223,25 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- calisma modu.
-- oyun modu.
-- uyku modu.
-- toplanti modu.
-- evden cikiyorum.
-- eve geldim.
-- schedule basics.
+- Calisma modu.
+- Oyun modu.
+- Uyku modu.
+- Toplanti modu.
+- Evden cikiyorum.
+- Eve geldim.
+- Schedule basics.
+- Child-action risk aggregation.
 
 **Kapsam disi:**
 
-- Home device write execution.
+- Home device write execution without registry and permission.
 - Complex conditional automations.
 
 **Acceptance criteria:**
 
 - Routine preview mandatory.
-- Medium/high risk routine steps confirmation ister.
+- Medium/high routine steps confirmation ister.
+- High-impact routines are high risk.
 
 ### Sprint 44 - Voice Core Architecture
 
@@ -232,22 +249,25 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- push-to-talk first.
-- wake word later.
+- Push-to-talk first.
+- Wake word later.
 - STT/TTS options.
 - Turkish quality.
-- latency targets.
-- privacy rules.
+- Latency targets.
+- Privacy rules.
+- Voice-source risk escalation.
 
 **Kapsam disi:**
 
 - STT/TTS code.
 - Wake word runtime.
+- Home action execution.
 
 **Acceptance criteria:**
 
 - Always-listening risk documented.
 - Text fallback documented.
+- Medium/high voice actions require repeated confirmation.
 
 ### Sprint 45 - STT/TTS MVP
 
@@ -255,10 +275,11 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- offline/local-first STT candidates.
+- Offline/local-first STT candidates.
 - TTS candidates.
 - Turkish command test set.
-- latency baseline.
+- Latency baseline.
+- Push-to-talk flow.
 
 **Kapsam disi:**
 
@@ -276,11 +297,12 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- device id.
-- aliases.
-- room names.
-- capability model.
-- state read/write distinction.
+- Device id.
+- Aliases.
+- Room names.
+- Capability model.
+- State read/write distinction.
+- Wrong-target prevention.
 
 **Kapsam disi:**
 
@@ -300,13 +322,14 @@ The former near-term roadmap is parked:
 
 - Home Assistant first candidate.
 - MQTT alternative.
-- cloud providers later.
-- state read before write.
-- approval rules.
+- Cloud providers later.
+- State read before write.
+- Approval rules.
+- Device registry dependency.
 
 **Kapsam disi:**
 
-- Physical device runtime execution.
+- Physical device runtime execution before PermissionManager and DeviceRegistry are ready.
 - Cloud account binding.
 
 **Acceptance criteria:**
@@ -319,11 +342,11 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- tray status.
-- pending action panel.
-- confirm/cancel.
-- audit view.
-- settings.
+- Tray status.
+- Pending action panel.
+- Confirm/cancel.
+- Audit view.
+- Settings.
 
 **Kapsam disi:**
 
@@ -341,10 +364,10 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- reminder.create.
-- notification summary.
-- local schedule.
-- future calendar adapter boundary.
+- `reminder.create`.
+- Notification summary.
+- Local schedule.
+- Future calendar adapter boundary.
 
 **Kapsam disi:**
 
@@ -362,13 +385,13 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- text command.
-- optional voice command.
-- intent.
-- action preview.
-- approval.
-- safe PC/routine result.
-- audit.
+- Text command.
+- Optional voice command.
+- Intent.
+- Action preview.
+- Approval.
+- Safe PC/routine result.
+- Audit.
 
 **Kapsam disi:**
 
@@ -386,12 +409,12 @@ The former near-term roadmap is parked:
 
 **Kapsam:**
 
-- latency budgets.
+- Latency budgets.
 - Ollama warmup UX.
-- error handling.
-- route regression.
-- action audit completeness.
-- privacy checks.
+- Error handling.
+- Route regression.
+- Action audit completeness.
+- Privacy checks.
 
 **Kapsam disi:**
 

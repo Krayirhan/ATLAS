@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane and read-only AI/agent core. After Sprint 36, its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, and Sprint 37 schema-only action contracts. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-No Python application logic is changed by Sprint 36. This README documents the target structure for future implementation.
+Sprint 37 adds model/enumeration contracts only. It does not add real PC control, home control, voice runtime, adapter execution, or a new CLI execution command.
 
 ## Current Technical Foundation
 
@@ -11,6 +11,7 @@ No Python application logic is changed by Sprint 36. This README documents the t
 | `app/ai` | Implemented | Local LLM runtime, Ollama provider, mock provider, bounded context, prompt composition |
 | `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
 | `app/approval` | Implemented preview-only approval foundation | Basis for future action permission and confirmation |
+| `app/actions` | Implemented schema-only contracts | Intent/action/risk/preview/result model foundation |
 | `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
@@ -57,23 +58,27 @@ All existing agents must remain read-only until a later sprint explicitly design
 Future direction:
 
 - Generalize from command/file/tool preview toward assistant actions.
-- Add action risk classification: `low`, `medium`, `high`, `blocked`.
+- Add action risk classification: `safe_readonly`, `low`, `medium`, `high`, `blocked`.
 - Require explicit confirmation for medium/high actions.
 - Keep blocked actions non-executable.
 - Produce audit metadata for every approval decision.
 
-## Future app/actions
+## app/actions - Intent and Action Contracts
 
-Planned responsibility:
+Current Sprint 37 responsibility:
 
-- `ActionSchema`
-- action identifiers
-- action type registry
-- expected result model
-- result and error model
-- dry-run/preview contract
-- `ActionRouter`
-- `SkillRegistry`
+- `IntentResult`
+- `ActionCandidate`
+- `ActionPreview`
+- `ActionResult`
+- `ClarificationRequest`
+- intent categories
+- action types
+- source values
+- risk levels
+- default risk mapping
+
+No execution exists in `app/actions`.
 
 Initial action types:
 
@@ -87,6 +92,13 @@ Initial action types:
 - `device.turn_on`
 - `device.turn_off`
 - `device.set_brightness`
+
+Future responsibility:
+
+- `ActionRouter`
+- `SkillRegistry`
+- adapter handoff validation
+- result and error model expansion
 
 ## Future app/voice
 
