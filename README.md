@@ -1,62 +1,180 @@
 # ATLAS AI Assistant
 
-## What is ATLAS?
+## Product Vision
 
-ATLAS is a local-first, security-first developer AI control plane. It centralizes project memory, instruction surfaces, JSON configs, safety policy, logs, reports, and bounded AI agent workflows so humans and AI operate under the same guardrails.
+ATLAS is a local-first personal AI assistant foundation for Windows. It is designed to understand voice and text commands, use Ollama as the default local LLM runtime, and safely manage personal computer actions, personal knowledge, routines, and device or home automation actions through an explicit permission and approval model.
 
-## Current status
+ATLAS is not primarily a developer assistant. The current developer-oriented agents remain valuable as a devtools/supporting subsystem, but the main product direction is now the personal control assistant architecture.
+
+## Current Status
 
 | Item | Value |
-|------|--------|
-| Release | V1 RC - GO |
+|---|---|
+| Product direction | Personal control assistant foundation |
+| Release baseline | V1 RC - GO for the existing local control plane |
+| Sprint focus | Sprint 36 - Product Realignment & Assistant Architecture |
 | Root | `E:\ATLAS` |
-| Self-project | `ATLAS` |
-| `D:\ATLAS` | Not used as operational root |
-| Tests | Run `python -m pytest -q` from `assistant-core` |
-| Health | `python -m app.cli doctor --full` |
-| Audit | `python -m app.cli audit v1-rc` |
+| Assistant core | `E:\ATLAS\assistant-core` |
+| Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
+| Default LLM provider | `ollama` |
+| Test command | `python -m pytest -q` from `assistant-core` |
+| Health command | `python -m app.cli doctor --full` |
 
-## Security model
+The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place.
 
-- No full-disk MCP
-- No secret file reading in product scope
-- No `D:` writes as ATLAS policy stance
-- Command preview never executes
-- No git push / production deploy automation
-- No autonomous coding agent execution path
+The missing product layers are voice, intent/action schema, PC control, routine engine, personal memory/preferences, device registry, home control, permission UX, desktop panel, and mobile bridge.
 
-## Forward-looking sprint map
+## Core Architecture
 
-- Sprint 28: Ollama AI layer foundation
-- Sprint 29: MemoryAgent / ProjectQAAgent
-- Sprint 30: PlannerAgent
-- Sprint 31: CodeReviewerAgent
-- Sprint 32: ToolApproval design
-- Sprint 33: MainAgent alpha
-- Sprint 34: SecurityAuditorAgent
-- Sprint 35: DocumentationAgent
+ATLAS now separates the project into three tracks:
 
-## SecurityAuditorAgent
+1. **Core assistant foundation**
+   - local LLM runtime
+   - bounded context loading
+   - main assistant orchestration
+   - action approval foundation
+   - security audit foundation
+   - local configuration and audit
 
-- `python -m app.cli ai security-audit --project ATLAS --provider mock --scope all-light`
-- `python -m app.cli ai security-audit --project ATLAS --provider mock --scope agents --show-sources`
-- `python -m app.cli ai security-audit --project ATLAS --provider mock --scope mcp`
-- `python -m app.cli ai main --project ATLAS --provider mock --show-routing "ATLAS guvenli mi?"`
+2. **Personal control assistant product track**
+   - voice and text interaction
+   - intent understanding
+   - action routing
+   - permission and confirmation UX
+   - Windows PC control
+   - routines
+   - personal memory
+   - home/device automation
 
-SecurityAuditorAgent read-only calisir. Dosya degistirmez, terminal calistirmaz, Git/MCP tool cagrisi yapmaz. Agent capability, MCP exposure, approval policy, context source ve secret-risk sinirlarini denetler.
+3. **Parked devtools subsystem**
+   - read-only code review
+   - documentation audit
+   - report synthesis
+   - repo hygiene ideas
+   - coding automation ideas
 
-## DocumentationAgent
+## Assistant Runtime Layers
 
-Sprint 35 ile `DocumentationAgent` geldi. Read-only dokümantasyon audit'i üretir.
-README, KB, NotebookLM workflow, roadmap, agent sprint dokümanları ve release dokümanlarını kontrol eder.
-Dosya değiştirmez. Terminal çalıştırmaz. Git/MCP tool çağırmaz.
+Target runtime flow:
 
-```powershell
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope notebooklm --show-sources
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope agents
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "README guncel mi?"
+```text
+User input
+  -> ConversationLoop
+  -> IntentRouter
+  -> MainAgent
+  -> CommandUnderstandingAgent
+  -> ActionRouter
+  -> PermissionManager
+  -> Adapter
+  -> Result/Audit
+  -> TTS/UI response
 ```
+
+Target layers:
+
+| Layer | Responsibility |
+|---|---|
+| Interaction Layer | Text, push-to-talk voice, future wake word, future desktop/mobile UI |
+| AI Reasoning Layer | Ollama-backed reasoning, bounded prompt/context |
+| Memory Layer | Personal preferences, routines, device aliases, safe command history |
+| Intent/Action Layer | Intent schema, action schema, skill registry, action router |
+| Permission Layer | Risk classification, preview, confirmation, block rules |
+| Adapter Layer | PC control, browser, media, files, future home/device adapters |
+| Audit Layer | Action result, decision trail, security review evidence |
+| UI Layer | Future tray, permission panel, logs, settings, routine editor |
+
+## Safety & Permission Model
+
+ATLAS remains security-first. The personal assistant must follow this sequence:
+
+```text
+understand -> preview -> classify risk -> ask approval if needed -> execute only allowed action -> audit result
+```
+
+Baseline rules:
+
+- No full-disk MCP exposure.
+- No `.env`, private key, SSH key, keystore, browser profile, or raw secret source reading.
+- No `D:` writes as ATLAS policy stance.
+- No unrestricted terminal execution.
+- No git push or production deployment automation in the assistant path.
+- Medium and high risk actions require explicit confirmation.
+- Blocked actions must not execute.
+- Voice commands must be treated as potentially misheard until confidence and confirmation rules exist.
+
+## Existing AI/Agent Core
+
+These modules are preserved as core or foundation infrastructure:
+
+- `app/ai`: local LLM runtime, Ollama provider, mock provider, context loader, prompt composer, AI service.
+- `MemoryAgent`: project-memory foundation; will evolve toward personal memory.
+- `ProjectQAAgent`: project QA foundation; will evolve toward personal knowledge QA.
+- `PlannerAgent`: planning foundation; will be repositioned as routine/task planning.
+- `MainAgent`: current deterministic coordinator; will become the assistant coordination layer around intent/action routing.
+- `ToolApprovalAgent`: command/action preview foundation; will evolve toward `PermissionManager`.
+- `SecurityAuditorAgent`: security audit foundation; will expand to PC/home/privacy risk checks.
+
+All current agents remain read-only. They do not write files, run terminal commands, call MCP tools, or produce approval tokens.
+
+## Parked DevTools Subsystem
+
+The following work is not deleted, but it is no longer on the main product path:
+
+| Item | New status | Reason |
+|---|---|---|
+| `CodeReviewerAgent` | Parked devtools support | Useful for repo quality, not personal assistant runtime |
+| `DocumentationAgent` | Supporting knowledge hygiene | Useful for KB/README consistency, not core user workflow |
+| `ReportAgent` idea/current work | Parked reporting support | Helpful for audits, not a user-facing control assistant layer |
+| Git hygiene | Deferred | Repo maintenance, not assistant capability |
+| CodeBuilder/BugFix/Refactor ideas | Parked | Developer automation would pull ATLAS away from the personal control assistant goal |
+
+Developer-oriented automation must not become the default roadmap again unless explicitly approved in a later devtools track.
+
+## New Roadmap
+
+| Sprint | Focus |
+|---|---|
+| Sprint 36 | Product Realignment & Assistant Architecture |
+| Sprint 37 | Action Architecture & Intent Schema |
+| Sprint 38 | PermissionManager & Action Approval Flow |
+| Sprint 39 | IntentRouter MVP |
+| Sprint 40 | PC Control Adapter MVP |
+| Sprint 41 | ConversationLoop MVP |
+| Sprint 42 | Personal Memory & Preferences |
+| Sprint 43 | RoutineEngine MVP |
+| Sprint 44 | Voice Core Architecture |
+| Sprint 45 | STT/TTS MVP |
+| Sprint 46 | DeviceRegistry + Room Model |
+| Sprint 47 | Home Control Adapter Design |
+| Sprint 48 | Desktop Tray / Permission Panel |
+| Sprint 49 | Notification / Reminder / Calendar Assistant |
+| Sprint 50 | End-to-End Personal Assistant Demo |
+| Sprint 51 | Safety / Latency / UX Hardening |
+
+## What Is Not Implemented Yet
+
+- Voice layer
+- Speech-to-text adapter
+- Text-to-speech adapter
+- Wake word listener
+- Conversation loop
+- Intent schema
+- Action schema
+- IntentRouter
+- ActionRouter
+- SkillRegistry
+- PermissionManager UX
+- PC control adapter
+- Home control adapter
+- Device registry
+- Routine engine
+- Personal memory/preferences
+- Desktop tray or dashboard
+- Mobile companion bridge
+
+## Next Sprint
+
+Sprint 37 should be **Action Architecture & Intent Schema**. It should define the first canonical action model, risk model, intent examples, and testable acceptance criteria before any PC control or voice runtime implementation begins.
 
 ## Repo
 

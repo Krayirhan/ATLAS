@@ -1,165 +1,161 @@
 # assistant-core
 
-ATLAS core uygulama katmani.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane and read-only AI/agent core. After Sprint 36, its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-## AI Layer / Ollama
+No Python application logic is changed by Sprint 36. This README documents the target structure for future implementation.
 
-Sprint 28 ile read-only AI foundation eklendi. Sprint 28.6 ile runtime hardening yapildi.
+## Current Technical Foundation
 
-- Varsayilan provider: `ollama`
-- Test ve fallback provider: `mock`
-- Kapsam: `ai doctor`, `ai ask`
-- Guvenlik sinirlari:
-  - AI read-only advisory mode
-  - terminal execution yok
-  - dosya yazan AI yok
-  - tool calling yok
-  - git automation yok
-- Ilk Ollama cagrisi model load nedeniyle yavas olabilir.
-- `ai warmup` modeli onceden yukleyebilir.
-- `keep_alive` modelin bellekte kalmasina yardimci olur.
-- Ollama timeout degeri `300s` olarak artirildi.
+| Area | Current status | Role in the new direction |
+|---|---|---|
+| `app/ai` | Implemented | Local LLM runtime, Ollama provider, mock provider, bounded context, prompt composition |
+| `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
+| `app/approval` | Implemented preview-only approval foundation | Basis for future action permission and confirmation |
+| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent commands |
+| `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
-### Ornek komutlar
+## app/ai - Local LLM Runtime
+
+`app/ai` is the local-first LLM runtime layer.
+
+Current responsibilities:
+
+- Ollama provider support.
+- Mock provider for deterministic tests and fallback.
+- Context loading from approved ATLAS sources.
+- Prompt composition with read-only safety rules.
+- `ai doctor`, `ai ask`, and `ai warmup` flows.
+
+Future responsibilities:
+
+- Support assistant intent prompts without broadening source access.
+- Keep prompt logging metadata-only.
+- Provide latency and warmup signals to future conversation UX.
+
+## app/agents - Existing Read-Only Agents
+
+Current agents are preserved, but their product roles are clarified:
+
+| Agent | Current role | New product position |
+|---|---|---|
+| `MemoryAgent` | Project snapshot | Foundation for PersonalMemoryAgent |
+| `ProjectQAAgent` | Project QA | Foundation for personal knowledge QA |
+| `PlannerAgent` | Sprint plan | Reposition as routine/task planning foundation |
+| `MainAgent` | Deterministic coordinator | Future assistant coordinator around intent/action routing |
+| `ToolApprovalAgent` | Preview-only command approval | Foundation for PermissionManager |
+| `SecurityAuditorAgent` | Bounded security audit | Future PC/home/privacy safety auditor |
+| `CodeReviewerAgent` | Read-only code review | Parked devtools support |
+| `DocumentationAgent` | Read-only docs audit | Supporting knowledge hygiene |
+| `ReportAgent` | Read-only report synthesis | Parked ops/devtools support |
+
+All existing agents must remain read-only until a later sprint explicitly designs execution boundaries.
+
+## app/approval - Permission and Action Approval Foundation
+
+`app/approval` currently models proposed commands, file changes, tool calls, approval status, risk, preview, requirements, and evaluator decisions.
+
+Future direction:
+
+- Generalize from command/file/tool preview toward assistant actions.
+- Add action risk classification: `low`, `medium`, `high`, `blocked`.
+- Require explicit confirmation for medium/high actions.
+- Keep blocked actions non-executable.
+- Produce audit metadata for every approval decision.
+
+## Future app/actions
+
+Planned responsibility:
+
+- `ActionSchema`
+- action identifiers
+- action type registry
+- expected result model
+- result and error model
+- dry-run/preview contract
+- `ActionRouter`
+- `SkillRegistry`
+
+Initial action types:
+
+- `pc.open_app`
+- `pc.open_folder`
+- `pc.media.play_pause`
+- `pc.system_info`
+- `browser.search`
+- `routine.run`
+- `reminder.create`
+- `device.turn_on`
+- `device.turn_off`
+- `device.set_brightness`
+
+## Future app/voice
+
+Planned responsibility:
+
+- push-to-talk first
+- STT adapter
+- TTS adapter
+- future wake word listener
+- interruption and cancel flow
+- fallback to text
+- latency measurement
+- privacy controls for microphone usage
+
+Wake word must not be implemented before the privacy model and confirmation policy are documented and accepted.
+
+## Future app/control
+
+Planned responsibility:
+
+- Windows PC control adapter.
+- Browser/search adapter.
+- Media adapter.
+- File search preview adapter.
+- Future home/device adapter integration boundary.
+
+Initial PC actions must be safe, previewable, and reversible where possible. Destructive actions such as delete, shutdown, registry edits, installs, and admin commands remain blocked or deferred.
+
+## Future app/routines
+
+Planned responsibility:
+
+- routine definitions
+- routine preview
+- schedule and trigger model
+- routine result/audit
+- user preference integration
+
+Example routines:
+
+- calisma modu
+- oyun modu
+- uyku modu
+- toplanti modu
+- evden cikiyorum
+- eve geldim
+
+## Validation Commands
+
+Run from `E:\ATLAS\assistant-core`:
 
 ```powershell
-ollama list
-ollama pull qwen2.5:7b
+python -m pytest -q
+python -m app.cli doctor --full
+python -m app.cli config validate
+python -m app.cli project validate ATLAS
 python -m app.cli ai doctor
-python -m app.cli ai warmup --provider ollama
-python -m app.cli ai ask --project ATLAS "ATLAS su an ne durumda?"
-python -m app.cli ai ask --project ATLAS --provider mock "ATLAS su an ne durumda?"
-```
-
-## Agents Alpha
-
-Sprint 29 ile `MemoryAgent` ve `ProjectQAAgent` Alpha geldi.
-
-- Read-only agentlardir.
-- Kod yazmazlar.
-- Dosya degistirmezler.
-- Terminal calistirmazlar.
-- Git/MCP tool cagrisi yapmazlar.
-
-```powershell
-python -m app.cli ai memory --project ATLAS
-python -m app.cli ai ask-agent --project ATLAS --provider mock "ATLAS su an ne durumda?"
-python -m app.cli ai ask-agent --project ATLAS --provider ollama "Sprint 30'a gecilebilir mi?"
-```
-
-## PlannerAgent Alpha
-
-Sprint 30 ile `PlannerAgent` Alpha geldi.
-
-- Read-only plan uretir.
-- Kod yazmaz.
-- Dosya degistirmez.
-- Terminal calistirmaz.
-- Git/MCP tool cagrisi yapmaz.
-
-```powershell
-python -m app.cli ai plan --project ATLAS --provider mock --goal "Sprint 31 icin CodeReviewerAgent planla"
-python -m app.cli ai plan --project ATLAS --provider ollama --goal "ATLAS icin test coverage sprinti planla"
-```
-
-## CodeReviewerAgent Alpha
-
-Sprint 31 ile `CodeReviewerAgent` Alpha geldi.
-
-- Read-only review uretir.
-- Kod yazmaz.
-- Dosya degistirmez.
-- Terminal calistirmaz.
-- Git/MCP tool cagrisi yapmaz.
-- Scope bazli sinirli dosya okur.
-
-```powershell
-python -m app.cli ai review --project ATLAS --provider mock --scope safety
-python -m app.cli ai review --project ATLAS --provider ollama --scope ai-layer --show-sources
-python -m app.cli ai review --project ATLAS --provider ollama --scope config
-```
-
-## ToolApproval Design
-
-Sprint 32 ile `ToolApprovalAgent` geldi.
-
-- Komutlari calistirmaz.
-- Sadece karar ve preview uretir.
-- `blocked`, `approval_required`, `preview_allowed`, `safe_readonly` kararlarini verir.
-- Kullanici onayi olmadan hicbir tool calismaz.
-
-```powershell
-python -m app.cli ai approval command --project ATLAS --cmd "python -m pytest -q"
-python -m app.cli ai approval command --project ATLAS --cmd "git reset --hard"
-python -m app.cli ai approval command --project ATLAS --cmd "git push"
-```
-
-## MainAgent Alpha
-
-Sprint 33 ile `MainAgent` Alpha geldi.
-
-- Alt agentlari koordine eder.
-- Read-only calisir.
-- Kod yazmaz.
-- Dosya degistirmez.
-- Terminal calistirmaz.
-- Git/MCP tool cagrisi yapmaz.
-- `ToolApprovalAgent` uzerinden sadece preview/risk degerlendirmesi yapar.
-
-```powershell
-python -m app.cli ai main --project ATLAS --provider mock "ATLAS su an ne durumda?"
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "Sprint 34 icin plan cikar"
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "git reset --hard guvenli mi?"
-python -m app.cli ai main --project ATLAS --provider ollama "AI layer guvenli mi?"
-```
-
-## SecurityAuditorAgent
-
-Sprint 34 ile `SecurityAuditorAgent` geldi.
-
-- Read-only guvenlik denetimi uretir.
-- Dosya degistirmez.
-- Terminal calistirmaz.
-- Git/MCP tool cagrisi yapmaz.
-- Agent capability, MCP, approval, context, secret ve docs guvenligini denetler.
-
-```powershell
-python -m app.cli ai security-audit --project ATLAS --provider mock --scope all-light
-python -m app.cli ai security-audit --project ATLAS --provider mock --scope agents --show-sources
-python -m app.cli ai security-audit --project ATLAS --provider mock --scope mcp
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "ATLAS guvenli mi?"
-```
-
-### Ollama onkosulu
-
-- Default endpoint: `http://localhost:11434`
-- Default model: `qwen2.5:7b`
-- Ollama kurulu degilse mock provider ile testler yine calisir.
-- Model yoksa pull islemi otomatik yapilmaz; onerilen komut:
-
-```powershell
-ollama pull qwen2.5:7b
-```
-
-## DocumentationAgent
-
-Sprint 35 ile `DocumentationAgent` geldi.
-
-- Read-only dokümantasyon audit'i üretir.
-- Dosya değiştirmez.
-- Terminal çalıştırmaz.
-- Git/MCP tool çağırmaz.
-- README, KB, NotebookLM workflow, roadmap, agent sprint dokümanları ve release dokümanlarını kontrol eder.
-- GO / CONDITIONAL / NO-GO kararı üretir.
-
-```powershell
 python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope readme --show-sources
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope notebooklm
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope agents
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope roadmap
-python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light --json
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "README guncel mi?"
-python -m app.cli ai main --project ATLAS --provider mock --show-routing "Dokumantasyon tutarli mi?"
+python -m app.cli ai security-audit --project ATLAS --provider mock --scope all-light
+python -m app.cli audit v1-rc
 ```
 
+## Non-Goals for the Assistant Runtime
+
+- Autonomous coding agents as a primary product.
+- Unrestricted terminal execution.
+- Git push automation.
+- Production deployment automation.
+- Full disk MCP access.
+- Secret file reading.
+- Wake word without privacy and permission design.
+- Home/device control before permission and device registry are ready.
