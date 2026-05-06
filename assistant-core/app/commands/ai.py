@@ -907,3 +907,55 @@ def ai_chat(
         console.print(f"[dim]Pending clarification: {state.pending_clarification}[/dim]")
         console.print(f"[dim]Pending confirmation: {state.pending_confirmation}[/dim]")
 
+def ai_memory_personal(
+    project: str,
+    text: str,
+    json_output: bool = False,
+    show_all: bool = False,
+    clear: bool = False,
+    memory_type_str: str | None = None,
+    session_id: str | None = None,
+):
+    from app.personal_memory.service import PersonalMemoryService
+    from app.personal_memory.models import MemoryType, MemoryOperationStatus
+    from rich.console import Console
+    import json
+    
+    console = Console()
+    service = PersonalMemoryService()
+    
+    m_type = MemoryType.UNKNOWN
+    if memory_type_str:
+        try:
+            m_type = MemoryType(memory_type_str)
+        except ValueError:
+            pass
+            
+    if clear:
+        count = service.store.clear(m_type if m_type != MemoryType.UNKNOWN else None)
+        if json_output:
+            print(json.dumps({"status": "cleared", "count": count}))
+        else:
+            console.print(f"Hafıza temizlendi. (Silinen: {count})")
+        return
+        
+    if show_all:
+        res = service.show(m_type)
+        if json_output:
+            print(res.model_dump_json(indent=2))
+        else:
+            console.print(res.message)
+        return
+        
+    res = service.handle_text(text)
+    if json_output:
+        print(res.model_dump_json(indent=2))
+    else:
+        if res.status == MemoryOperationStatus.BLOCKED:
+            console.print(f"[red]BLOCKED[/red]: {res.message}")
+            if res.blocked_reason:
+                console.print(f"[dim]{res.blocked_reason}[/dim]")
+        else:
+            console.print(f"[green]SUCCESS[/green]: {res.message}")
+
+

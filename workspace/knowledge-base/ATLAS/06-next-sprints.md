@@ -21,6 +21,7 @@
 - **Sprint 39:** IntentRouter MVP.
 - **Sprint 40:** PC Control Adapter MVP.
 - **Sprint 41:** ConversationLoop MVP.
+- **Sprint 42:** Personal Memory & Preferences.
 
 ## Sprint 36 - Completed
 
@@ -203,32 +204,27 @@ The former near-term developer roadmap remains parked:
 - Confirmation turn stale action'a baglanmaz.
 - New command cannot accidentally confirm old action.
 
-## Active Personal Assistant Roadmap
-
-### Sprint 42 - Personal Memory & Preferences
+## Sprint 42 - Completed
 
 **Amac:** Personal memory modelini privacy-first sekilde tanimlamak.
 
 **Kapsam:**
 
-- Preferences.
-- Device aliases.
-- Room names.
-- Routine definitions.
-- Safe command history summaries.
-- Forget/delete.
+- Entity schema.
+- Automatic context retention.
+- Forget flow.
+- Storage.
 
 **Kapsam disi:**
 
-- Raw log ingestion.
-- Browser profile read.
-- Secret storage.
+- Routine variables.
 
 **Acceptance criteria:**
 
-- Sensitive memory policy tanimli.
-- Forget/delete akisi tanimli.
-- Memory writes require policy and audit.
+- Assistant can store safe preferences.
+- Sensitive memory blocked.
+
+## Active Personal Assistant Roadmap
 
 ### Sprint 43 - RoutineEngine MVP
 

@@ -21,6 +21,15 @@
 14. **Pending confirmation lost** - A user's explicit confirmation might be dropped or misaligned with the intended action.
 15. **Conversation state leakage** - Sensitive information or context might persist too long or leak across sessions.
 16. **Voice-source command treated as text** - A risky voice command might bypass strict voice confirmation rules if the source is incorrectly tracked.
+17. **Automatic memory write risk** - The assistant might accidentally store conversation history or transient context without explicit user consent.
+18. **Sensitive memory storage risk** - Storing passwords, financial details, or API keys in plain text.
+19. **User forgot but memory remains** - A forget command might fail to delete an item correctly.
+20. **Memory poisoning** - Malicious intent input might craft fake aliases or preferences to cause harmful execution down the line.
+21. **Wrong alias stored** - A device alias might map to the wrong canonical device, causing unexpected interactions.
+22. **Private preference overexposure** - Preferences might be printed/logged openly without considering user context.
+23. **Stale preference** - An old memory might dictate behavior when it is no longer relevant.
+24. **Personal data export risk** - JSON persistence or memory dump features might expose internal secrets to other apps.
+25. **Memory CLI persistence confusion** - Differences between in-memory testing and persistent state might confuse users or testers.
 13. **Malicious phrasing** - User text may look like a natural request while attempting shell-like, destructive, or policy-bypass behavior.
 14. **Command injection-like user text** - Symbols or phrasing such as `;`, `&&`, `|`, or PowerShell-like text must not be treated as executable intent.
 15. **Overconfident routing** - Deterministic matches can classify too aggressively and skip clarification.

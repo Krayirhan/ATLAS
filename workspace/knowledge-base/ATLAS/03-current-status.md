@@ -12,6 +12,7 @@
 - **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
 - **Sprint 40 status:** completed PCControlAdapter MVP; dry-run/preview PC plan generation available.
 - **Sprint 41 status:** completed ConversationLoop MVP; text-first conversational loop with safe responses.
+- **Sprint 42 status:** completed Personal Memory & Preferences; secure, local-only preference storage with sensitive data blocks.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -211,24 +212,24 @@ Not implemented:
 - Home control.
 - Voice layer.
 
-## Sprint 41 Status
+## Sprint 42 Status
 
-Sprint 41 is complete as the first conversational state loop implementation.
+Sprint 42 is complete, providing a secure local-first personal memory system.
 
 Completed:
 
-- `app/conversation` package added to orchestrate user interactions.
-- `ai chat` CLI command added.
-- In-memory conversation state managing intents and clarifications.
-- Safe Turkish response generation.
-- Test coverage for action preview, clarification, confirmation, and blocked paths.
+- `app/personal_memory` package added with models, store, policy, and service.
+- Local in-memory storage (read/write/forget).
+- Sensitive data blocking (`şifre`, `password`, `token` are blocked from storage).
+- `ai memory-personal` CLI command.
+- Integrated `ConversationLoop` to process memory intents gracefully alongside standard execution.
 
 Not implemented:
 
-- Execution of actions.
-- Voice runtime.
-- Routine execution.
+- Routine variable mapping.
+- Automatic context retention (explicit write only).
+- Cloud sync (strictly local-only).
 
 ## Next Sprint
 
-Sprint 42 should be **Personal Memory & Preferences**. It should introduce privacy-first storage for user settings and history.
+Sprint 43 should be **RoutineEngine MVP**. It will enable the definition and execution of multi-step workflows using stored personal preferences.

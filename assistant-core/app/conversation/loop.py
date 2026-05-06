@@ -14,6 +14,10 @@ from app.conversation.response_builder import ResponseBuilder
 
 from dataclasses import asdict
 
+from app.personal_memory.service import PersonalMemoryService
+from app.personal_memory.intents import MemoryIntentParser
+from app.personal_memory.models import MemoryOperation, MemoryOperationStatus
+
 class ConversationLoop:
     def __init__(self):
         self.router = IntentRouter()
@@ -23,6 +27,39 @@ class ConversationLoop:
 
     def handle(self, request: ConversationRequest) -> ConversationResponse:
         state = self.state_manager.get_state(request.session_id)
+        
+        # 0. Check memory intent first
+        op, _, _ = MemoryIntentParser.parse(request.message)
+        if op != MemoryOperation.UNKNOWN:
+            mem_service = PersonalMemoryService()
+            mem_res = mem_service.handle_text(request.message)
+            
+            resp_type = ConversationResponseType.ANSWER
+            if mem_res.status == MemoryOperationStatus.BLOCKED:
+                resp_type = ConversationResponseType.BLOCKED
+                
+            response = ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=mem_res.message,
+                response_type=resp_type,
+                blocked=mem_res.status == MemoryOperationStatus.BLOCKED
+            )
+            
+            # Update state for memory operation
+            state.last_intent = "memory." + op.value
+            state.last_action = "none"
+            state.turns.append(ConversationTurn(
+                turn_id=str(uuid.uuid4()),
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=response.assistant_message,
+                intent_category=state.last_intent,
+                action_type=state.last_action,
+                decision_status="none"
+            ))
+            self.state_manager.save_state(state)
+            return response
         
         # 1. Parse intent and get preview
         preview_result = self.router.preview(request.message, source=request.source)

@@ -531,6 +531,28 @@ def _ai_chat(
     )
 
 
+@ai.command("memory-personal")
+def _ai_memory_personal(
+    text: str = typer.Argument(..., help="Text command for memory"),
+    project: str = typer.Option(..., "--project"),
+    json_output: bool = typer.Option(False, "--json"),
+    show_all: bool = typer.Option(False, "--show-all"),
+    clear: bool = typer.Option(False, "--clear"),
+    memory_type: str | None = typer.Option(None, "--type"),
+    session_id: str | None = typer.Option(None, "--session-id"),
+) -> None:
+    from app.commands.ai import ai_memory_personal
+    ai_memory_personal(
+        project=project,
+        text=text,
+        json_output=json_output,
+        show_all=show_all,
+        clear=clear,
+        memory_type_str=memory_type,
+        session_id=session_id
+    )
+
+
 @ai.command("docs-audit")
 def _ai_docs_audit(
     project: str = typer.Option(..., "--project"),

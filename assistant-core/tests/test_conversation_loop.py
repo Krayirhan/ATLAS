@@ -46,3 +46,14 @@ def test_conversation_loop_state_management():
     state = loop.get_state(session_id)
     assert state.last_intent is None
     assert len(state.turns) == 0
+
+def test_conversation_loop_memory_remember():
+    loop = ConversationLoop()
+    response = loop.handle_text("Bunu hatırla: Chrome kullanırım", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.ANSWER
+    assert "chrome" in response.assistant_message.lower()
+
+def test_conversation_loop_memory_blocked():
+    loop = ConversationLoop()
+    response = loop.handle_text("Şifremin 1234 olduğunu hatırla", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.BLOCKED
