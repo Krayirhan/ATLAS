@@ -27,6 +27,7 @@ class IntentResult:
     ambiguity_reason: str = ""
     requires_clarification: bool = False
     safety_notes: list[str] = field(default_factory=list)
+    suggested_questions: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if not 0.0 <= self.confidence <= 1.0:
@@ -35,7 +36,7 @@ class IntentResult:
             self.requires_clarification = True
             if not self.ambiguity_reason:
                 self.ambiguity_reason = "Intent target or action is ambiguous."
-        if self.category in {IntentCategory.UNKNOWN, IntentCategory.BLOCKED}:
+        if self.category is IntentCategory.UNKNOWN:
             self.action_candidate = None
 
 
@@ -178,3 +179,15 @@ class ClarificationRequest:
     def __post_init__(self) -> None:
         if self.safe_default != "no_action":
             raise ValueError("clarification safe_default must be no_action")
+
+
+@dataclass(slots=True)
+class IntentPreviewResult:
+    raw_text: str
+    intent: IntentResult
+    action_candidate: ActionCandidate | None = None
+    action_preview: ActionPreview | None = None
+    permission_decision: PermissionDecision | None = None
+    clarification: ClarificationRequest | None = None
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)

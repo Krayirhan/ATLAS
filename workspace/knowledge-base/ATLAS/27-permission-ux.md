@@ -135,6 +135,13 @@ Sprint 38 runtime contract:
 - target must be explicit.
 - blocked voice actions remain blocked.
 
+Sprint 39 router contract:
+
+- text parsing may mark confidence low before PermissionManager sees the action
+- ambiguous target must remain clarification-only
+- blocked phrases may still be rendered as blocked previews
+- no router path may trigger execution
+
 Turkish voice confirmation examples:
 
 | Action | Confirmation copy |
@@ -272,3 +279,4 @@ These systems share the same security philosophy but are not the same layer.
 ## Sprint 38 Status
 
 Sprint 38 turns this UX contract into `PermissionManager & Action Approval Flow`. It still avoids real PC/home execution. Sprint 39 should feed this layer through `IntentRouter` output.
+Sprint 39 now feeds this layer through deterministic `IntentRouter` output. Sprint 40 should keep the same UX guarantees while adding PC adapters.

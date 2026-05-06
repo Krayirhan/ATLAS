@@ -6,8 +6,10 @@ from app.actions.models import (
     ActionResult,
     ClarificationRequest,
     IntentResult,
+    IntentPreviewResult,
     PermissionDecision,
 )
+from app.actions.intent_router import IntentRouter
 from app.actions.permission import PermissionManager
 from app.actions.risk import DEFAULT_ACTION_RISK, RiskLevel, requires_confirmation
 from app.actions.types import ActionSource, ActionStatus, ActionType, IntentCategory, PermissionStatus
@@ -23,6 +25,8 @@ __all__ = [
     "DEFAULT_ACTION_RISK",
     "IntentCategory",
     "IntentResult",
+    "IntentPreviewResult",
+    "IntentRouter",
     "PermissionDecision",
     "PermissionManager",
     "PermissionStatus",

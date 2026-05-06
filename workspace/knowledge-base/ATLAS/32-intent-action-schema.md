@@ -256,6 +256,17 @@ Status values:
 
 `execution_attempted` must always be `false` in Sprint 38 audit metadata.
 
+## Sprint 39 Implementation Notes
+
+Sprint 39 adds:
+
+- deterministic `IntentRouter`
+- basic entity extraction
+- text -> `IntentResult`
+- `IntentResult` -> `ActionCandidate`
+- `IntentPreviewResult` wrapper for safe preview output
+- PermissionManager integration without execution
+
 ## Clarification Model
 
 `ClarificationRequest` fields:
@@ -425,4 +436,4 @@ Sprint 37 and Sprint 38 have no execution runtime:
 - No adapter code.
 - No PermissionManager adapter calls.
 
-The schema and PermissionManager can be tested in isolation and then consumed by Sprint 39 IntentRouter work.
+The schema, PermissionManager, and IntentRouter can be tested in isolation and then consumed by Sprint 40 PC adapter work.

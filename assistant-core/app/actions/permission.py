@@ -24,6 +24,8 @@ class PermissionManager:
     def decide(self, action: ActionCandidate) -> PermissionDecision:
         preview = self.build_preview(action)
 
+        if action.risk_level is RiskLevel.BLOCKED:
+            return self.block(action, action.blocked_reason or "Action ATLAS policy tarafindan engellidir.", preview=preview)
         if action.intent_category in {IntentCategory.AMBIGUOUS, IntentCategory.UNKNOWN}:
             return self._clarification_decision(
                 action,
@@ -42,8 +44,6 @@ class PermissionManager:
                 preview=preview,
                 reason="Sesli komut confidence dusuk; action oncesi tekrar netlestirme gerekir.",
             )
-        if action.risk_level is RiskLevel.BLOCKED:
-            return self.block(action, action.blocked_reason or "Action ATLAS policy tarafindan engellidir.", preview=preview)
         if action.risk_level is RiskLevel.SAFE_READONLY:
             return self._decision(
                 action,

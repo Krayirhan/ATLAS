@@ -9,6 +9,7 @@
 - **Product direction after Sprint 36:** local-first personal control assistant foundation.
 - **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
 - **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
+- **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -28,6 +29,7 @@ These modules are preserved as the core technical foundation:
 - **SecurityAuditorAgent:** bounded security audit; future basis for PC/home/privacy safety review.
 - **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts.
 - **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
+- **IntentRouter foundation:** `app/actions/intent_router.py` parses text into `IntentResult`, `ActionCandidate`, and `PermissionDecision` preview output.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -84,11 +86,23 @@ Sprint 38 completed the first personal action permission layer:
 
 This is still non-executing. No adapter is called.
 
+Sprint 39 completed the first deterministic routing layer:
+
+- `IntentRouter` rule-based MVP.
+- text -> `IntentResult`.
+- `IntentResult` -> `ActionCandidate`.
+- `IntentRouter.preview()` -> `ActionPreview` + `PermissionDecision`.
+- blocked, ambiguous, and unknown fallback handling.
+- CLI preview command: `python -m app.cli ai intent`.
+- `tests/test_intent_router.py`.
+- `tests/test_ai_intent_cli.py`.
+
+This is still non-executing. No adapter, browser action, media action, or terminal action runs.
+
 ## D) Missing Personal Assistant Runtime Layers
 
-These are not implemented yet and are the focus of Sprint 39+:
+These are not implemented yet and are the focus of Sprint 40+:
 
-- IntentRouter runtime
 - ActionRouter runtime
 - SkillRegistry
 - PC control adapter
@@ -157,6 +171,25 @@ Not implemented:
 - Permission UI.
 - Durable runtime action audit log beyond metadata contract.
 
+## Sprint 39 Status
+
+Sprint 39 is complete as a deterministic routing and preview sprint.
+
+Completed:
+
+- `app/actions/intent_router.py` adds rule-based routing.
+- `ai intent` CLI command previews route, candidate, and permission decision.
+- user text -> `IntentResult` -> `ActionCandidate` -> `PermissionDecision` flow is available.
+- ambiguous/unknown/blocked inputs stay on safe preview paths.
+
+Not implemented:
+
+- Personal action execution.
+- Adapter implementation.
+- PC/home control runtime.
+- Voice runtime.
+- ActionRouter runtime.
+
 ## Next Sprint
 
-Sprint 39 should be **IntentRouter MVP**. It should convert user text into `IntentResult` and safe `ActionCandidate` objects that can be passed through PermissionManager.
+Sprint 40 should be **PC Control Adapter MVP**. It should consume approved low/safe action previews without introducing unrestricted execution.

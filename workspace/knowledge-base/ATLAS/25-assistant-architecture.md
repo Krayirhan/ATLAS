@@ -79,6 +79,14 @@ Responsibilities:
 - Avoid action creation when target or category is unclear.
 - Preserve raw user goal for audit.
 
+Sprint 39 implementation stance:
+
+- deterministic and rule-based
+- text-only MVP
+- no LLM dependency
+- no adapter calls
+- no execution
+
 Low confidence intent must not become an executable action. Ambiguous intent must produce a clarification request.
 
 ### IntentResult
@@ -130,7 +138,7 @@ Responsibilities:
 - Reject unsupported or blocked actions.
 - Route supported actions to the future adapter family only after permission gates.
 
-Sprint 37 defines the schema. Runtime routing is Sprint 39+.
+Sprint 37 defines the schema. Sprint 39 adds deterministic runtime preview routing without execution.
 
 ### ActionCandidate
 

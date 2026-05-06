@@ -307,6 +307,28 @@ Rules:
 - `confirm`, `deny`, and `cancel` return model results only; no adapter is called.
 - Audit metadata must always include `execution_attempted=false`.
 
+## Sprint 39 IntentRouter Integration
+
+Sprint 39 adds a deterministic router in front of this contract:
+
+```text
+user text
+  -> IntentRouter.parse_text()
+  -> IntentResult
+  -> IntentRouter.to_action_candidate()
+  -> ActionCandidate
+  -> PermissionManager.decide()
+  -> PermissionDecision
+```
+
+Rules:
+
+- No LLM call is required.
+- No Ollama dependency is required.
+- Unknown text stays unknown or clarification-only.
+- Blocked phrasing may still produce blocked `ActionCandidate` for safe preview.
+- Conversation/status requests may remain no-action read-only paths.
+
 ## Clarification Contract
 
 Ambiguous commands produce `ClarificationRequest` instead of `ActionCandidate`.
@@ -360,7 +382,7 @@ Sprint 37 and Sprint 38 do not implement:
 | Dependency | Why it matters |
 |---|---|
 | Sprint 38 - PermissionManager & Action Approval Flow | Completed non-executing preview and permission decisions |
-| Sprint 39 - IntentRouter MVP | Produces `IntentResult` and action candidates from text |
+| Sprint 39 - IntentRouter MVP | Completed deterministic text-to-intent and candidate preview routing |
 | Sprint 40 - PC Control Adapter MVP | Executes only approved low/safe PC actions |
 | Sprint 43 - RoutineEngine MVP | Uses action preview and risk aggregation |
 | Sprint 47 - Home Control Adapter Design | Depends on DeviceRegistry, room model, and approval policy |

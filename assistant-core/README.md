@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, and Sprint 38 permission decision flow. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, and Sprint 39 deterministic intent routing. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview and decision logic only. It does not add real PC control, home control, voice runtime, adapter execution, or a new CLI execution command.
+Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview and decision logic. Sprint 39 adds deterministic text-to-intent preview routing. It still does not add real PC control, home control, voice runtime, adapter execution, or unrestricted command execution.
 
 ## Current Technical Foundation
 
@@ -11,7 +11,7 @@ Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview a
 | `app/ai` | Implemented | Local LLM runtime, Ollama provider, mock provider, bounded context, prompt composition |
 | `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
 | `app/approval` | Implemented preview-only devtools approval foundation | Command/file/tool preview for devtools support |
-| `app/actions` | Implemented schema and permission contracts | Intent/action/risk/preview/permission/result model foundation |
+| `app/actions` | Implemented schema, permission, and router contracts | Intent/action/risk/preview/permission/router/result model foundation |
 | `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
@@ -64,7 +64,7 @@ Current role:
 
 ## app/actions - Intent, Action, and Permission Contracts
 
-Current Sprint 37/38 responsibility:
+Current Sprint 37/38/39 responsibility:
 
 - `IntentResult`
 - `ActionCandidate`
@@ -73,12 +73,16 @@ Current Sprint 37/38 responsibility:
 - `ClarificationRequest`
 - `PermissionDecision`
 - `PermissionManager`
+- `IntentRouter`
+- `IntentPreviewResult`
 - intent categories
 - action types
 - source values
 - risk levels
 - default risk mapping
 - preview, confirmation, clarification, block, deny, cancel decisions
+- deterministic rule-based text parsing
+- entity extraction for MVP preview routes
 - permission audit metadata with `execution_attempted=false`
 
 No execution exists in `app/actions`.
@@ -98,7 +102,6 @@ Initial action types:
 
 Future responsibility:
 
-- `IntentRouter`
 - `ActionRouter`
 - `SkillRegistry`
 - adapter handoff validation

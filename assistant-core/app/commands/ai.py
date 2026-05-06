@@ -4,11 +4,16 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import asdict
+from enum import Enum
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from app.actions.intent_router import IntentRouter
+from app.actions.models import IntentPreviewResult
+from app.actions.types import ActionSource
 from app.agents.code_reviewer_agent import CodeReviewerAgent
 from app.agents.documentation_agent import DocumentationAgent
 from app.agents.main_agent import MainAgent
@@ -40,6 +45,16 @@ def _safe_console_text(text: str) -> str:
         return text
     except UnicodeEncodeError:
         return text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+
+
+def _json_safe(value):
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    return value
 
 
 def ai_doctor() -> None:
@@ -715,3 +730,81 @@ def ai_docs_audit(
         for warning in result.warnings:
             console.print(f"- {warning}")
     console.print(_safe_console_text(result.summary))
+
+
+def ai_intent_preview(
+    user_text: str = typer.Argument(..., help="User text to route into intent/action preview"),
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    source: str = typer.Option("text", "--source", help="text|voice|routine|schedule|manual"),
+    show_preview: bool = typer.Option(False, "--show-preview", help="Show preview and permission decision"),
+    as_json: bool = typer.Option(False, "--json", help="Render router output as JSON"),
+) -> None:
+    console = Console()
+    source_enum = _parse_action_source(source)
+    result = IntentRouter().preview(user_text, source=source_enum)
+
+    if as_json:
+        payload = _intent_preview_payload(project, result)
+        typer.echo(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2))
+        return
+
+    console.print(f"[bold]Project[/bold]: {project}")
+    console.print(f"[bold]Source[/bold]: {source_enum.value}")
+    console.print(f"[bold]Intent[/bold]: {result.intent.category.value}")
+    console.print(f"[bold]Confidence[/bold]: {result.intent.confidence}")
+    if result.intent.target:
+        console.print(f"[bold]Target[/bold]: {result.intent.target}")
+    if result.intent.requires_clarification:
+        console.print(f"[bold]Clarification[/bold]: {result.intent.ambiguity_reason or 'Clarification required'}")
+    if result.action_candidate is not None:
+        console.print(f"[bold]Action[/bold]: {result.action_candidate.action_type.value}")
+        console.print(f"[bold]Risk[/bold]: {result.action_candidate.risk_level.value}")
+    else:
+        console.print("[bold]Action[/bold]: none")
+
+    if show_preview:
+        if result.permission_decision is not None:
+            console.print(f"[bold]Permission[/bold]: {result.permission_decision.status.value}")
+            console.print(f"[bold]Reason[/bold]: {result.permission_decision.reason}")
+            if result.permission_decision.confirmation_prompt:
+                console.print(f"[bold]Prompt[/bold]: {_safe_console_text(result.permission_decision.confirmation_prompt)}")
+        elif result.clarification is not None:
+            console.print(f"[bold]Permission[/bold]: clarification_required")
+            console.print(f"[bold]Reason[/bold]: {_safe_console_text(result.clarification.reason)}")
+        else:
+            console.print("[bold]Permission[/bold]: no_action_required")
+        if result.action_preview is not None:
+            console.print(f"[bold]Preview[/bold]: {result.action_preview.summary}")
+    if result.warnings:
+        console.print("[bold]Warnings[/bold]")
+        for warning in result.warnings:
+            console.print(f"- {_safe_console_text(warning)}")
+    console.print("[bold]Execution[/bold]: none")
+
+
+def _parse_action_source(source: str) -> ActionSource:
+    normalized = source.strip().lower()
+    mapping = {
+        "text": ActionSource.TEXT,
+        "voice": ActionSource.VOICE,
+        "routine": ActionSource.ROUTINE,
+        "schedule": ActionSource.SCHEDULE,
+        "manual": ActionSource.MANUAL,
+    }
+    if normalized not in mapping:
+        raise typer.BadParameter("source must be one of: text, voice, routine, schedule, manual")
+    return mapping[normalized]
+
+
+def _intent_preview_payload(project: str, result: IntentPreviewResult) -> dict[str, object]:
+    return {
+        "project": project,
+        "raw_text": result.raw_text,
+        "intent": asdict(result.intent),
+        "action_candidate": asdict(result.action_candidate) if result.action_candidate is not None else None,
+        "action_preview": asdict(result.action_preview) if result.action_preview is not None else None,
+        "permission_decision": asdict(result.permission_decision) if result.permission_decision is not None else None,
+        "clarification": asdict(result.clarification) if result.clarification is not None else None,
+        "warnings": result.warnings,
+        "metadata": result.metadata,
+    }

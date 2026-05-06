@@ -205,6 +205,10 @@ Sprint 38 has no execution boundary crossing:
 - ToolApprovalAgent distinction is documented.
 - tests cover model-only permission behavior.
 
+## Sprint 39 Outcome
+
+Sprint 39 now feeds text-derived `IntentResult` and `ActionCandidate` objects into PermissionManager through deterministic `IntentRouter` preview routing.
+
 ## Next Step
 
-Sprint 39 should implement **IntentRouter MVP** and feed text-derived `IntentResult` and `ActionCandidate` objects into PermissionManager.
+Sprint 40 should implement **PC Control Adapter MVP** and consume approved low/safe preview outputs without bypassing PermissionManager.

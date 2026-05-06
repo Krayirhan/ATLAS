@@ -18,6 +18,7 @@
 - **Sprint 36:** Product Realignment & Assistant Architecture.
 - **Sprint 37:** Action Architecture & Intent Schema.
 - **Sprint 38:** PermissionManager & Action Approval Flow.
+- **Sprint 39:** IntentRouter MVP.
 
 ## Sprint 36 - Completed
 
@@ -115,32 +116,37 @@ The former near-term developer roadmap remains parked:
 - Permission decision emits audit-ready metadata.
 - `execution_attempted=false` is present in audit metadata.
 
-## Active Personal Assistant Roadmap
+## Sprint 39 - Completed
 
-### Sprint 39 - IntentRouter MVP
-
-**Amac:** User input'i structured `IntentResult`'a ceviren MVP routing tasarimini ve testlerini yapmak.
+**Amac:** User input'i structured `IntentResult`'a ceviren deterministic MVP routing ve permission preview entegrasyonunu yapmak.
 
 **Kapsam:**
 
 - Text command classification.
 - Confidence model.
 - Entity extraction basics.
+- Intent -> `ActionCandidate` mapping.
+- PermissionManager preview integration.
 - Ambiguous command fallback.
-- MainAgent relationship.
 - Unknown/blocked routing.
+- `ai intent` CLI preview command.
+- Router and CLI tests.
 
 **Kapsam disi:**
 
 - STT.
 - PC adapter execution.
 - Home/device execution.
+- MainAgent route mutation.
 
 **Acceptance criteria:**
 
-- IntentRouter unknown/ambiguous komutu action'a cevirmez.
+- IntentRouter unknown/ambiguous komutu guvenli clarification veya no-action path'ine indirir.
 - Intent categories match Sprint 37 schema.
-- MainAgent, IntentRouter, and ActionRouter responsibilities remain separate.
+- PermissionManager preview integration calisir.
+- `ai intent` execution yapmaz.
+
+## Active Personal Assistant Roadmap
 
 ### Sprint 40 - PC Control Adapter MVP
 
