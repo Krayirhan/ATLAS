@@ -958,4 +958,64 @@ def ai_memory_personal(
         else:
             console.print(f"[green]SUCCESS[/green]: {res.message}")
 
+def ai_routine(
+    project: str,
+    text: str | None = None,
+    json_output: bool = False,
+    list_routines: bool = False,
+    show_preview: bool = False,
+    source: str = "text"
+):
+    from app.routines.engine import RoutineEngine
+    from app.routines.service import RoutineService
+    from rich.console import Console
+    import json
+    
+    console = Console()
+    engine = RoutineEngine()
+    service = RoutineService()
+    
+    if list_routines:
+        routines = engine.list_routines()
+        if json_output:
+            print(json.dumps([r.model_dump() for r in routines], default=str))
+        else:
+            for r in routines:
+                console.print(f"- [bold]{r.display_name}[/bold] ({len(r.steps)} steps, risk: {r.risk_level})")
+        return
+
+    if not text:
+        console.print("[red]Rutin ismi belirtmediniz.[/red]")
+        return
+        
+    routine_name, operation = service.parse_routine_request(text)
+    if not routine_name:
+        routine_name = text # fallback
+        
+    if show_preview:
+        from app.actions.types import ActionSource
+        src_enum = ActionSource(source) if source in [e.value for e in ActionSource] else ActionSource.TEXT
+        preview = engine.preview_routine(routine_name, source=src_enum)
+        if json_output:
+            print(preview.model_dump_json(indent=2))
+        else:
+            console.print(f"[bold]Routine Preview: {preview.routine_name}[/bold]")
+            console.print(f"Risk: {preview.risk_level}, Conf Req: {preview.requires_confirmation}")
+            console.print(f"Blocked: {preview.blocked}")
+            for step in preview.steps:
+                console.print(f"  - Step: {step.label} ({step.action_type})")
+        return
+        
+    # Default is run
+    res = engine.run_routine(routine_name)
+    if json_output:
+        print(res.model_dump_json(indent=2))
+    else:
+        if res.status == "blocked":
+            console.print(f"[red]BLOCKED[/red]: {res.message}")
+        elif res.status == "awaiting_confirmation":
+            console.print(f"[yellow]CONFIRMATION REQUIRED[/yellow]: {res.message}")
+        else:
+            console.print(f"[green]SUCCESS[/green]: {res.message}")
+
 

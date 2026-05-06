@@ -553,6 +553,26 @@ def _ai_memory_personal(
     )
 
 
+@ai.command("routine")
+def _ai_routine(
+    text: str = typer.Argument(None, help="Routine command"),
+    project: str = typer.Option(..., "--project"),
+    json_output: bool = typer.Option(False, "--json"),
+    list_routines: bool = typer.Option(False, "--list"),
+    show_preview: bool = typer.Option(False, "--show-preview"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    from app.commands.ai import ai_routine
+    ai_routine(
+        project=project,
+        text=text,
+        json_output=json_output,
+        list_routines=list_routines,
+        show_preview=show_preview,
+        source=source
+    )
+
+
 @ai.command("docs-audit")
 def _ai_docs_audit(
     project: str = typer.Option(..., "--project"),

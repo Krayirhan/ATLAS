@@ -19,9 +19,6 @@
 - **Sprint 37:** Action Architecture & Intent Schema.
 - **Sprint 38:** PermissionManager & Action Approval Flow.
 - **Sprint 39:** IntentRouter MVP.
-- **Sprint 40:** PC Control Adapter MVP.
-- **Sprint 41:** ConversationLoop MVP.
-- **Sprint 42:** Personal Memory & Preferences.
 
 ## Sprint 36 - Completed
 
@@ -149,7 +146,9 @@ The former near-term developer roadmap remains parked:
 - PermissionManager preview integration calisir.
 - `ai intent` execution yapmaz.
 
-## Sprint 40 - Completed
+## Active Personal Assistant Roadmap
+
+### Sprint 40 - PC Control Adapter MVP
 
 **Amac:** Windows icin safe PC control adapter MVP'sini tasarlamak ve implementasyona baslamak.
 
@@ -173,13 +172,13 @@ The former near-term developer roadmap remains parked:
 - Admin commands.
 - Unrestricted shell execution.
 
-**Acceptance criteria status:**
+**Acceptance criteria:**
 
-- MVP action risk, dry-run, approval, and test approach ile tanimli.
-- Destructive actions blocked.
-- Adapter evaluates permissions and returns dry-run plans.
+- Her MVP action risk, dry-run, approval, and test approach ile tanimlidir.
+- Destructive actions blocked/deferred listesinde kalir.
+- Adapter accepts only approved actions.
 
-## Sprint 41 - Completed
+### Sprint 41 - ConversationLoop MVP
 
 **Amac:** Text-first conversation loop ve future voice loop davranisini tasarlamak.
 
@@ -204,27 +203,30 @@ The former near-term developer roadmap remains parked:
 - Confirmation turn stale action'a baglanmaz.
 - New command cannot accidentally confirm old action.
 
-## Sprint 42 - Completed
+### Sprint 42 - Personal Memory & Preferences
 
 **Amac:** Personal memory modelini privacy-first sekilde tanimlamak.
 
 **Kapsam:**
 
-- Entity schema.
-- Automatic context retention.
-- Forget flow.
-- Storage.
+- Preferences.
+- Device aliases.
+- Room names.
+- Routine definitions.
+- Safe command history summaries.
+- Forget/delete.
 
 **Kapsam disi:**
 
-- Routine variables.
+- Raw log ingestion.
+- Browser profile read.
+- Secret storage.
 
 **Acceptance criteria:**
 
-- Assistant can store safe preferences.
-- Sensitive memory blocked.
-
-## Active Personal Assistant Roadmap
+- Sensitive memory policy tanimli.
+- Forget/delete akisi tanimli.
+- Memory writes require policy and audit.
 
 ### Sprint 43 - RoutineEngine MVP
 

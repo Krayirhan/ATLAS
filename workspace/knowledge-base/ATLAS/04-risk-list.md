@@ -17,19 +17,6 @@
 10. **Wake word / always-listening privacy** - Continuous microphone listening can create privacy risk and user trust loss.
 11. **Conversation state drift** - Multi-turn context can cause the assistant to apply an old target or stale user intent.
 12. **Entity extraction error** - App, room, folder, routine, date, or numeric value extraction can be wrong.
-13. **Clarification state mismatch** - Clarification answers might not map correctly to the pending prompt.
-14. **Pending confirmation lost** - A user's explicit confirmation might be dropped or misaligned with the intended action.
-15. **Conversation state leakage** - Sensitive information or context might persist too long or leak across sessions.
-16. **Voice-source command treated as text** - A risky voice command might bypass strict voice confirmation rules if the source is incorrectly tracked.
-17. **Automatic memory write risk** - The assistant might accidentally store conversation history or transient context without explicit user consent.
-18. **Sensitive memory storage risk** - Storing passwords, financial details, or API keys in plain text.
-19. **User forgot but memory remains** - A forget command might fail to delete an item correctly.
-20. **Memory poisoning** - Malicious intent input might craft fake aliases or preferences to cause harmful execution down the line.
-21. **Wrong alias stored** - A device alias might map to the wrong canonical device, causing unexpected interactions.
-22. **Private preference overexposure** - Preferences might be printed/logged openly without considering user context.
-23. **Stale preference** - An old memory might dictate behavior when it is no longer relevant.
-24. **Personal data export risk** - JSON persistence or memory dump features might expose internal secrets to other apps.
-25. **Memory CLI persistence confusion** - Differences between in-memory testing and persistent state might confuse users or testers.
 13. **Malicious phrasing** - User text may look like a natural request while attempting shell-like, destructive, or policy-bypass behavior.
 14. **Command injection-like user text** - Symbols or phrasing such as `;`, `&&`, `|`, or PowerShell-like text must not be treated as executable intent.
 15. **Overconfident routing** - Deterministic matches can classify too aggressively and skip clarification.
@@ -56,19 +43,6 @@
 33. **Audit metadata missing fields** - `action_id`, risk, source, decision, target summary, or `execution_attempted=false` could be omitted.
 34. **Irreversible action** - Destructive action may not be reversible or auditable.
 35. **Windows permission issues** - UAC, focus control, app launch, media control, and file system permissions may fail or behave inconsistently.
-36. **Adapter bypass** - Execution could happen outside of the PCControlAdapter safety gates.
-37. **Arbitrary command injection** - User input could be injected into shell execution or app arguments.
-38. **Unsafe app launch** - Launching unintended or dangerous applications.
-39. **Unsafe folder path** - Opening restricted directories.
-40. **Full disk scan** - File search could hit unbounded system paths causing slowdowns or crashes.
-41. **Shell executor creep** - Expanding shell usage beyond bounded safe commands.
-42. **Dry-run and execution mixup** - An action marked as dry-run might accidentally perform side effects.
-43. **Permission decision ignored** - Adapter executing an action that is blocked or lacking allowed status.
-44. **Unsupported action accidentally executed** - Adapter attempting to execute an action it doesn't officially support.
-45. **Media/volume side effect risk** - Unintended playback or system-wide volume changes without user visibility.
-46. **Assistant response claims execution incorrectly** - The response generation might tell the user an action was completed when it was only previewed.
-47. **User believes preview was execution** - The user might act on a false assumption because the assistant wasn't clear about dry-run status.
-48. **Accidental adapter execute call** - The ConversationLoop might mistakenly invoke the execute path instead of just building a preview plan.
 
 ## Privacy and Data Risks
 
@@ -80,12 +54,11 @@
 
 ## Runtime and Reliability Risks
 
-57. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
-58. **Ollama warmup/load time** - Cold model start can delay the first answer.
-59. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
-60. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
-61. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
-62. **Long conversation state growth** - Unbounded in-memory state can cause memory exhaustion over time.
+41. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
+42. **Ollama warmup/load time** - Cold model start can delay the first answer.
+43. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
+44. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
+45. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
 
 ## Current Controls
 
@@ -102,8 +75,6 @@
 - Sprint 38 audit metadata sets `execution_attempted=false`.
 - Sprint 39 IntentRouter keeps MVP parsing deterministic and local; no LLM or adapter path is used.
 - Sprint 39 blocks shell-like or secret-reading phrasing at the router layer before any execution boundary exists.
-- Sprint 40 PCControlAdapter enforces safety gates, `PermissionDecision` adherence, and returns dry-run plans without arbitrary shell execution.
-- Sprint 41 ConversationLoop explicitly constructs safe responses explaining block, preview, and confirmation requirements without claiming execution.
 
 ## Missing Controls
 
@@ -112,6 +83,7 @@
 - Adapter allowlist and execution guard.
 - Confirmation timeout/cancel implementation.
 - Voice confirmation policy runtime.
+- PC control adapter safety contract implementation.
 - Device registry and room model runtime.
 - Personal memory privacy runtime.
 - Routine preview and cancellation runtime.

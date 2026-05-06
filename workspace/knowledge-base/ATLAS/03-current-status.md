@@ -10,9 +10,6 @@
 - **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
 - **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
 - **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
-- **Sprint 40 status:** completed PCControlAdapter MVP; dry-run/preview PC plan generation available.
-- **Sprint 41 status:** completed ConversationLoop MVP; text-first conversational loop with safe responses.
-- **Sprint 42 status:** completed Personal Memory & Preferences; secure, local-only preference storage with sensitive data blocks.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -33,8 +30,6 @@ These modules are preserved as the core technical foundation:
 - **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts.
 - **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
 - **IntentRouter foundation:** `app/actions/intent_router.py` parses text into `IntentResult`, `ActionCandidate`, and `PermissionDecision` preview output.
-- **PCControlAdapter foundation:** `app/control` layer builds dry-run PC control plans safely without unrestricted terminal execution.
-- **ConversationLoop foundation:** `app/conversation` package coordinates IntentRouter, PermissionManager, and PCControlAdapter into an in-memory session loop.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -106,10 +101,11 @@ This is still non-executing. No adapter, browser action, media action, or termin
 
 ## D) Missing Personal Assistant Runtime Layers
 
-These are not implemented yet and are the focus of Sprint 42+:
+These are not implemented yet and are the focus of Sprint 40+:
 
 - ActionRouter runtime
 - SkillRegistry
+- PC control adapter
 - Browser/media/file adapter execution
 - Routine engine
 - Personal memory and preferences runtime
@@ -120,6 +116,7 @@ These are not implemented yet and are the focus of Sprint 42+:
 - Speech-to-text adapter
 - Text-to-speech adapter
 - Wake word listener
+- ConversationLoop
 - Desktop tray / permission panel
 - Permission UI
 - Durable action audit log
@@ -193,43 +190,6 @@ Not implemented:
 - Voice runtime.
 - ActionRouter runtime.
 
-## Sprint 40 Status
-
-Sprint 40 is complete as the first PC control adapter implementation.
-
-Completed:
-
-- `app/control/pc_adapter.py` added to safely build `PCControlPlan` objects.
-- Supported capability registry with dry-run-first strategy.
-- Safety gate enforcing `PermissionDecision` and checking target bounds.
-- `ai pc-preview` CLI command generated for testing.
-- Test coverage for safe non-execution boundaries.
-
-Not implemented:
-
-- Execution of medium/high actions.
-- Real application launch.
-- Home control.
-- Voice layer.
-
-## Sprint 42 Status
-
-Sprint 42 is complete, providing a secure local-first personal memory system.
-
-Completed:
-
-- `app/personal_memory` package added with models, store, policy, and service.
-- Local in-memory storage (read/write/forget).
-- Sensitive data blocking (`şifre`, `password`, `token` are blocked from storage).
-- `ai memory-personal` CLI command.
-- Integrated `ConversationLoop` to process memory intents gracefully alongside standard execution.
-
-Not implemented:
-
-- Routine variable mapping.
-- Automatic context retention (explicit write only).
-- Cloud sync (strictly local-only).
-
 ## Next Sprint
 
-Sprint 43 should be **RoutineEngine MVP**. It will enable the definition and execution of multi-step workflows using stored personal preferences.
+Sprint 40 should be **PC Control Adapter MVP**. It should consume approved low/safe action previews without introducing unrestricted execution.

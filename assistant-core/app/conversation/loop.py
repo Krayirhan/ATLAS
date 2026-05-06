@@ -60,6 +60,45 @@ class ConversationLoop:
             ))
             self.state_manager.save_state(state)
             return response
+            
+        # 0.5 Check routine intent
+        from app.routines.service import RoutineService
+        routine_service = RoutineService()
+        routine_name, operation = routine_service.parse_routine_request(request.message)
+        if operation != "unknown":
+            res_message = routine_service.handle_text(request.message)
+            resp_type = ConversationResponseType.ANSWER
+            
+            if "engellendi" in res_message.lower():
+                resp_type = ConversationResponseType.BLOCKED
+            elif "onay bekliyor" in res_message.lower():
+                resp_type = ConversationResponseType.CONFIRMATION_REQUIRED
+            elif "güvenli" in res_message.lower():
+                resp_type = ConversationResponseType.ACTION_PREVIEW
+                
+            response = ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=res_message,
+                response_type=resp_type,
+                blocked=resp_type == ConversationResponseType.BLOCKED,
+                confirmation_required=resp_type == ConversationResponseType.CONFIRMATION_REQUIRED
+            )
+            
+            state.last_intent = "routine." + operation
+            state.last_action = "none"
+            state.pending_confirmation = response.confirmation_required
+            state.turns.append(ConversationTurn(
+                turn_id=str(uuid.uuid4()),
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=response.assistant_message,
+                intent_category=state.last_intent,
+                action_type=state.last_action,
+                decision_status="none"
+            ))
+            self.state_manager.save_state(state)
+            return response
         
         # 1. Parse intent and get preview
         preview_result = self.router.preview(request.message, source=request.source)

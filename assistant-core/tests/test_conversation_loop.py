@@ -57,3 +57,8 @@ def test_conversation_loop_memory_blocked():
     loop = ConversationLoop()
     response = loop.handle_text("Şifremin 1234 olduğunu hatırla", project_name="ATLAS")
     assert response.response_type == ConversationResponseType.BLOCKED
+
+def test_conversation_loop_routine():
+    loop = ConversationLoop()
+    response = loop.handle_text("Çalışma modunu başlat", project_name="ATLAS")
+    assert response.response_type in [ConversationResponseType.ACTION_PREVIEW, ConversationResponseType.CONFIRMATION_REQUIRED]
