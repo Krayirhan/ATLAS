@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_plan, ai_review, ai_security_audit, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_plan, ai_review, ai_security_audit, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -488,6 +488,25 @@ def _ai_intent(
         source=source,
         show_preview=show_preview,
         as_json=as_json,
+    )
+
+
+@ai.command("pc-preview")
+def _ai_pc_preview(
+    user_text: str = typer.Argument(...),
+    project: str = typer.Option(..., "--project"),
+    source: str = typer.Option("text", "--source"),
+    show_plan: bool = typer.Option(False, "--show-plan"),
+    as_json: bool = typer.Option(False, "--json"),
+    dry_run: bool = typer.Option(True, "--dry-run"),
+) -> None:
+    ai_pc_preview(
+        user_text=user_text,
+        project=project,
+        source=source,
+        show_plan=show_plan,
+        as_json=as_json,
+        dry_run=dry_run,
     )
 
 

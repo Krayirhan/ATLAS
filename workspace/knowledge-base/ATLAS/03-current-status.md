@@ -10,6 +10,7 @@
 - **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
 - **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
 - **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
+- **Sprint 40 status:** completed PCControlAdapter MVP; dry-run/preview PC plan generation available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -30,6 +31,7 @@ These modules are preserved as the core technical foundation:
 - **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts.
 - **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
 - **IntentRouter foundation:** `app/actions/intent_router.py` parses text into `IntentResult`, `ActionCandidate`, and `PermissionDecision` preview output.
+- **PCControlAdapter foundation:** `app/control` layer builds dry-run PC control plans safely without unrestricted terminal execution.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -105,7 +107,6 @@ These are not implemented yet and are the focus of Sprint 40+:
 
 - ActionRouter runtime
 - SkillRegistry
-- PC control adapter
 - Browser/media/file adapter execution
 - Routine engine
 - Personal memory and preferences runtime
@@ -190,6 +191,26 @@ Not implemented:
 - Voice runtime.
 - ActionRouter runtime.
 
+## Sprint 40 Status
+
+Sprint 40 is complete as the first PC control adapter implementation.
+
+Completed:
+
+- `app/control/pc_adapter.py` added to safely build `PCControlPlan` objects.
+- Supported capability registry with dry-run-first strategy.
+- Safety gate enforcing `PermissionDecision` and checking target bounds.
+- `ai pc-preview` CLI command generated for testing.
+- Test coverage for safe non-execution boundaries.
+
+Not implemented:
+
+- Execution of medium/high actions.
+- Real application launch.
+- Home control.
+- Voice layer.
+- ConversationLoop.
+
 ## Next Sprint
 
-Sprint 40 should be **PC Control Adapter MVP**. It should consume approved low/safe action previews without introducing unrestricted execution.
+Sprint 41 should be **ConversationLoop MVP**. It should provide a text-first conversational state loop for processing user input and returning previews/results safely.

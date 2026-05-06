@@ -43,6 +43,16 @@
 33. **Audit metadata missing fields** - `action_id`, risk, source, decision, target summary, or `execution_attempted=false` could be omitted.
 34. **Irreversible action** - Destructive action may not be reversible or auditable.
 35. **Windows permission issues** - UAC, focus control, app launch, media control, and file system permissions may fail or behave inconsistently.
+36. **Adapter bypass** - Execution could happen outside of the PCControlAdapter safety gates.
+37. **Arbitrary command injection** - User input could be injected into shell execution or app arguments.
+38. **Unsafe app launch** - Launching unintended or dangerous applications.
+39. **Unsafe folder path** - Opening restricted directories.
+40. **Full disk scan** - File search could hit unbounded system paths causing slowdowns or crashes.
+41. **Shell executor creep** - Expanding shell usage beyond bounded safe commands.
+42. **Dry-run and execution mixup** - An action marked as dry-run might accidentally perform side effects.
+43. **Permission decision ignored** - Adapter executing an action that is blocked or lacking allowed status.
+44. **Unsupported action accidentally executed** - Adapter attempting to execute an action it doesn't officially support.
+45. **Media/volume side effect risk** - Unintended playback or system-wide volume changes without user visibility.
 
 ## Privacy and Data Risks
 
@@ -75,6 +85,7 @@
 - Sprint 38 audit metadata sets `execution_attempted=false`.
 - Sprint 39 IntentRouter keeps MVP parsing deterministic and local; no LLM or adapter path is used.
 - Sprint 39 blocks shell-like or secret-reading phrasing at the router layer before any execution boundary exists.
+- Sprint 40 PCControlAdapter enforces safety gates, `PermissionDecision` adherence, and returns dry-run plans without arbitrary shell execution.
 
 ## Missing Controls
 
@@ -83,7 +94,6 @@
 - Adapter allowlist and execution guard.
 - Confirmation timeout/cancel implementation.
 - Voice confirmation policy runtime.
-- PC control adapter safety contract implementation.
 - Device registry and room model runtime.
 - Personal memory privacy runtime.
 - Routine preview and cancellation runtime.

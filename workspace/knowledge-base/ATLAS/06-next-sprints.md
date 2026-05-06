@@ -19,6 +19,7 @@
 - **Sprint 37:** Action Architecture & Intent Schema.
 - **Sprint 38:** PermissionManager & Action Approval Flow.
 - **Sprint 39:** IntentRouter MVP.
+- **Sprint 40:** PC Control Adapter MVP.
 
 ## Sprint 36 - Completed
 
@@ -146,9 +147,7 @@ The former near-term developer roadmap remains parked:
 - PermissionManager preview integration calisir.
 - `ai intent` execution yapmaz.
 
-## Active Personal Assistant Roadmap
-
-### Sprint 40 - PC Control Adapter MVP
+## Sprint 40 - Completed
 
 **Amac:** Windows icin safe PC control adapter MVP'sini tasarlamak ve implementasyona baslamak.
 
@@ -172,11 +171,13 @@ The former near-term developer roadmap remains parked:
 - Admin commands.
 - Unrestricted shell execution.
 
-**Acceptance criteria:**
+**Acceptance criteria status:**
 
-- Her MVP action risk, dry-run, approval, and test approach ile tanimlidir.
-- Destructive actions blocked/deferred listesinde kalir.
-- Adapter accepts only approved actions.
+- MVP action risk, dry-run, approval, and test approach ile tanimli.
+- Destructive actions blocked.
+- Adapter evaluates permissions and returns dry-run plans.
+
+## Active Personal Assistant Roadmap
 
 ### Sprint 41 - ConversationLoop MVP
 

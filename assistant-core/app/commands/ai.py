@@ -808,3 +808,52 @@ def _intent_preview_payload(project: str, result: IntentPreviewResult) -> dict[s
         "warnings": result.warnings,
         "metadata": result.metadata,
     }
+
+
+def ai_pc_preview(
+    user_text: str = typer.Argument(..., help="User text to route into PC action preview"),
+    project: str = typer.Option(..., "--project", help="Registered project name"),
+    source: str = typer.Option("text", "--source", help="text|voice|routine|schedule|manual"),
+    show_plan: bool = typer.Option(False, "--show-plan", help="Show the generated PC control plan"),
+    as_json: bool = typer.Option(False, "--json", help="Render output as JSON"),
+    dry_run: bool = typer.Option(True, "--dry-run", help="Generate a dry-run plan"),
+) -> None:
+    from app.control.pc_adapter import PCControlAdapter
+    
+    console = Console()
+    source_enum = _parse_action_source(source)
+    router_result = IntentRouter().preview(user_text, source=source_enum)
+    
+    adapter = PCControlAdapter()
+    
+    if as_json:
+        payload = _intent_preview_payload(project, router_result)
+        if router_result.action_candidate and router_result.permission_decision:
+            plan = adapter.build_plan(router_result.action_candidate, router_result.permission_decision, dry_run=dry_run)
+            payload["pc_plan"] = asdict(plan)
+            result = adapter.execute(plan)
+            payload["pc_result"] = asdict(result)
+        typer.echo(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2))
+        return
+
+    if not router_result.action_candidate or not router_result.permission_decision:
+        if router_result.clarification:
+            console.print(f"Clarification required: {router_result.clarification.reason}")
+        else:
+            console.print("Blocked: No valid action candidate or permission decision.")
+        return
+        
+    plan = adapter.build_plan(router_result.action_candidate, router_result.permission_decision, dry_run=dry_run)
+    result = adapter.execute(plan)
+    
+    if show_plan:
+        console.print(f"[bold]Plan[/bold]: {plan.summary}")
+        console.print(f"[bold]Executable[/bold]: {plan.executable}")
+        console.print(f"[bold]Execution Allowed[/bold]: {plan.execution_allowed}")
+        if plan.blocked_reason:
+            console.print(f"[bold]Blocked Reason[/bold]: {plan.blocked_reason}")
+            
+    console.print(f"[bold]Result Status[/bold]: {result.status.value}")
+    console.print(f"[bold]Result Message[/bold]: {result.message}")
+    if result.data:
+        console.print(f"[bold]Data[/bold]: {json.dumps(result.data, indent=2, ensure_ascii=False)}")
