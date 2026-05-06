@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any
 
 from app.actions.risk import DEFAULT_ACTION_RISK, RiskLevel, requires_confirmation
-from app.actions.types import ActionSource, ActionStatus, ActionType, IntentCategory
+from app.actions.types import ActionSource, ActionStatus, ActionType, IntentCategory, PermissionStatus
 
 
 @dataclass(slots=True)
@@ -86,8 +86,13 @@ class ActionPreview:
     warnings: list[str] = field(default_factory=list)
     safe_to_execute: bool = False
     blocked_reason: str = ""
+    requires_clarification: bool = False
 
     def __post_init__(self) -> None:
+        if self.requires_clarification:
+            self.safe_to_execute = False
+            self.requires_confirmation = False
+            return
         if self.risk_level is RiskLevel.BLOCKED:
             self.safe_to_execute = False
             self.requires_confirmation = False
@@ -126,6 +131,40 @@ class ActionResult:
             ActionStatus.SKIPPED,
         }:
             self.executed = False
+
+
+@dataclass(slots=True)
+class PermissionDecision:
+    action_id: str
+    status: PermissionStatus
+    risk_level: RiskLevel
+    allowed_to_execute: bool
+    requires_confirmation: bool
+    requires_clarification: bool
+    blocked: bool
+    reason: str
+    confirmation_prompt: str
+    warnings: list[str]
+    audit_metadata: dict[str, Any]
+    next_step: str
+    preview: ActionPreview | None = None
+
+    def __post_init__(self) -> None:
+        if self.status is PermissionStatus.BLOCKED:
+            self.blocked = True
+            self.allowed_to_execute = False
+            self.requires_confirmation = False
+        if self.status is PermissionStatus.CLARIFICATION_REQUIRED:
+            self.requires_clarification = True
+            self.allowed_to_execute = False
+            self.requires_confirmation = False
+        if self.status is PermissionStatus.CONFIRMATION_REQUIRED:
+            self.requires_confirmation = True
+            self.allowed_to_execute = False
+        if self.status in {PermissionStatus.DENIED, PermissionStatus.CANCELLED, PermissionStatus.UNKNOWN}:
+            self.allowed_to_execute = False
+        if self.blocked:
+            self.allowed_to_execute = False
 
 
 @dataclass(slots=True)

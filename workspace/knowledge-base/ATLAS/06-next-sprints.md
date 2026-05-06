@@ -17,6 +17,7 @@
 - **Sprint 35:** DocumentationAgent.
 - **Sprint 36:** Product Realignment & Assistant Architecture.
 - **Sprint 37:** Action Architecture & Intent Schema.
+- **Sprint 38:** PermissionManager & Action Approval Flow.
 
 ## Sprint 36 - Completed
 
@@ -79,23 +80,24 @@ The former near-term developer roadmap remains parked:
 
 `IntegrationAgent` can return only if it is re-scoped as Device/Service Integration for personal assistant use. Tool execution approval returns as personal Action Approval, not autonomous developer execution.
 
-## Active Personal Assistant Roadmap
-
-### Sprint 38 - PermissionManager & Action Approval Flow
+## Sprint 38 - Completed
 
 **Amac:** ToolApproval foundation'i personal action approval sistemine evriltmek.
 
-**Kapsam:**
+**Tamamlanan kapsam:**
 
 - `ActionCandidate` to `ActionPreview` flow.
 - Risk to confirmation matrix implementation.
 - Medium/high confirmation contract.
 - Blocked action handling.
-- Deny/cancel/timeout states.
+- Deny/cancel result states.
 - Audit metadata for permission decisions.
-- CLI/text-safe preview flow if needed, without real adapter execution.
+- confirm/deny/cancel ActionResult modeling.
+- voice-source stricter confirmation and low-confidence clarification.
+- `33-permission-manager-flow.md`.
+- `tests/test_permission_manager.py`.
 
-**Kapsam disi:**
+**Kapsam disi kalanlar:**
 
 - Real PC control execution.
 - Home/device execution.
@@ -103,7 +105,7 @@ The former near-term developer roadmap remains parked:
 - Voice confirmation runtime.
 - Autonomous developer tool execution.
 
-**Acceptance criteria:**
+**Acceptance criteria status:**
 
 - Medium risk explicit confirm ister.
 - High risk clear warning ister.
@@ -111,6 +113,9 @@ The former near-term developer roadmap remains parked:
 - Ambiguous action produces clarification, not approval.
 - Voice-originated risky action has stricter confirmation rule.
 - Permission decision emits audit-ready metadata.
+- `execution_attempted=false` is present in audit metadata.
+
+## Active Personal Assistant Roadmap
 
 ### Sprint 39 - IntentRouter MVP
 

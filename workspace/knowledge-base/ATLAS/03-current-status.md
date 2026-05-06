@@ -8,6 +8,7 @@
 - **Knowledge base:** `E:\ATLAS\workspace\knowledge-base\ATLAS`.
 - **Product direction after Sprint 36:** local-first personal control assistant foundation.
 - **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
+- **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -23,9 +24,10 @@ These modules are preserved as the core technical foundation:
 - **ProjectQAAgent foundation:** project QA; future basis for personal knowledge QA.
 - **PlannerAgent foundation:** sprint planning today; future basis for routine/task planning.
 - **MainAgent:** deterministic read-only coordinator; future assistant coordinator.
-- **ToolApprovalAgent:** preview-only approval foundation; future basis for PermissionManager.
+- **ToolApprovalAgent:** preview-only devtools command/tool approval foundation.
 - **SecurityAuditorAgent:** bounded security audit; future basis for PC/home/privacy safety review.
-- **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts only.
+- **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts.
+- **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -67,11 +69,25 @@ Sprint 37 completed the first canonical contract layer:
 
 These are schema and documentation artifacts. They do not execute actions.
 
+Sprint 38 completed the first personal action permission layer:
+
+- `PermissionDecision` model.
+- `PermissionStatus` values: `safe_readonly`, `preview_allowed`, `confirmation_required`, `clarification_required`, `denied`, `blocked`, `cancelled`, `unknown`.
+- `PermissionManager` decision engine.
+- `ActionCandidate -> ActionPreview -> PermissionDecision` flow.
+- confirm/deny/cancel result modeling.
+- blocked action non-execution decision.
+- ambiguous/unknown clarification decision.
+- voice-source confidence and confirmation rules.
+- audit metadata helper with `execution_attempted=false`.
+- `tests/test_permission_manager.py`.
+
+This is still non-executing. No adapter is called.
+
 ## D) Missing Personal Assistant Runtime Layers
 
-These are not implemented yet and are the focus of Sprint 38+:
+These are not implemented yet and are the focus of Sprint 39+:
 
-- Permission UX runtime / `PermissionManager`
 - IntentRouter runtime
 - ActionRouter runtime
 - SkillRegistry
@@ -88,6 +104,8 @@ These are not implemented yet and are the focus of Sprint 38+:
 - Wake word listener
 - ConversationLoop
 - Desktop tray / permission panel
+- Permission UI
+- Durable action audit log
 - Notification / reminder / calendar assistant
 - Mobile bridge
 
@@ -114,10 +132,31 @@ Not implemented:
 - Adapter implementation.
 - PC control.
 - Home control.
-- PermissionManager runtime.
 - Voice runtime.
 - ConversationLoop.
 
+## Sprint 38 Status
+
+Sprint 38 is complete as a permission decision and documentation sprint.
+
+Completed:
+
+- `app/actions/permission.py` adds `PermissionManager`.
+- `app/actions/preview.py` builds `ActionPreview`.
+- `app/actions/audit.py` builds audit metadata.
+- `PermissionDecision` and `PermissionStatus` are part of the action contracts.
+- `33-permission-manager-flow.md` documents the flow and ToolApprovalAgent distinction.
+- `tests/test_permission_manager.py` validates risk-to-decision behavior.
+
+Not implemented:
+
+- Personal action execution.
+- PC/home adapter.
+- Voice runtime.
+- ConversationLoop.
+- Permission UI.
+- Durable runtime action audit log beyond metadata contract.
+
 ## Next Sprint
 
-Sprint 38 should be **PermissionManager & Action Approval Flow**. It should consume the Sprint 37 schema and implement preview/confirm/block decision flow before any adapter execution begins.
+Sprint 39 should be **IntentRouter MVP**. It should convert user text into `IntentResult` and safe `ActionCandidate` objects that can be passed through PermissionManager.

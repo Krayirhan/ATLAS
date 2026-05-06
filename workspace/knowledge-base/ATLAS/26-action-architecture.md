@@ -210,12 +210,14 @@ Risk classification must consider:
 | `warnings` | Safety/privacy warnings |
 | `safe_to_execute` | True only after policy permits |
 | `blocked_reason` | Required when blocked |
+| `requires_clarification` | True when no action may proceed before user clarifies |
 
 Rules:
 
 - Medium/high action cannot execute without preview.
 - Voice-source medium/high action must repeat understood action and target.
 - Ambiguous target does not produce an executable action.
+- Ambiguous/unknown action preview uses `requires_clarification=true`.
 - Blocked action preview only explains the block.
 
 ## ActionResult Contract
@@ -248,6 +250,62 @@ Status values:
 - `failed`
 - `cancelled`
 - `skipped`
+
+## PermissionDecision Contract
+
+Sprint 38 adds `PermissionDecision` as the bridge between preview and any future adapter boundary.
+
+| Field | Purpose |
+|---|---|
+| `action_id` | Matches candidate action |
+| `status` | Permission status |
+| `risk_level` | Final risk used by the permission gate |
+| `allowed_to_execute` | Whether future adapter execution could be allowed by policy |
+| `requires_confirmation` | Whether explicit user confirmation is required |
+| `requires_clarification` | Whether the assistant must ask a clarification question |
+| `blocked` | Whether execution is forbidden |
+| `reason` | Human-readable decision reason |
+| `confirmation_prompt` | Prompt text for confirmation or clarification |
+| `warnings` | Risk or source warnings |
+| `audit_metadata` | Audit-ready metadata with `execution_attempted=false` |
+| `next_step` | What the caller should do next |
+
+Status values:
+
+- `safe_readonly`
+- `preview_allowed`
+- `confirmation_required`
+- `clarification_required`
+- `denied`
+- `blocked`
+- `cancelled`
+- `unknown`
+
+## PermissionManager Flow
+
+Sprint 38 implements this non-executing decision flow:
+
+```text
+ActionCandidate
+  -> build_preview()
+  -> PermissionDecision
+  -> confirm / deny / cancel / block / clarification
+  -> ActionResult
+```
+
+Rules:
+
+- `safe_readonly` becomes `safe_readonly`, no confirmation.
+- `low` becomes `preview_allowed`, no default confirmation.
+- `medium` becomes `confirmation_required`.
+- `high` becomes `confirmation_required` with warning.
+- `blocked` becomes `blocked`.
+- `ambiguous` or `unknown` intent becomes `clarification_required`.
+- Missing target becomes `clarification_required`.
+- Voice-source medium/high requires confirmation.
+- Voice-source low confidence becomes `clarification_required`.
+- `confirm`, `deny`, and `cancel` return model results only; no adapter is called.
+- Audit metadata must always include `execution_attempted=false`.
 
 ## Clarification Contract
 
@@ -283,9 +341,9 @@ Rules:
 - Medium/high actions require `ActionPreview` and confirmation first.
 - Adapter results must become `ActionResult`.
 
-## Sprint 37 Non-Execution Rule
+## Sprint 37/38 Non-Execution Rule
 
-Sprint 37 does not implement:
+Sprint 37 and Sprint 38 do not implement:
 
 - PC control execution.
 - Home/device execution.
@@ -295,12 +353,13 @@ Sprint 37 does not implement:
 - Conversation loop.
 - File delete/move/run execution.
 - New CLI execution command.
+- Adapter calls from PermissionManager.
 
 ## Sprint Dependencies
 
 | Dependency | Why it matters |
 |---|---|
-| Sprint 38 - PermissionManager & Action Approval Flow | Consumes risk, preview, confirmation, blocked-action contracts |
+| Sprint 38 - PermissionManager & Action Approval Flow | Completed non-executing preview and permission decisions |
 | Sprint 39 - IntentRouter MVP | Produces `IntentResult` and action candidates from text |
 | Sprint 40 - PC Control Adapter MVP | Executes only approved low/safe PC actions |
 | Sprint 43 - RoutineEngine MVP | Uses action preview and risk aggregation |

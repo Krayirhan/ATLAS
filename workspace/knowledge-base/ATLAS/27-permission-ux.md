@@ -20,6 +20,19 @@ No medium, high, blocked, unknown, ambiguous, destructive, privacy-sensitive, or
 | `ambiguous` | "Isigi ac" with no room/device | Clarification only | No | No action candidate until clarified |
 | `unknown` | Unclassified request | None/action-safe answer | No | No action execution |
 
+## Sprint 38 PermissionDecision Status Matrix
+
+| Status | Meaning | Next step |
+|---|---|---|
+| `safe_readonly` | Read-only action is safe to preview/read in future | Return read-only result path; no adapter execution in Sprint 38 |
+| `preview_allowed` | Low-risk action preview is allowed | Future adapter may use this only after explicit implementation |
+| `confirmation_required` | Medium/high action needs explicit user approval | Ask confirmation; no adapter call in Sprint 38 |
+| `clarification_required` | Ambiguous, unknown, missing target, or low-confidence voice action | Ask a clarification question |
+| `denied` | User declined action | Return denied `ActionResult` |
+| `blocked` | Policy forbids action | Explain block and suggest safe alternative |
+| `cancelled` | User or timeout cancelled flow | Return cancelled `ActionResult` |
+| `unknown` | Permission engine cannot classify safely | No execution; require review |
+
 ## Low Risk
 
 Examples:
@@ -113,6 +126,14 @@ Voice commands are treated more conservatively because STT may mishear the targe
 | `high` | Must repeat target/action, show warning, and require explicit confirmation |
 | `blocked` | Must not execute; explain block |
 | `ambiguous` | Ask clarification; safe default is no action |
+
+Sprint 38 runtime contract:
+
+- `source=voice` plus medium/high risk always requires confirmation.
+- voice confidence below threshold returns `clarification_required`.
+- voice prompt starts with a repeat-back style phrase.
+- target must be explicit.
+- blocked voice actions remain blocked.
 
 Turkish voice confirmation examples:
 
@@ -222,7 +243,32 @@ Every permission decision records:
 - adapter selected
 - result status
 - timestamp
+- `execution_attempted=false`
 
-## Sprint 38 Dependency
+Sprint 38 audit metadata includes:
 
-Sprint 38 should turn this UX contract into `PermissionManager & Action Approval Flow`. It should still avoid real PC/home execution until the approval gate is testable.
+- `action_id`
+- `action_type`
+- `intent_category`
+- `risk_level`
+- `source`
+- `decision_status`
+- `requires_confirmation`
+- `blocked`
+- `target_summary`
+- `created_at`
+- `policy_version`
+- `execution_attempted=false`
+
+## ToolApprovalAgent vs PermissionManager
+
+These systems share the same security philosophy but are not the same layer.
+
+| Layer | Scope | Current role |
+|---|---|---|
+| `ToolApprovalAgent` / `app/approval` | Devtools command/file/tool/git/MCP-style preview | Read-only support subsystem; no command execution |
+| `PermissionManager` / `app/actions` | Personal assistant actions such as PC, browser, routine, and device candidates | Non-executing preview, confirmation, clarification, block, and audit metadata |
+
+## Sprint 38 Status
+
+Sprint 38 turns this UX contract into `PermissionManager & Action Approval Flow`. It still avoids real PC/home execution. Sprint 39 should feed this layer through `IntentRouter` output.

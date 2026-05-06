@@ -6,9 +6,11 @@ from app.actions.models import (
     ActionResult,
     ClarificationRequest,
     IntentResult,
+    PermissionDecision,
 )
+from app.actions.permission import PermissionManager
 from app.actions.risk import DEFAULT_ACTION_RISK, RiskLevel, requires_confirmation
-from app.actions.types import ActionSource, ActionStatus, ActionType, IntentCategory
+from app.actions.types import ActionSource, ActionStatus, ActionType, IntentCategory, PermissionStatus
 
 __all__ = [
     "ActionCandidate",
@@ -21,6 +23,9 @@ __all__ = [
     "DEFAULT_ACTION_RISK",
     "IntentCategory",
     "IntentResult",
+    "PermissionDecision",
+    "PermissionManager",
+    "PermissionStatus",
     "RiskLevel",
     "requires_confirmation",
 ]

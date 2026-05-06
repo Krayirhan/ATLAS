@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, and Sprint 37 schema-only action contracts. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, and Sprint 38 permission decision flow. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-Sprint 37 adds model/enumeration contracts only. It does not add real PC control, home control, voice runtime, adapter execution, or a new CLI execution command.
+Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview and decision logic only. It does not add real PC control, home control, voice runtime, adapter execution, or a new CLI execution command.
 
 ## Current Technical Foundation
 
@@ -10,8 +10,8 @@ Sprint 37 adds model/enumeration contracts only. It does not add real PC control
 |---|---|---|
 | `app/ai` | Implemented | Local LLM runtime, Ollama provider, mock provider, bounded context, prompt composition |
 | `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
-| `app/approval` | Implemented preview-only approval foundation | Basis for future action permission and confirmation |
-| `app/actions` | Implemented schema-only contracts | Intent/action/risk/preview/result model foundation |
+| `app/approval` | Implemented preview-only devtools approval foundation | Command/file/tool preview for devtools support |
+| `app/actions` | Implemented schema and permission contracts | Intent/action/risk/preview/permission/result model foundation |
 | `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
@@ -43,7 +43,7 @@ Current agents are preserved, but their product roles are clarified:
 | `ProjectQAAgent` | Project QA | Foundation for personal knowledge QA |
 | `PlannerAgent` | Sprint plan | Reposition as routine/task planning foundation |
 | `MainAgent` | Deterministic coordinator | Future assistant coordinator around intent/action routing |
-| `ToolApprovalAgent` | Preview-only command approval | Foundation for PermissionManager |
+| `ToolApprovalAgent` | Preview-only command approval | Devtools command/tool preview support |
 | `SecurityAuditorAgent` | Bounded security audit | Future PC/home/privacy safety auditor |
 | `CodeReviewerAgent` | Read-only code review | Parked devtools support |
 | `DocumentationAgent` | Read-only docs audit | Supporting knowledge hygiene |
@@ -51,32 +51,35 @@ Current agents are preserved, but their product roles are clarified:
 
 All existing agents must remain read-only until a later sprint explicitly designs execution boundaries.
 
-## app/approval - Permission and Action Approval Foundation
+## app/approval - DevTools Approval Foundation
 
 `app/approval` currently models proposed commands, file changes, tool calls, approval status, risk, preview, requirements, and evaluator decisions.
 
-Future direction:
+Current role:
 
-- Generalize from command/file/tool preview toward assistant actions.
-- Add action risk classification: `safe_readonly`, `low`, `medium`, `high`, `blocked`.
-- Require explicit confirmation for medium/high actions.
-- Keep blocked actions non-executable.
-- Produce audit metadata for every approval decision.
+- ToolApprovalAgent support.
+- Command/tool/git/MCP-style preview and block decisions.
+- Devtools support subsystem, not the personal action runtime.
+- No command execution.
 
-## app/actions - Intent and Action Contracts
+## app/actions - Intent, Action, and Permission Contracts
 
-Current Sprint 37 responsibility:
+Current Sprint 37/38 responsibility:
 
 - `IntentResult`
 - `ActionCandidate`
 - `ActionPreview`
 - `ActionResult`
 - `ClarificationRequest`
+- `PermissionDecision`
+- `PermissionManager`
 - intent categories
 - action types
 - source values
 - risk levels
 - default risk mapping
+- preview, confirmation, clarification, block, deny, cancel decisions
+- permission audit metadata with `execution_attempted=false`
 
 No execution exists in `app/actions`.
 
@@ -95,6 +98,7 @@ Initial action types:
 
 Future responsibility:
 
+- `IntentRouter`
 - `ActionRouter`
 - `SkillRegistry`
 - adapter handoff validation
@@ -169,5 +173,6 @@ python -m app.cli audit v1-rc
 - Production deployment automation.
 - Full disk MCP access.
 - Secret file reading.
+- Personal action execution before PermissionManager and adapter boundaries are tested.
 - Wake word without privacy and permission design.
 - Home/device control before permission and device registry are ready.

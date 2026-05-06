@@ -1,4 +1,4 @@
-"""Canonical intent and action type enums for Sprint 37.
+"""Canonical intent, action, and permission enums.
 
 These are schema contracts only. They do not execute actions or choose adapters.
 """
@@ -97,3 +97,14 @@ class ActionStatus(str, Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
     SKIPPED = "skipped"
+
+
+class PermissionStatus(str, Enum):
+    SAFE_READONLY = "safe_readonly"
+    PREVIEW_ALLOWED = "preview_allowed"
+    CONFIRMATION_REQUIRED = "confirmation_required"
+    CLARIFICATION_REQUIRED = "clarification_required"
+    DENIED = "denied"
+    BLOCKED = "blocked"
+    CANCELLED = "cancelled"
+    UNKNOWN = "unknown"

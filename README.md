@@ -12,7 +12,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 |---|---|
 | Product direction | Personal control assistant foundation |
 | Release baseline | V1 RC - GO for the existing local control plane |
-| Sprint focus | Sprint 37 - Action Architecture & Intent Schema completed; Sprint 38 next |
+| Sprint focus | Sprint 38 - PermissionManager & Action Approval Flow completed; Sprint 39 next |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
@@ -22,7 +22,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 
 The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place.
 
-The missing product layers are voice, intent/action schema, PC control, routine engine, personal memory/preferences, device registry, home control, permission UX, desktop panel, and mobile bridge.
+The missing product layers are voice, IntentRouter, ActionRouter, PC control, routine engine, personal memory/preferences, device registry, home control, permission UI, desktop panel, and mobile bridge.
 
 ## Core Architecture
 
@@ -107,12 +107,13 @@ Baseline rules:
 These modules are preserved as core or foundation infrastructure:
 
 - `app/ai`: local LLM runtime, Ollama provider, mock provider, context loader, prompt composer, AI service.
-- `app/actions`: Sprint 37 schema-only intent/action/risk/result contracts; no execution or adapter code.
+- `app/actions`: Sprint 37 intent/action/risk/result contracts plus Sprint 38 PermissionManager decision flow; no execution or adapter code.
 - `MemoryAgent`: project-memory foundation; will evolve toward personal memory.
 - `ProjectQAAgent`: project QA foundation; will evolve toward personal knowledge QA.
 - `PlannerAgent`: planning foundation; will be repositioned as routine/task planning.
 - `MainAgent`: current deterministic coordinator; will become the assistant coordination layer around intent/action routing.
-- `ToolApprovalAgent`: command/action preview foundation; will evolve toward `PermissionManager`.
+- `ToolApprovalAgent`: devtools command/tool preview foundation.
+- `PermissionManager`: personal action preview, confirmation, block, clarification, and audit metadata foundation.
 - `SecurityAuditorAgent`: security audit foundation; will expand to PC/home/privacy risk checks.
 
 All current agents remain read-only. They do not write files, run terminal commands, call MCP tools, or produce approval tokens.
@@ -137,7 +138,7 @@ Developer-oriented automation must not become the default roadmap again unless e
 |---|---|
 | Sprint 36 | Product Realignment & Assistant Architecture |
 | Sprint 37 | Action Architecture & Intent Schema - completed contract |
-| Sprint 38 | PermissionManager & Action Approval Flow |
+| Sprint 38 | PermissionManager & Action Approval Flow - completed decision engine |
 | Sprint 39 | IntentRouter MVP |
 | Sprint 40 | PC Control Adapter MVP |
 | Sprint 41 | ConversationLoop MVP |
@@ -162,7 +163,7 @@ Developer-oriented automation must not become the default roadmap again unless e
 - IntentRouter
 - ActionRouter
 - SkillRegistry
-- PermissionManager UX
+- Permission UI
 - PC control adapter
 - Home control adapter
 - Device registry
@@ -173,7 +174,7 @@ Developer-oriented automation must not become the default roadmap again unless e
 
 ## Next Sprint
 
-Sprint 38 should be **PermissionManager & Action Approval Flow**. It should consume the Sprint 37 intent/action schema and implement preview, confirm, deny, cancel, block, and audit-ready permission decisions before any PC control or home control execution begins.
+Sprint 39 should be **IntentRouter MVP**. It should convert user text into `IntentResult` and safe action candidates using the Sprint 37 schema and Sprint 38 permission flow, while still avoiding PC/home/voice execution.
 
 ## Repo
 

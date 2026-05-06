@@ -184,12 +184,14 @@ Risk classification must consider:
 - `warnings`
 - `safe_to_execute`
 - `blocked_reason`
+- `requires_clarification`
 
 Rules:
 
 - Medium/high actions cannot execute without preview.
 - Voice-source medium/high actions require repeated target/action confirmation.
 - Ambiguous target does not produce an action.
+- Ambiguous/unknown preview sets `requires_clarification=true`.
 - Blocked action preview only explains why it is blocked.
 - Preview must not perform state-changing behavior.
 
@@ -223,6 +225,36 @@ Status values:
 - `skipped`
 
 Sprint 37 defines the contract only; real adapter results are future work.
+
+## PermissionDecision Model
+
+Sprint 38 adds this permission decision model:
+
+- `action_id`
+- `status`
+- `risk_level`
+- `allowed_to_execute`
+- `requires_confirmation`
+- `requires_clarification`
+- `blocked`
+- `reason`
+- `confirmation_prompt`
+- `warnings`
+- `audit_metadata`
+- `next_step`
+
+Status values:
+
+- `safe_readonly`
+- `preview_allowed`
+- `confirmation_required`
+- `clarification_required`
+- `denied`
+- `blocked`
+- `cancelled`
+- `unknown`
+
+`execution_attempted` must always be `false` in Sprint 38 audit metadata.
 
 ## Clarification Model
 
@@ -258,6 +290,20 @@ Example:
 | `blocked` | Block explanation | No | Never |
 | `ambiguous` | Clarification | No | Never |
 | `unknown` | Safe fallback | No | Never |
+
+Sprint 38 implementation mapping:
+
+| Input | PermissionDecision |
+|---|---|
+| `safe_readonly` | `safe_readonly` |
+| `low` | `preview_allowed` |
+| `medium` | `confirmation_required` |
+| `high` | `confirmation_required` with warning |
+| `blocked` | `blocked` |
+| `ambiguous` | `clarification_required` |
+| `unknown` | `clarification_required` |
+| missing target | `clarification_required` |
+| voice + low confidence | `clarification_required` |
 
 ## Turkish Intent and Action Examples
 
@@ -367,7 +413,7 @@ This matrix provides example classification targets for Sprint 37. It is not an 
 
 ## Execution Boundary
 
-Sprint 37 has no execution runtime:
+Sprint 37 and Sprint 38 have no execution runtime:
 
 - No PC control adapter.
 - No home control adapter.
@@ -377,5 +423,6 @@ Sprint 37 has no execution runtime:
 - No conversation loop implementation.
 - No file operation execution.
 - No adapter code.
+- No PermissionManager adapter calls.
 
-The schema can be tested in isolation and then consumed by Sprint 38 PermissionManager work.
+The schema and PermissionManager can be tested in isolation and then consumed by Sprint 39 IntentRouter work.
