@@ -280,3 +280,13 @@ These systems share the same security philosophy but are not the same layer.
 
 Sprint 38 turns this UX contract into `PermissionManager & Action Approval Flow`. It still avoids real PC/home execution. Sprint 39 should feed this layer through `IntentRouter` output.
 Sprint 39 now feeds this layer through deterministic `IntentRouter` output. Sprint 40 should keep the same UX guarantees while adding PC adapters.
+
+## Sprint 44 Voice Clarification
+
+Sprint 44 keeps the same permission model and applies stricter rules for voice:
+
+- push-to-talk first
+- transcript confidence gates risky actions
+- medium/high voice actions always require explicit confirmation
+- high-risk voice actions require repeat-back summary
+- wake word remains disabled until later privacy and false-positive controls exist

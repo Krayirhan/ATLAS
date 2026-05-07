@@ -23,6 +23,7 @@
 - **Sprint 41:** ConversationLoop MVP.
 - **Sprint 42:** Personal Memory & Preferences.
 - **Sprint 43:** RoutineEngine MVP.
+- **Sprint 44:** Voice Core Architecture.
 
 ## Sprint 36 - Completed
 
@@ -256,7 +257,7 @@ The former near-term developer roadmap remains parked:
 - Medium/high routine steps confirmation ister.
 - High-impact routines are high risk.
 
-### Sprint 44 - Voice Core Architecture
+## Sprint 44 - Completed
 
 **Amac:** Voice layer'i implementasyon oncesi privacy ve architecture seviyesinde tanimlamak.
 

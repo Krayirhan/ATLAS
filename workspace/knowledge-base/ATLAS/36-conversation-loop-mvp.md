@@ -39,5 +39,19 @@ It supports `--json`, `--show-state`, `--session-id`, and `--reset-session`.
 - **Voice/STT/TTS**: NO
 - **Terminal Execution**: NO
 
-### Sprint 42 Dependency
-Sprint 42 will introduce Personal Memory & Preferences, which will be integrated into the ConversationLoop context.
+### Sprint 42 Outcome
+Personal Memory & Preferences now feed the ConversationLoop before the normal action path.
+
+### Sprint 43 Outcome
+RoutineEngine preview support is now integrated into the ConversationLoop:
+
+- `Calisma modunu baslat` returns routine preview / confirmation-safe output
+- `Rutinleri goster` returns built-in routine list
+- routine requests stay preview-only
+
+### Sprint 44 Dependency Result
+Sprint 44 now defines how a future voice layer will feed `ConversationLoop`:
+
+- push-to-talk transcript becomes the input message
+- low transcript confidence returns clarification before action routing
+- no direct microphone runtime exists yet

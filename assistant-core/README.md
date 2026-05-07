@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, and Sprint 39 deterministic intent routing. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, Sprint 39 deterministic intent routing, Sprint 40 PC preview planning, Sprint 41 conversation loop MVP, Sprint 42 personal memory MVP, Sprint 43 routine preview MVP, and Sprint 44 voice architecture decisions. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview and decision logic. Sprint 39 adds deterministic text-to-intent preview routing. It still does not add real PC control, home control, voice runtime, adapter execution, or unrestricted command execution.
+Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview and decision logic. Sprint 39 added deterministic text-to-intent preview routing. Sprint 40 added safe PC dry-run planning. Sprint 41 added a text-first conversation loop. Sprint 42 added privacy-first personal memory. Sprint 43 added preview-only routines. Sprint 44 added the voice architecture and safety contracts. It still does not add microphone runtime, STT/TTS engine runtime, wake word runtime, home control runtime, or unrestricted command execution.
 
 ## Current Technical Foundation
 
@@ -12,7 +12,7 @@ Sprint 37 added model/enumeration contracts. Sprint 38 adds permission preview a
 | `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
 | `app/approval` | Implemented preview-only devtools approval foundation | Command/file/tool preview for devtools support |
 | `app/actions` | Implemented schema, permission, and router contracts | Intent/action/risk/preview/permission/router/result model foundation |
-| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent commands |
+| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent/routine/chat commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
 ## app/ai - Local LLM Runtime
@@ -109,18 +109,28 @@ Future responsibility:
 
 ## Future app/voice
 
+Sprint 44 defines the contract and architecture only.
+
 Planned responsibility:
 
-- push-to-talk first
-- STT adapter
-- TTS adapter
+- push-to-talk first voice input
+- STT adapter contract
+- TTS adapter contract
 - future wake word listener
 - interruption and cancel flow
 - fallback to text
 - latency measurement
 - privacy controls for microphone usage
 
-Wake word must not be implemented before the privacy model and confirmation policy are documented and accepted.
+Not implemented:
+
+- microphone capture
+- audio retention
+- STT runtime
+- TTS runtime
+- wake word runtime
+
+Wake word must not be implemented before the privacy model, voice confirmation policy, and opt-in behavior are documented and accepted.
 
 ## Future app/control
 
@@ -134,17 +144,18 @@ Planned responsibility:
 
 Initial PC actions must be safe, previewable, and reversible where possible. Destructive actions such as delete, shutdown, registry edits, installs, and admin commands remain blocked or deferred.
 
-## Future app/routines
+## app/routines
 
-Planned responsibility:
+Current responsibility:
 
-- routine definitions
+- built-in routine definitions
 - routine preview
-- schedule and trigger model
-- routine result/audit
-- user preference integration
+- routine result/audit metadata
+- routine risk aggregation
+- step-level PermissionManager decisions
+- optional read-only personal preference lookup
 
-Example routines:
+Built-in routines:
 
 - calisma modu
 - oyun modu

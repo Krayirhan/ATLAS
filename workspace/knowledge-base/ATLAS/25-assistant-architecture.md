@@ -89,6 +89,29 @@ Sprint 39 implementation stance:
 
 Low confidence intent must not become an executable action. Ambiguous intent must produce a clarification request.
 
+## Sprint 44 Voice Integration Update
+
+Voice is now defined as a future input/output layer around the same architecture:
+
+```text
+push-to-talk input
+  -> STT adapter
+  -> TranscriptResult
+  -> confidence check
+  -> ConversationLoop
+  -> IntentRouter
+  -> PermissionManager
+  -> ResponseBuilder
+  -> TTS adapter
+```
+
+Rules:
+
+- voice never bypasses `ConversationLoop`
+- voice never bypasses `PermissionManager`
+- low-confidence transcript stays on clarification path
+- wake word remains deferred
+
 ### IntentResult
 
 Canonical fields:

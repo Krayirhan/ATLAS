@@ -12,7 +12,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 |---|---|
 | Product direction | Personal control assistant foundation |
 | Release baseline | V1 RC - GO for the existing local control plane |
-| Sprint focus | Sprint 39 - IntentRouter MVP completed; Sprint 40 next |
+| Sprint focus | Sprint 44 - Voice Core Architecture completed; Sprint 45 next |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
@@ -22,7 +22,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 
 The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place.
 
-The missing product layers are voice, ActionRouter, PC control, routine engine, personal memory/preferences, device registry, home control, permission UI, desktop panel, and mobile bridge.
+The missing product layers are runtime voice capture, STT/TTS implementation, ActionRouter, device registry, home control, permission UI, desktop panel, durable scheduling, and mobile bridge.
 
 ## Core Architecture
 
@@ -141,11 +141,11 @@ Developer-oriented automation must not become the default roadmap again unless e
 | Sprint 37 | Action Architecture & Intent Schema - completed contract |
 | Sprint 38 | PermissionManager & Action Approval Flow - completed decision engine |
 | Sprint 39 | IntentRouter MVP - completed deterministic preview routing |
-| Sprint 40 | PC Control Adapter MVP |
-| Sprint 41 | ConversationLoop MVP |
-| Sprint 42 | Personal Memory & Preferences |
-| Sprint 43 | RoutineEngine MVP |
-| Sprint 44 | Voice Core Architecture |
+| Sprint 40 | PC Control Adapter MVP - completed |
+| Sprint 41 | ConversationLoop MVP - completed |
+| Sprint 42 | Personal Memory & Preferences - completed |
+| Sprint 43 | RoutineEngine MVP - completed |
+| Sprint 44 | Voice Core Architecture - completed |
 | Sprint 45 | STT/TTS MVP |
 | Sprint 46 | DeviceRegistry + Room Model |
 | Sprint 47 | Home Control Adapter Design |
@@ -157,24 +157,21 @@ Developer-oriented automation must not become the default roadmap again unless e
 ## What Is Not Implemented Yet
 
 - Voice layer
-- Speech-to-text adapter
-- Text-to-speech adapter
-- Wake word listener
-- Conversation loop
+- Speech-to-text runtime
+- Text-to-speech runtime
+- Wake word runtime
 - ActionRouter
 - SkillRegistry
 - Permission UI
-- PC control adapter
 - Home control adapter
 - Device registry
-- Routine engine
-- Personal memory/preferences
 - Desktop tray or dashboard
+- Always-listening opt-in model
 - Mobile companion bridge
 
 ## Next Sprint
 
-Sprint 40 should be **PC Control Adapter MVP**. It should consume approved low/safe personal action previews and define adapter boundaries without adding unrestricted execution paths.
+Sprint 45 should be **STT/TTS MVP**. It should implement contract-level local-first speech adapters around push-to-talk, keep wake word disabled, and preserve preview-only safety semantics.
 
 ## Repo
 

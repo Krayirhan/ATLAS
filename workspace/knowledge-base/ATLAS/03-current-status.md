@@ -14,6 +14,7 @@
 - **Sprint 41 status:** completed ConversationLoop MVP; text-first session state and response building are available.
 - **Sprint 42 status:** completed Personal Memory MVP; explicit remember/forget/show flow is available.
 - **Sprint 43 status:** completed RoutineEngine MVP; built-in routine preview, risk aggregation, and routine CLI are available.
+- **Sprint 44 status:** completed Voice Core Architecture; push-to-talk-first voice direction, privacy boundaries, and STT/TTS selection guidance are defined.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -113,10 +114,10 @@ These are not implemented yet and are the focus of Sprint 44+:
 - Device registry
 - Room model
 - Home control adapter
-- Voice layer
-- Speech-to-text adapter
-- Text-to-speech adapter
-- Wake word listener
+- Voice runtime
+- Speech-to-text runtime
+- Text-to-speech runtime
+- Wake word runtime
 - Desktop tray / permission panel
 - Permission UI
 - Durable action audit log
@@ -259,6 +260,30 @@ Not implemented:
 - Home or PC runtime execution from routine steps.
 - Routine writes back into personal memory.
 
+## Sprint 44 Status
+
+Sprint 44 is complete as a voice architecture and safety sprint.
+
+Completed:
+
+- `28-voice-architecture.md` defines the canonical voice stance.
+- `39-voice-core-architecture.md` defines the Voice Core Architecture in detail.
+- push-to-talk first is the accepted MVP direction.
+- wake word is explicitly deferred.
+- STT and TTS adapter contracts are documented.
+- voice-source safety rules and confirmation matrix are documented.
+- latency targets, Turkish quality goals, and privacy boundaries are documented.
+
+Not implemented:
+
+- microphone capture runtime
+- STT runtime
+- TTS runtime
+- wake word runtime
+- always-listening mode
+- voice-driven PC or home execution
+- audio retention system
+
 ## Next Sprint
 
-Sprint 44 should be **Voice Core Architecture**. It should define push-to-talk-first boundaries, Turkish STT/TTS evaluation criteria, privacy rules, and voice confirmation escalation before any microphone runtime exists.
+Sprint 45 should be **STT/TTS MVP**. It should implement contract-level local-first speech adapters around push-to-talk, keep wake word disabled, and preserve preview-only safety guarantees.
