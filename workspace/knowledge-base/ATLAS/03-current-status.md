@@ -16,6 +16,7 @@
 - **Sprint 43 status:** completed RoutineEngine MVP; built-in routine preview, risk aggregation, and routine CLI are available.
 - **Sprint 44 status:** completed Voice Core Architecture; push-to-talk-first voice direction, privacy boundaries, and STT/TTS selection guidance are defined.
 - **Sprint 45 status:** completed STT/TTS MVP; mock voice pipeline and `ai voice` CLI are available.
+- **Sprint 46 status:** completed DeviceRegistry + Room Model; in-memory registry, alias resolution, and `ai device` CLI are available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -112,8 +113,6 @@ These are not implemented yet and are the focus of Sprint 44+:
 - ActionRouter runtime
 - SkillRegistry
 - Browser/media/file execution beyond safe preview
-- Device registry
-- Room model
 - Home control adapter
 - Voice runtime
 - real speech-to-text runtime
@@ -125,6 +124,7 @@ These are not implemented yet and are the focus of Sprint 44+:
 - Durable routine scheduler / daemon
 - Notification / reminder / calendar assistant
 - Mobile bridge
+- Network discovery
 
 ## Sprint 36 Status
 
@@ -282,6 +282,45 @@ Not implemented:
 - TTS runtime
 - wake word runtime
 - always-listening mode
+
+## Sprint 45 Status
+
+Sprint 45 is complete as a mock-only voice runtime sprint.
+
+Completed:
+
+- `app/voice` package exists.
+- mock STT and mock TTS exist.
+- `VoicePipeline` routes transcript -> `ConversationLoop` -> mock TTS.
+- `ai voice` CLI is available.
+
+Not implemented:
+
+- microphone capture
+- real STT/TTS engine runtime
+- wake word
+- always-listening
+
+## Sprint 46 Status
+
+Sprint 46 is complete as a device identity and target-resolution sprint.
+
+Completed:
+
+- `app/devices` defines device, room, alias, capability, state, resolution, and plan models.
+- In-memory demo `DeviceRegistry` exists.
+- `DeviceTargetResolver` resolves room/device aliases and returns clarification when target is ambiguous.
+- `DeviceActionPlanner` produces preview-only device plans and never executes home actions.
+- `ai device` CLI is available.
+- `ConversationLoop` now returns better device clarification and confirmation responses.
+
+Not implemented:
+
+- real home control execution
+- Home Assistant or MQTT integration
+- network discovery
+- physical device state changes
+- durable device storage
 - voice-driven PC or home execution
 - audio retention system
 

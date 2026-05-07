@@ -267,6 +267,16 @@ Sprint 39 adds:
 - `IntentPreviewResult` wrapper for safe preview output
 - PermissionManager integration without execution
 
+## Sprint 46 Device Target Resolution Notes
+
+Sprint 46 adds a canonical target-resolution layer for device intents:
+
+- `device.turn_on`, `device.turn_off`, `device.set_brightness`, and `device.set_temperature` now depend on `DeviceRegistry`
+- room name + device type can resolve to a canonical device id
+- alias-only device targets may resolve if unique
+- ambiguous device targets must return clarification and candidate list
+- unsupported or privacy-sensitive device classes stay blocked/unsupported
+
 ## Clarification Model
 
 `ClarificationRequest` fields:

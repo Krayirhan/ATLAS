@@ -1,16 +1,28 @@
-import re
 from app.personal_memory.models import MemorySensitivity, MemoryType, PersonalMemoryItem
 
+
 class SensitiveMemoryPolicy:
-    
     BLOCKED_KEYWORDS = [
-        "şifre", "password", "token", "api key", "secret", "private key", 
-        "tc kimlik", "kredi kartı", "banka şifresi", "seed phrase", "recovery code"
+        "sifre",
+        "password",
+        "token",
+        "api key",
+        "secret",
+        "private key",
+        "tc kimlik",
+        "kredi karti",
+        "banka sifresi",
+        "seed phrase",
+        "recovery code",
     ]
-    
+
+    @staticmethod
+    def _normalize(text: str) -> str:
+        return text.lower().translate(str.maketrans({"ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u"}))
+
     @classmethod
     def classify_sensitivity(cls, text: str, memory_type: MemoryType) -> MemorySensitivity:
-        text_lower = text.lower()
+        text_lower = cls._normalize(text)
         if any(keyword in text_lower for keyword in cls.BLOCKED_KEYWORDS):
             return MemorySensitivity.BLOCKED
         if memory_type == MemoryType.PREFERENCE:
@@ -31,4 +43,4 @@ class SensitiveMemoryPolicy:
 
     @classmethod
     def build_blocked_reason(cls, text: str) -> str:
-        return "İçerisinde hassas veya yasaklı bilgiler bulunduğu için (örn: şifre, token) güvenlik politikası gereği bu hafıza işlemi engellendi."
+        return "Icerisinde hassas veya yasakli bilgiler bulundugu icin (orn: sifre, token) guvenlik politikasi geregi bu hafiza islemi engellendi."

@@ -36,6 +36,8 @@ from app.ai.models import AIRequest
 from app.ai.providers.base import AIProviderError
 from app.ai.providers.mock_provider import MockAIProvider
 from app.ai.service import AIService
+from app.devices.planner import DeviceActionPlanner
+from app.devices.registry import DeviceRegistry
 
 
 def _safe_console_text(text: str) -> str:
@@ -857,6 +859,84 @@ def ai_pc_preview(
     console.print(f"[bold]Result Message[/bold]: {result.message}")
     if result.data:
         console.print(f"[bold]Data[/bold]: {json.dumps(result.data, indent=2, ensure_ascii=False)}")
+
+
+def ai_device(
+    project: str,
+    text: str | None = None,
+    list_devices: bool = False,
+    list_rooms: bool = False,
+    as_json: bool = False,
+    show_plan: bool = False,
+    source: str = "text",
+) -> None:
+    console = Console()
+    registry = DeviceRegistry()
+    planner = DeviceActionPlanner(registry=registry)
+
+    if list_rooms:
+        rooms = registry.list_rooms()
+        if as_json:
+            typer.echo(json.dumps(_json_safe([asdict(room) for room in rooms]), ensure_ascii=False, indent=2))
+            return
+        for room in rooms:
+            console.print(f"- {room.display_name}")
+        return
+
+    if list_devices:
+        devices = registry.list_devices()
+        if as_json:
+            typer.echo(json.dumps(_json_safe([asdict(device) for device in devices]), ensure_ascii=False, indent=2))
+            return
+        for device in devices:
+            room = registry.get_room(device.room_id)
+            console.print(f"- {device.display_name} ({device.device_type.value}, room: {room.display_name if room else device.room_id})")
+        return
+
+    if not text:
+        console.print("[red]Device preview icin bir metin belirtmelisin.[/red]")
+        raise typer.Exit(1)
+
+    source_enum = _parse_action_source(source)
+    result = planner.preview_device_action(text, source=source_enum)
+    payload = {
+        "project": project,
+        "text": text,
+        "status": result.status.value,
+        "message": result.message,
+        "device": asdict(result.device) if result.device is not None else None,
+        "room": asdict(result.room) if result.room is not None else None,
+        "resolution": asdict(result.resolution) if result.resolution is not None else None,
+        "plan": asdict(result.plan) if result.plan is not None else None,
+        "warnings": result.warnings,
+        "metadata": result.metadata,
+    }
+    if as_json:
+        typer.echo(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2))
+        return
+
+    console.print(f"[bold]Project[/bold]: {project}")
+    console.print(f"[bold]Status[/bold]: {result.status.value}")
+    console.print(f"[bold]Message[/bold]: {_safe_console_text(result.message)}")
+    if result.device is not None:
+        console.print(f"[bold]Device[/bold]: {result.device.display_name}")
+    if result.room is not None:
+        console.print(f"[bold]Room[/bold]: {result.room.display_name}")
+    if result.resolution is not None and result.resolution.requires_clarification:
+        console.print(f"[bold]Clarification[/bold]: {_safe_console_text(result.resolution.ambiguity_reason)}")
+        if result.resolution.candidates:
+            console.print("[bold]Candidates[/bold]")
+            for device in result.resolution.candidates:
+                console.print(f"- {device.display_name}")
+    if show_plan and result.plan is not None:
+        console.print(f"[bold]Plan[/bold]: {_safe_console_text(result.plan.summary)}")
+        console.print(f"[bold]Capability[/bold]: {result.plan.capability}")
+        console.print(f"[bold]Risk[/bold]: {result.plan.risk_level.value}")
+        console.print(f"[bold]Confirmation Required[/bold]: {result.plan.requires_confirmation}")
+        console.print(f"[bold]Safe To Execute[/bold]: {result.plan.safe_to_execute}")
+        if result.plan.blocked_reason:
+            console.print(f"[bold]Blocked Reason[/bold]: {_safe_console_text(result.plan.blocked_reason)}")
+    console.print("[bold]Execution[/bold]: none")
 
 
 def ai_chat(

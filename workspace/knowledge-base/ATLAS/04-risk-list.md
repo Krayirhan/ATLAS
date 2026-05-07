@@ -68,22 +68,32 @@
 58. **Scheduler creep before safety** - Automatic routine scheduling may arrive before audit and confirmation boundaries are ready.
 59. **Home step accidentally executed** - Device-oriented routine steps may execute before home adapters are safe.
 60. **PC adapter execute accidentally called** - Routine planning may call a future execution path instead of dry-run preview only.
+61. **Wrong device resolved** - A device alias may map to the wrong canonical device id.
+62. **Wrong room resolved** - A room alias may map to the wrong room.
+63. **Stale alias** - A stored alias may no longer match the intended device layout.
+64. **Duplicate alias** - Two rooms or devices may claim the same alias and create ambiguity.
+65. **Unsupported capability treated as supported** - Planner or adapter code may skip capability validation.
+66. **Device state write without confirmation** - Medium-risk home write actions may lose confirmation enforcement.
+67. **Home adapter accidentally called** - Preview-only device planning may accidentally call a future runtime adapter.
+68. **Network discovery creep** - Convenience work may add LAN discovery before policy and privacy review.
+69. **Physical world side effect risk** - Device writes can change lights, climate, locks, or security state in the real world.
+70. **Room/device privacy** - Registry data can reveal home layout, devices, and behavioral patterns.
 
 ## Privacy and Data Risks
 
-46. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
-47. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
-48. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
-49. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
-50. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
+71. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
+72. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
+73. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
+74. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
+75. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
 
 ## Runtime and Reliability Risks
 
-41. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
-42. **Ollama warmup/load time** - Cold model start can delay the first answer.
-43. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
-44. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
-45. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
+76. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
+77. **Ollama warmup/load time** - Cold model start can delay the first answer.
+78. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
+79. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
+80. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
 
 ## Current Controls
 
@@ -109,7 +119,7 @@
 - Voice confirmation policy runtime.
 - Transcript confidence enforcement runtime.
 - Audio retention/deletion runtime policy enforcement.
-- Device registry and room model runtime.
+- Home adapter runtime on top of device registry and room model.
 - Durable personal memory storage policy.
 - Routine scheduler and cancellation runtime.
 - Desktop permission panel.

@@ -59,6 +59,8 @@ DEVICE_ALIASES = (
     "isig",
     "lamba",
     "klima",
+    "kamera",
+    "kapi",
 )
 
 BLOCKED_PATTERNS: list[tuple[re.Pattern[str], ActionType, str]] = [
@@ -215,7 +217,7 @@ class IntentRouter:
 
         target = intent.target
         parameters = dict(intent.entities)
-        risk_level = DEFAULT_ACTION_RISK.get(action_type, RiskLevel.MEDIUM)
+        risk_level = RiskLevel.BLOCKED if intent.category is IntentCategory.BLOCKED else DEFAULT_ACTION_RISK.get(action_type, RiskLevel.MEDIUM)
         requires_confirmation = risk_level in {RiskLevel.MEDIUM, RiskLevel.HIGH}
         reversible = risk_level in {RiskLevel.SAFE_READONLY, RiskLevel.LOW, RiskLevel.MEDIUM}
         blocked_reason = ""
@@ -522,6 +524,32 @@ class IntentRouter:
         return None
 
     def _match_device(self, normalized_text: str):
+        if "kamera" in normalized_text and re.search(r"\b(ac|izle|baslat)\b", normalized_text):
+            return lambda intent_id, raw_text, norm: IntentResult(
+                intent_id=intent_id,
+                category=IntentCategory.BLOCKED,
+                confidence=0.95,
+                language="tr",
+                raw_text=raw_text,
+                normalized_text=norm,
+                entities={"device_name": "kamera"},
+                target="kamera",
+                action_candidate=ActionType.DEVICE_DISABLE_SECURITY,
+                safety_notes=["Kamera aksiyonlari privacy riski nedeniyle MVP'de blocked."],
+            )
+        if "kapi" in normalized_text and re.search(r"\b(ac|kilidi ac)\b", normalized_text):
+            return lambda intent_id, raw_text, norm: IntentResult(
+                intent_id=intent_id,
+                category=IntentCategory.BLOCKED,
+                confidence=0.95,
+                language="tr",
+                raw_text=raw_text,
+                normalized_text=norm,
+                entities={"device_name": "kapi"},
+                target="kapi",
+                action_candidate=ActionType.DEVICE_OPEN_DOOR,
+                safety_notes=["Kapi veya kilit aksiyonlari fiziksel guvenlik nedeniyle MVP'de blocked."],
+            )
         temperature_match = re.search(r"(klimayi|termostatini|klima|termostat)\s+(\d{1,2})\s+derece\s+yap", normalized_text)
         if temperature_match:
             room_name = self._extract_room(normalized_text)
@@ -535,8 +563,45 @@ class IntentRouter:
                 target=room_name or "klima",
                 action_type=ActionType.DEVICE_SET_TEMPERATURE,
             )
+        brightness_match = re.search(r"(.+?)\s+(?:yuzde\s+)?(\d{1,3})\s+yap", normalized_text)
+        if brightness_match and ("isik" in normalized_text or "isig" in normalized_text or "lamba" in normalized_text):
+            room_name = self._extract_room(normalized_text)
+            brightness = max(0, min(100, int(brightness_match.group(2))))
+            target = f"{room_name} isik".strip() if room_name else "isik"
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_SET_BRIGHTNESS,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.9 if room_name else 0.72,
+                entities={"room_name": room_name, "device_name": "isik", "brightness": brightness},
+                target=target,
+                action_type=ActionType.DEVICE_SET_BRIGHTNESS,
+            )
         device_name = self._extract_device(normalized_text)
         room_name = self._extract_room(normalized_text)
+        if device_name and not room_name and "ana isik" in normalized_text and re.search(r"\bac\b", normalized_text):
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_TURN_ON,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.84,
+                entities={"device_name": "ana isik"},
+                target="ana isik",
+                action_type=ActionType.DEVICE_TURN_ON,
+            )
+        if device_name and not room_name and "ana isik" in normalized_text and "kapat" in normalized_text:
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_TURN_OFF,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.84,
+                entities={"device_name": "ana isik"},
+                target="ana isik",
+                action_type=ActionType.DEVICE_TURN_OFF,
+            )
         if device_name and room_name and re.search(r"\bac\b", normalized_text):
             return lambda intent_id, raw_text, norm: self._intent(
                 intent_id=intent_id,
@@ -557,6 +622,28 @@ class IntentRouter:
                 confidence=0.91,
                 entities={"room_name": room_name, "device_name": device_name},
                 target=f"{room_name} {device_name}",
+                action_type=ActionType.DEVICE_TURN_OFF,
+            )
+        if device_name and not room_name and re.search(r"\bac\b", normalized_text):
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_TURN_ON,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.74,
+                entities={"device_name": device_name},
+                target=device_name,
+                action_type=ActionType.DEVICE_TURN_ON,
+            )
+        if device_name and not room_name and "kapat" in normalized_text:
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_TURN_OFF,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.74,
+                entities={"device_name": device_name},
+                target=device_name,
                 action_type=ActionType.DEVICE_TURN_OFF,
             )
         return None

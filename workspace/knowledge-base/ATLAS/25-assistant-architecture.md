@@ -31,14 +31,15 @@ User Input
 | Layer | Responsibility | Current status |
 |---|---|---|
 | Interaction Layer | Text input now; future push-to-talk voice, wake word, desktop panel, mobile bridge | Text/CLI foundation exists |
-| Conversation Layer | Session state, cancellation, confirmation turns, stale action prevention | Not implemented |
-| Intent Layer | Classify user request into `IntentResult`, confidence, entities, ambiguity | Schema defined in Sprint 37 |
+| Conversation Layer | Session state, cancellation, confirmation turns, stale action prevention | Sprint 41 text-first foundation exists |
+| Intent Layer | Classify user request into `IntentResult`, confidence, entities, ambiguity | Sprint 39 deterministic router exists |
 | AI Reasoning Layer | Ollama-backed interpretation, bounded context, answer-only reasoning | Existing `app/ai` foundation |
 | Main Coordination Layer | Decide whether request is answer, clarification, plan, or action candidate | Existing `MainAgent` foundation |
 | Action Layer | Canonical `ActionCandidate`, action type, target, parameters, source, expected result | Schema defined in Sprint 37 |
 | Risk Layer | Default risk, voice-source risk, target ambiguity, blocked categories | Schema defined in Sprint 37 |
 | Permission Layer | Preview, confirmation, denial, block, timeout, cancel | Sprint 38 target |
-| Adapter Layer | Execute approved PC, browser, media, routine, or future device actions | Not implemented |
+| Device Identity Layer | Canonical rooms, device aliases, capability matrix, target resolution | Sprint 46 preview-only foundation exists |
+| Adapter Layer | Execute approved PC, browser, media, routine, or future device actions | PC preview exists; home execution not implemented |
 | Audit Layer | Capture intent, action, risk, permission, result, timestamps | Contract defined; runtime pending |
 | UI Layer | Permission panel, status, logs, settings, routine editor | Future desktop layer |
 

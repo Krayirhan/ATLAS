@@ -78,6 +78,15 @@ def test_device_turn_on_maps_to_confirmation_required() -> None:
     assert preview.permission_decision.status is PermissionStatus.CONFIRMATION_REQUIRED
 
 
+def test_device_brightness_maps_to_confirmation_required() -> None:
+    preview = IntentRouter().preview("Salon isigini yuzde 50 yap")
+    assert preview.intent.category is IntentCategory.DEVICE_SET_BRIGHTNESS
+    assert preview.action_candidate is not None
+    assert preview.action_candidate.action_type is ActionType.DEVICE_SET_BRIGHTNESS
+    assert preview.permission_decision is not None
+    assert preview.permission_decision.status is PermissionStatus.CONFIRMATION_REQUIRED
+
+
 def test_isigi_ac_requires_clarification() -> None:
     preview = IntentRouter().preview("Isigi ac")
     assert preview.intent.category is IntentCategory.AMBIGUOUS
@@ -115,6 +124,13 @@ def test_secret_read_maps_to_blocked() -> None:
     assert preview.intent.category is IntentCategory.BLOCKED
     assert preview.action_candidate is not None
     assert preview.action_candidate.action_type is ActionType.SECRET_READ
+    assert preview.permission_decision is not None
+    assert preview.permission_decision.status is PermissionStatus.BLOCKED
+
+
+def test_camera_open_maps_to_blocked() -> None:
+    preview = IntentRouter().preview("Kamerayi ac")
+    assert preview.intent.category is IntentCategory.BLOCKED
     assert preview.permission_decision is not None
     assert preview.permission_decision.status is PermissionStatus.BLOCKED
 

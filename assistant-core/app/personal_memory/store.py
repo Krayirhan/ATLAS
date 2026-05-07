@@ -3,6 +3,10 @@ from typing import Optional
 from app.personal_memory.models import PersonalMemoryItem, MemoryType
 
 class InMemoryPersonalMemoryStore:
+    @staticmethod
+    def _normalize(value: str) -> str:
+        return value.lower().translate(str.maketrans({"ç": "c", "ğ": "g", "ı": "i", "ö": "o", "ş": "s", "ü": "u"}))
+
     def __init__(self):
         self._items: dict[str, PersonalMemoryItem] = {}
 
@@ -21,7 +25,11 @@ class InMemoryPersonalMemoryStore:
     def forget(self, memory_id_or_key: str) -> bool:
         to_delete = []
         for mid, item in self._items.items():
-            if mid == memory_id_or_key or item.key == memory_id_or_key:
+            if (
+                mid == memory_id_or_key
+                or item.key == memory_id_or_key
+                or self._normalize(item.key) == self._normalize(memory_id_or_key)
+            ):
                 to_delete.append(mid)
         for mid in to_delete:
             del self._items[mid]

@@ -131,4 +131,4 @@ Validation coverage:
 
 ## Next Dependency
 
-Sprint 46 should define **DeviceRegistry + Room Model** before any real home/device runtime is introduced.
+Sprint 46 completed **DeviceRegistry + Room Model**. The next dependency is Sprint 47 **Home Control Adapter Design** on top of that preview-only registry layer.

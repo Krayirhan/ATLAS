@@ -167,3 +167,12 @@ Not allowed:
 ## Privacy Notes
 
 Personal memory is a product feature and a risk surface. Sprint 42 should define storage format, deletion behavior, and sensitivity tags before implementation.
+
+## Sprint 46 Alias Integration
+
+Sprint 46 allows limited read-only use of personal memory for device and room aliases:
+
+- `device_alias` memory may help resolve a device target
+- `room_alias` memory may help resolve a room target
+- DeviceRegistry does not write back to personal memory
+- Alias learning remains an explicit user-memory concern, not an automatic background behavior

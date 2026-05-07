@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_voice, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_device, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -595,6 +595,27 @@ def _ai_voice(
         as_json=as_json,
         show_transcript=show_transcript,
         show_safety=show_safety,
+    )
+
+
+@ai.command("device")
+def _ai_device(
+    text: str = typer.Argument(None, help="Device command to preview"),
+    project: str = typer.Option(..., "--project"),
+    list_devices: bool = typer.Option(False, "--list"),
+    list_rooms: bool = typer.Option(False, "--rooms"),
+    as_json: bool = typer.Option(False, "--json"),
+    show_plan: bool = typer.Option(False, "--show-plan"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    ai_device(
+        project=project,
+        text=text,
+        list_devices=list_devices,
+        list_rooms=list_rooms,
+        as_json=as_json,
+        show_plan=show_plan,
+        source=source,
     )
 
 

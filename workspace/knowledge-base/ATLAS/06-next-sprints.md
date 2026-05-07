@@ -25,6 +25,7 @@
 - **Sprint 43:** RoutineEngine MVP.
 - **Sprint 44:** Voice Core Architecture.
 - **Sprint 45:** STT/TTS MVP.
+- **Sprint 46:** DeviceRegistry + Room Model.
 
 ## Sprint 36 - Completed
 
@@ -306,28 +307,36 @@ The former near-term developer roadmap remains parked:
 - Basit Turkish commands icin test matrix hazir.
 - Riskli command confirmation path'i voice kaynakli komutlarda zorunlu.
 
-### Sprint 46 - DeviceRegistry + Room Model
+## Sprint 46 - Completed
 
-**Amac:** Home/device control icin kimlik, oda ve capability modelini hazirlamak.
+**Amac:** Home/device control icin canonical device registry, room model, alias resolution, capability matrix, and target clarification altyapisini tamamlamak.
 
 **Kapsam:**
 
-- Device id.
-- Aliases.
-- Room names.
-- Capability model.
-- State read/write distinction.
-- Wrong-target prevention.
+- `app/devices` package
+- in-memory `DeviceRegistry`
+- room model
+- device alias / room alias
+- capability matrix
+- `DeviceTargetResolver`
+- `DeviceActionPlanner`
+- `ai device` CLI
+- ConversationLoop device clarification improvements
 
 **Kapsam disi:**
 
-- Physical device write action.
-- Cloud provider integration.
+- physical device write
+- Home Assistant / MQTT
+- network discovery
+- home adapter runtime
 
 **Acceptance criteria:**
 
-- Ambiguous device alias action'a donusmez.
-- Device capability olmadan write action yok.
+- `Salon isigini ac` resolved + confirmation required.
+- `Isigi ac` ambiguous + clarification required.
+- `Klimayi 24 derece yap` resolved + confirmation required.
+- Kamera/kapi tarzı hedefler blocked veya unsupported.
+- No physical device execution.
 
 ### Sprint 47 - Home Control Adapter Design
 

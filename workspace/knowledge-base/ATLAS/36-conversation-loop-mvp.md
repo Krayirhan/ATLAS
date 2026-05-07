@@ -63,3 +63,12 @@ Sprint 45 now exercises that path with a mock-only voice pipeline:
 - medium/high voice requests still require confirmation
 - blocked and ambiguous voice requests stay blocked/clarification only
 - no direct execution is introduced
+
+### Sprint 46 Outcome
+Sprint 46 adds preview-only device target resolution into the ConversationLoop:
+
+- `Salon isigini ac` now resolves through `DeviceTargetResolver`
+- `Isigi ac` now returns candidate-based clarification
+- `Klimayi 24 derece yap` now returns confirmation-required preview
+- camera/door-like risky home requests stay blocked or unsupported
+- no home adapter execution is introduced

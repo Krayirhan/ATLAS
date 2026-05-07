@@ -3,6 +3,8 @@ from typing import Any
 from app.actions.intent_router import IntentRouter
 from app.actions.types import ActionSource, PermissionStatus
 from app.control.pc_adapter import PCControlAdapter
+from app.devices.planner import DeviceActionPlanner
+from app.devices.models import DeviceRegistryStatus
 from app.conversation.models import (
     ConversationRequest,
     ConversationResponse,
@@ -22,6 +24,7 @@ class ConversationLoop:
     def __init__(self):
         self.router = IntentRouter()
         self.pc_adapter = PCControlAdapter()
+        self.device_planner = DeviceActionPlanner(router=self.router)
         self.state_manager = get_state_manager()
         self.response_builder = ResponseBuilder()
 
@@ -117,9 +120,18 @@ class ConversationLoop:
             action_type_str = str(candidate.action_type.value) if hasattr(candidate.action_type, "value") else str(candidate.action_type)
             if action_type_str.startswith("pc.") or action_type_str in ("browser.search", "file.search"):
                 pc_plan = self.pc_adapter.build_plan(candidate, decision, dry_run=True)
+
+        device_response = None
+        if self._is_device_like(request.message, candidate):
+            device_response = self._build_device_response(
+                request=request,
+                intent_res=intent_res,
+                action_candidate=candidate,
+                permission_decision=decision,
+            )
                 
         # 3. Build response
-        response = self.response_builder.build(
+        response = device_response or self.response_builder.build(
             session_id=request.session_id,
             user_message=request.message,
             intent_result=intent_res,
@@ -147,6 +159,64 @@ class ConversationLoop:
         self.state_manager.save_state(state)
         
         return response
+
+    def _is_device_like(self, message: str, candidate) -> bool:
+        normalized = message.lower()
+        if candidate is not None:
+            action_type_value = getattr(candidate.action_type, "value", str(candidate.action_type))
+            if action_type_value.startswith("device."):
+                return True
+        return any(token in normalized for token in ("isik", "ışık", "lamba", "klima", "kamera", "kapi", "kapı"))
+
+    def _build_device_response(self, request: ConversationRequest, intent_res: dict[str, Any], action_candidate, permission_decision):
+        device_result = self.device_planner.preview_device_action(request.message, source=request.source)
+        if device_result.status is DeviceRegistryStatus.AMBIGUOUS:
+            candidate_labels = [device.display_name for device in device_result.resolution.candidates] if device_result.resolution else []
+            prompt = "Hangi cihazi kastettigini belirtmelisin."
+            if candidate_labels:
+                prompt = f"Hangi cihazi kastettigini belirtmelisin: {', '.join(candidate_labels)}."
+            return ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=prompt,
+                response_type=ConversationResponseType.CLARIFICATION,
+                intent=intent_res,
+                action_candidate=action_candidate,
+                permission_decision=permission_decision,
+                clarification_required=True,
+                warnings=device_result.warnings,
+                metadata={"device_result_status": device_result.status.value},
+            )
+        if device_result.status in {DeviceRegistryStatus.BLOCKED, DeviceRegistryStatus.UNSUPPORTED}:
+            return ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=device_result.message,
+                response_type=ConversationResponseType.BLOCKED,
+                intent=intent_res,
+                action_candidate=action_candidate,
+                permission_decision=permission_decision,
+                blocked=True,
+                warnings=device_result.warnings,
+                metadata={"device_result_status": device_result.status.value},
+            )
+        if device_result.plan is not None:
+            return ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=device_result.message,
+                response_type=ConversationResponseType.CONFIRMATION_REQUIRED if device_result.plan.requires_confirmation else ConversationResponseType.ACTION_PREVIEW,
+                intent=intent_res,
+                action_candidate=action_candidate,
+                permission_decision=permission_decision,
+                confirmation_required=device_result.plan.requires_confirmation,
+                warnings=device_result.warnings,
+                metadata={
+                    "device_result_status": device_result.status.value,
+                    "device_plan": asdict(device_result.plan),
+                },
+            )
+        return None
 
     def handle_text(self, message: str, project_name: str = "ATLAS", session_id: str | None = None, source: ActionSource = ActionSource.TEXT) -> ConversationResponse:
         session_id = session_id or str(uuid.uuid4())

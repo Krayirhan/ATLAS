@@ -4,6 +4,15 @@
 
 Home control is a later ATLAS capability. This document defines the architecture boundary and safety requirements before any physical device action is implemented.
 
+Sprint 46 now completes the prerequisite identity layer:
+
+- canonical device ids
+- room model
+- alias resolution
+- capability matrix
+- preview-only device planning
+- no real device execution
+
 No home automation runtime is implemented in Sprint 36.
 
 ## Integration Candidates
