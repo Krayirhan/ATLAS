@@ -1021,3 +1021,106 @@ def ai_routine(
             console.print(f"[yellow]CONFIRMATION REQUIRED[/yellow]: {formatted}")
         else:
             console.print(f"[green]SUCCESS[/green]: {formatted}")
+
+
+def ai_voice(
+    project: str,
+    mock_transcript: str | None = None,
+    audio_path: str | None = None,
+    language: str = "tr",
+    session_id: str | None = None,
+    speak: bool = False,
+    as_json: bool = False,
+    show_transcript: bool = False,
+    show_safety: bool = False,
+) -> None:
+    from app.voice.mock_adapters import MockSTTAdapter, MockTTSAdapter
+    from app.voice.models import VoicePipelineRequest, VoiceSource
+    from app.voice.pipeline import VoicePipeline
+
+    console = Console()
+    if not mock_transcript and not audio_path:
+        console.print("[red]Mock transcript veya audio path belirtmelisin.[/red]")
+        raise typer.Exit(1)
+
+    source = VoiceSource.MOCK_TRANSCRIPT if mock_transcript else VoiceSource.AUDIO_FILE
+    pipeline = VoicePipeline(stt_adapter=MockSTTAdapter(), tts_adapter=MockTTSAdapter())
+    result = pipeline.handle(
+        VoicePipelineRequest(
+            project_name=project,
+            mock_transcript=mock_transcript,
+            audio_path=audio_path,
+            language=language,
+            session_id=session_id,
+            speak=speak,
+            source=source,
+        )
+    )
+
+    if as_json:
+        typer.echo(json.dumps(_json_safe(_voice_pipeline_payload(project, result)), ensure_ascii=False, indent=2))
+        return
+
+    console.print(f"[bold]Project[/bold]: {project}")
+    console.print(f"[bold]Source[/bold]: {result.metadata.get('source', source.value)}")
+    if show_transcript:
+        console.print(f"[bold]Transcript[/bold]: {_safe_console_text(result.transcript.text or '(empty)')}")
+        console.print(f"[bold]Transcript Confidence[/bold]: {result.transcript.confidence}")
+    console.print(f"[bold]Response[/bold]: {_safe_console_text(result.conversation_response.assistant_message if result.conversation_response else 'none')}")
+    console.print(f"[bold]Response Type[/bold]: {result.conversation_response.response_type.value if result.conversation_response else 'none'}")
+
+    if show_safety:
+        console.print("[bold]Safety[/bold]")
+        console.print(f"- audio_retained: {result.audio_retained}")
+        console.print(f"- microphone_used: {result.microphone_used}")
+        console.print(f"- wake_word_used: {result.wake_word_used}")
+        console.print(f"- execution_attempted: {result.execution_attempted}")
+        for warning in result.safety_warnings:
+            console.print(f"- warning: {_safe_console_text(warning)}")
+
+    if speak and result.tts_result is not None:
+        console.print("[bold]TTS[/bold]")
+        console.print(f"- engine: {result.tts_result.engine}")
+        console.print(f"- success: {result.tts_result.success}")
+        console.print(f"- spoken: {result.tts_result.spoken}")
+        for warning in result.tts_result.warnings:
+            console.print(f"- warning: {_safe_console_text(warning)}")
+
+    console.print("[bold]Execution[/bold]: none")
+
+
+def _conversation_response_payload(response) -> dict[str, object] | None:
+    if response is None:
+        return None
+    return {
+        "session_id": response.session_id,
+        "user_message": response.user_message,
+        "assistant_message": response.assistant_message,
+        "response_type": response.response_type.value,
+        "intent": response.intent,
+        "action_candidate": asdict(response.action_candidate) if response.action_candidate is not None else None,
+        "permission_decision": asdict(response.permission_decision) if response.permission_decision is not None else None,
+        "pc_plan": response.pc_plan.model_dump() if response.pc_plan is not None else None,
+        "clarification_required": response.clarification_required,
+        "confirmation_required": response.confirmation_required,
+        "blocked": response.blocked,
+        "warnings": response.warnings,
+        "suggestions": response.suggestions,
+        "audit_metadata": response.audit_metadata,
+        "metadata": response.metadata,
+    }
+
+
+def _voice_pipeline_payload(project: str, result) -> dict[str, object]:
+    return {
+        "project": project,
+        "transcript": result.transcript.model_dump(),
+        "conversation_response": _conversation_response_payload(result.conversation_response),
+        "tts_result": result.tts_result.model_dump() if result.tts_result is not None else None,
+        "safety_warnings": result.safety_warnings,
+        "audio_retained": result.audio_retained,
+        "microphone_used": result.microphone_used,
+        "wake_word_used": result.wake_word_used,
+        "execution_attempted": result.execution_attempted,
+        "metadata": result.metadata,
+    }

@@ -240,3 +240,13 @@ Sprint 44 test strategy is documentation-driven:
 ## Sprint 45 Dependency
 
 Sprint 45 should implement **STT/TTS MVP** against these contracts without adding microphone persistence, wake word runtime, or voice-driven action execution.
+
+## Sprint 45 Outcome
+
+Sprint 45 implements the safe MVP path against this architecture:
+
+- mock transcript input
+- mock TTS response output
+- transcript confidence policy
+- transcript -> `ConversationLoop` -> preview/confirmation response flow
+- no real microphone, wake word, always-listening, or raw audio retention

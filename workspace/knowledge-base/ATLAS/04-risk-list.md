@@ -28,39 +28,46 @@
 21. **Background noise** - Environmental sound can corrupt targets, confirmations, or cancellation phrases.
 22. **Language mismatch** - The STT engine may detect or transcribe the wrong language under mixed Turkish/English utterances.
 23. **Voice command injection** - Spoken shell-like or destructive phrasing may look natural but still map to blocked intent classes.
+24. **Transcript hallucination** - The STT layer may produce a fluent but incorrect transcript that looks trustworthy.
+25. **Mock vs real STT confusion** - Users or developers may treat mock transcript results as evidence of real audio support.
+26. **Audio path privacy** - An audio path handed to the CLI may be mistaken for approved file ingestion even though audio reading is disabled.
+27. **Accidental audio retention** - Future debugging changes may start retaining raw audio unexpectedly.
+28. **TTS output misleading execution status** - Spoken feedback may sound like an action was executed when only preview happened.
+29. **Wake word creep** - Convenience pressure may reintroduce wake word before false-positive and privacy controls are ready.
+30. **Always-listening creep** - Background listening may slip into scope before opt-in and retention controls are stable.
 
 ## Action and Control Risks
 
-24. **Intent misclassification** - A supported phrase can be mapped to the wrong intent category.
-25. **Ambiguous target execution** - A vague request may accidentally resolve to a concrete target later if guardrails regress.
-26. **Action risk misclassification** - A medium/high or blocked action can be classified as low and bypass approval.
-27. **Permission decision mismatch** - `PermissionDecision` can disagree with the candidate risk or preview if contracts drift.
-28. **Action preview wrong information** - A preview can show the wrong target, expected effect, or reversibility.
-29. **Stale risk classification** - A previously low-risk action can become risky after target, source, or parameters change.
-30. **Risky PC action** - File operations, shutdown, installs, admin commands, or registry edits can damage the user environment.
-31. **Wrong home device control** - A room/device alias can resolve to the wrong physical device.
-32. **Unauthorized action** - Medium/high risk actions can run without explicit confirmation if permission gates are incomplete.
-33. **Confirmation bypass** - A future adapter could run an action without a valid `ActionPreview` and approval decision.
-34. **Voice confirmation ambiguity** - A user may confirm a misunderstood voice action if repeat-back or confidence handling is weak.
-35. **Blocked intent bypass** - A blocked phrase such as `secret.read`, `file.delete`, or shell-like text could slip through the router.
-36. **Blocked action bypass** - A blocked action such as `secret.read`, `file.delete`, or unrestricted shell execution could reach an adapter.
-37. **Adapter execution before PermissionManager** - Adapter code could be added before permission decisions are mandatory.
-38. **Adapter execution without preview** - Medium/high actions could execute without showing target, effect, risk, and warnings.
-39. **Medium/high action accidental execution** - A future action may execute after preview but before explicit confirmation.
-40. **Action result/audit missing** - Future actions could complete without durable status, error, or audit metadata.
-41. **Audit metadata missing fields** - `action_id`, risk, source, decision, target summary, or `execution_attempted=false` could be omitted.
-42. **Irreversible action** - Destructive action may not be reversible or auditable.
-43. **Windows permission issues** - UAC, focus control, app launch, media control, and file system permissions may fail or behave inconsistently.
-44. **Routine step risk aggregation error** - A medium/high or blocked step may be summarized as a safe routine.
-45. **High-risk routine accidental approval** - A routine such as `evden cikiyorum` may appear harmless if confirmation rules drift.
-46. **Routine preview mistaken for execution** - Users may think dry-run routine planning already changed PC or home state.
-47. **Stale preference affects routine** - Old personal memory preferences may select the wrong default app or routine target.
-48. **Wrong routine selected** - Similar routine names or aliases may resolve to the wrong built-in workflow.
-49. **Ambiguous routine name** - Partial mode commands such as `modu baslat` must not select a routine automatically.
-50. **Routine contains blocked step** - A future template or custom routine may include blocked actions.
-51. **Scheduler creep before safety** - Automatic routine scheduling may arrive before audit and confirmation boundaries are ready.
-52. **Home step accidentally executed** - Device-oriented routine steps may execute before home adapters are safe.
-53. **PC adapter execute accidentally called** - Routine planning may call a future execution path instead of dry-run preview only.
+31. **Intent misclassification** - A supported phrase can be mapped to the wrong intent category.
+32. **Ambiguous target execution** - A vague request may accidentally resolve to a concrete target later if guardrails regress.
+33. **Action risk misclassification** - A medium/high or blocked action can be classified as low and bypass approval.
+34. **Permission decision mismatch** - `PermissionDecision` can disagree with the candidate risk or preview if contracts drift.
+35. **Action preview wrong information** - A preview can show the wrong target, expected effect, or reversibility.
+36. **Stale risk classification** - A previously low-risk action can become risky after target, source, or parameters change.
+37. **Risky PC action** - File operations, shutdown, installs, admin commands, or registry edits can damage the user environment.
+38. **Wrong home device control** - A room/device alias can resolve to the wrong physical device.
+39. **Unauthorized action** - Medium/high risk actions can run without explicit confirmation if permission gates are incomplete.
+40. **Confirmation bypass** - A future adapter could run an action without a valid `ActionPreview` and approval decision.
+41. **Voice confirmation ambiguity** - A user may confirm a misunderstood voice action if repeat-back or confidence handling is weak.
+42. **Blocked intent bypass** - A blocked phrase such as `secret.read`, `file.delete`, or shell-like text could slip through the router.
+43. **Blocked action bypass** - A blocked action such as `secret.read`, `file.delete`, or unrestricted shell execution could reach an adapter.
+44. **Adapter execution before PermissionManager** - Adapter code could be added before permission decisions are mandatory.
+45. **Adapter execution without preview** - Medium/high actions could execute without showing target, effect, risk, and warnings.
+46. **Medium/high action accidental execution** - A future action may execute after preview but before explicit confirmation.
+47. **Action result/audit missing** - Future actions could complete without durable status, error, or audit metadata.
+48. **Audit metadata missing fields** - `action_id`, risk, source, decision, target summary, or `execution_attempted=false` could be omitted.
+49. **Irreversible action** - Destructive action may not be reversible or auditable.
+50. **Windows permission issues** - UAC, focus control, app launch, media control, and file system permissions may fail or behave inconsistently.
+51. **Routine step risk aggregation error** - A medium/high or blocked step may be summarized as a safe routine.
+52. **High-risk routine accidental approval** - A routine such as `evden cikiyorum` may appear harmless if confirmation rules drift.
+53. **Routine preview mistaken for execution** - Users may think dry-run routine planning already changed PC or home state.
+54. **Stale preference affects routine** - Old personal memory preferences may select the wrong default app or routine target.
+55. **Wrong routine selected** - Similar routine names or aliases may resolve to the wrong built-in workflow.
+56. **Ambiguous routine name** - Partial mode commands such as `modu baslat` must not select a routine automatically.
+57. **Routine contains blocked step** - A future template or custom routine may include blocked actions.
+58. **Scheduler creep before safety** - Automatic routine scheduling may arrive before audit and confirmation boundaries are ready.
+59. **Home step accidentally executed** - Device-oriented routine steps may execute before home adapters are safe.
+60. **PC adapter execute accidentally called** - Routine planning may call a future execution path instead of dry-run preview only.
 
 ## Privacy and Data Risks
 

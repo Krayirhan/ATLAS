@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, Sprint 39 deterministic intent routing, Sprint 40 PC preview planning, Sprint 41 conversation loop MVP, Sprint 42 personal memory MVP, Sprint 43 routine preview MVP, and Sprint 44 voice architecture decisions. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, Sprint 39 deterministic intent routing, Sprint 40 PC preview planning, Sprint 41 conversation loop MVP, Sprint 42 personal memory MVP, Sprint 43 routine preview MVP, Sprint 44 voice architecture decisions, and Sprint 45 mock STT/TTS voice pipeline MVP. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview and decision logic. Sprint 39 added deterministic text-to-intent preview routing. Sprint 40 added safe PC dry-run planning. Sprint 41 added a text-first conversation loop. Sprint 42 added privacy-first personal memory. Sprint 43 added preview-only routines. Sprint 44 added the voice architecture and safety contracts. It still does not add microphone runtime, STT/TTS engine runtime, wake word runtime, home control runtime, or unrestricted command execution.
+Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview and decision logic. Sprint 39 added deterministic text-to-intent preview routing. Sprint 40 added safe PC dry-run planning. Sprint 41 added a text-first conversation loop. Sprint 42 added privacy-first personal memory. Sprint 43 added preview-only routines. Sprint 44 added the voice architecture and safety contracts. Sprint 45 adds a mock-only voice package and CLI. It still does not add microphone runtime, real STT/TTS engines, wake word runtime, home control runtime, or unrestricted command execution.
 
 ## Current Technical Foundation
 
@@ -12,7 +12,8 @@ Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview 
 | `app/agents` | Implemented read-only agents | Existing reasoning/orchestration foundation |
 | `app/approval` | Implemented preview-only devtools approval foundation | Command/file/tool preview for devtools support |
 | `app/actions` | Implemented schema, permission, and router contracts | Intent/action/risk/preview/permission/router/result model foundation |
-| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent/routine/chat commands |
+| `app/voice` | Implemented mock-only voice contracts and pipeline | Mock STT/TTS, transcript safety, no microphone runtime |
+| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent/routine/chat/voice commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
 ## app/ai - Local LLM Runtime
@@ -107,27 +108,25 @@ Future responsibility:
 - adapter handoff validation
 - result and error model expansion
 
-## Future app/voice
+## app/voice
 
-Sprint 44 defines the contract and architecture only.
+Sprint 45 adds the safe MVP package.
 
-Planned responsibility:
+Current responsibility:
 
-- push-to-talk first voice input
-- STT adapter contract
-- TTS adapter contract
-- future wake word listener
-- interruption and cancel flow
-- fallback to text
-- latency measurement
-- privacy controls for microphone usage
+- mock STT transcript handling
+- mock TTS response planning
+- transcript safety policy
+- transcript -> ConversationLoop -> response flow
+- no audio retention
+- no microphone runtime
+- no wake word
 
 Not implemented:
 
 - microphone capture
-- audio retention
-- STT runtime
-- TTS runtime
+- real STT runtime
+- real TTS runtime
 - wake word runtime
 
 Wake word must not be implemented before the privacy model, voice confirmation policy, and opt-in behavior are documented and accepted.

@@ -321,3 +321,13 @@ Sprint 45 must still avoid:
 - home execution from voice
 - wake word runtime
 - always-listening daemon
+
+## Sprint 45 Outcome
+
+Sprint 45 now adds the first safe runtime slice for voice:
+
+- `app/voice` package exists
+- mock STT and mock TTS adapters exist
+- `VoicePipeline` connects transcript -> `ConversationLoop` -> mock TTS
+- `ai voice` CLI exists
+- no microphone capture, no wake word, no always-listening, and no audio retention were added

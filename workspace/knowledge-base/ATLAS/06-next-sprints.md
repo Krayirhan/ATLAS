@@ -24,6 +24,7 @@
 - **Sprint 42:** Personal Memory & Preferences.
 - **Sprint 43:** RoutineEngine MVP.
 - **Sprint 44:** Voice Core Architecture.
+- **Sprint 45:** STT/TTS MVP.
 
 ## Sprint 36 - Completed
 
@@ -283,7 +284,7 @@ The former near-term developer roadmap remains parked:
 - Text fallback documented.
 - Medium/high voice actions require repeated confirmation.
 
-### Sprint 45 - STT/TTS MVP
+## Sprint 45 - Completed
 
 **Amac:** Voice MVP icin adapter secimi ve minimum acceptance testlerini hazirlamak.
 

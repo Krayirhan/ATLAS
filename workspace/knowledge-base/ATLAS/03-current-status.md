@@ -15,6 +15,7 @@
 - **Sprint 42 status:** completed Personal Memory MVP; explicit remember/forget/show flow is available.
 - **Sprint 43 status:** completed RoutineEngine MVP; built-in routine preview, risk aggregation, and routine CLI are available.
 - **Sprint 44 status:** completed Voice Core Architecture; push-to-talk-first voice direction, privacy boundaries, and STT/TTS selection guidance are defined.
+- **Sprint 45 status:** completed STT/TTS MVP; mock voice pipeline and `ai voice` CLI are available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -115,8 +116,8 @@ These are not implemented yet and are the focus of Sprint 44+:
 - Room model
 - Home control adapter
 - Voice runtime
-- Speech-to-text runtime
-- Text-to-speech runtime
+- real speech-to-text runtime
+- real text-to-speech runtime
 - Wake word runtime
 - Desktop tray / permission panel
 - Permission UI
@@ -284,6 +285,29 @@ Not implemented:
 - voice-driven PC or home execution
 - audio retention system
 
+## Sprint 45 Status
+
+Sprint 45 is complete as a mock-only voice pipeline sprint.
+
+Completed:
+
+- `app/voice` defines speech, transcript, TTS, and pipeline models.
+- STT/TTS adapter contracts are implemented.
+- `MockSTTAdapter` and `MockTTSAdapter` are implemented.
+- `VoicePipeline` connects transcript -> `ConversationLoop` -> mock TTS result.
+- `ai voice` CLI is available.
+- `source=voice` path is now exercised through a safe mock flow.
+
+Not implemented:
+
+- real microphone capture
+- real STT engine
+- real TTS engine
+- wake word runtime
+- always-listening mode
+- voice-driven action execution
+- audio retention
+
 ## Next Sprint
 
-Sprint 45 should be **STT/TTS MVP**. It should implement contract-level local-first speech adapters around push-to-talk, keep wake word disabled, and preserve preview-only safety guarantees.
+Sprint 46 should be **DeviceRegistry + Room Model**. It should define canonical device identity, aliasing, room mapping, and capability constraints before any real home control runtime is added.

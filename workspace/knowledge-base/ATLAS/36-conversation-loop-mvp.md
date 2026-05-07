@@ -55,3 +55,11 @@ Sprint 44 now defines how a future voice layer will feed `ConversationLoop`:
 - push-to-talk transcript becomes the input message
 - low transcript confidence returns clarification before action routing
 - no direct microphone runtime exists yet
+
+### Sprint 45 Outcome
+Sprint 45 now exercises that path with a mock-only voice pipeline:
+
+- transcript is forwarded as `source=voice`
+- medium/high voice requests still require confirmation
+- blocked and ambiguous voice requests stay blocked/clarification only
+- no direct execution is introduced

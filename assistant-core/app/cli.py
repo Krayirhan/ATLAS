@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -570,6 +570,31 @@ def _ai_routine(
         list_routines=list_routines,
         show_preview=show_preview,
         source=source
+    )
+
+
+@ai.command("voice")
+def _ai_voice(
+    project: str = typer.Option(..., "--project"),
+    mock_transcript: str | None = typer.Option(None, "--mock-transcript"),
+    audio_path: str | None = typer.Option(None, "--audio-path"),
+    language: str = typer.Option("tr", "--language"),
+    session_id: str | None = typer.Option(None, "--session-id"),
+    speak: bool = typer.Option(False, "--speak"),
+    as_json: bool = typer.Option(False, "--json"),
+    show_transcript: bool = typer.Option(False, "--show-transcript"),
+    show_safety: bool = typer.Option(False, "--show-safety"),
+) -> None:
+    ai_voice(
+        project=project,
+        mock_transcript=mock_transcript,
+        audio_path=audio_path,
+        language=language,
+        session_id=session_id,
+        speak=speak,
+        as_json=as_json,
+        show_transcript=show_transcript,
+        show_safety=show_safety,
     )
 
 
