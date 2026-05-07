@@ -43,14 +43,24 @@
 33. **Audit metadata missing fields** - `action_id`, risk, source, decision, target summary, or `execution_attempted=false` could be omitted.
 34. **Irreversible action** - Destructive action may not be reversible or auditable.
 35. **Windows permission issues** - UAC, focus control, app launch, media control, and file system permissions may fail or behave inconsistently.
+36. **Routine step risk aggregation error** - A medium/high or blocked step may be summarized as a safe routine.
+37. **High-risk routine accidental approval** - A routine such as `evden cikiyorum` may appear harmless if confirmation rules drift.
+38. **Routine preview mistaken for execution** - Users may think dry-run routine planning already changed PC or home state.
+39. **Stale preference affects routine** - Old personal memory preferences may select the wrong default app or routine target.
+40. **Wrong routine selected** - Similar routine names or aliases may resolve to the wrong built-in workflow.
+41. **Ambiguous routine name** - Partial mode commands such as `modu baslat` must not select a routine automatically.
+42. **Routine contains blocked step** - A future template or custom routine may include blocked actions.
+43. **Scheduler creep before safety** - Automatic routine scheduling may arrive before audit and confirmation boundaries are ready.
+44. **Home step accidentally executed** - Device-oriented routine steps may execute before home adapters are safe.
+45. **PC adapter execute accidentally called** - Routine planning may call a future execution path instead of dry-run preview only.
 
 ## Privacy and Data Risks
 
-36. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
-37. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
-38. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
-39. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
-40. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
+46. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
+47. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
+48. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
+49. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
+50. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
 
 ## Runtime and Reliability Risks
 
@@ -78,14 +88,12 @@
 
 ## Missing Controls
 
-- Runtime `IntentRouter`.
 - Runtime `ActionRouter`.
 - Adapter allowlist and execution guard.
 - Confirmation timeout/cancel implementation.
 - Voice confirmation policy runtime.
-- PC control adapter safety contract implementation.
 - Device registry and room model runtime.
-- Personal memory privacy runtime.
-- Routine preview and cancellation runtime.
+- Durable personal memory storage policy.
+- Routine scheduler and cancellation runtime.
 - Desktop permission panel.
-- Durable action audit log.
+- Durable action and routine audit log.

@@ -39,7 +39,12 @@ class RoutinePolicy:
             has_medium = True
             
         is_blocked = has_blocked
-        requires_confirmation = has_high or has_medium or routine.requires_confirmation
+        requires_confirmation = (
+            has_high
+            or has_medium
+            or routine.requires_confirmation
+            or routine.risk_level in {"medium", "high"}
+        )
         
         agg_risk = "low"
         if has_high or routine.risk_level == "high":

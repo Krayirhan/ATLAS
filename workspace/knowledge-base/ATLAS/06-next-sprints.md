@@ -19,6 +19,10 @@
 - **Sprint 37:** Action Architecture & Intent Schema.
 - **Sprint 38:** PermissionManager & Action Approval Flow.
 - **Sprint 39:** IntentRouter MVP.
+- **Sprint 40:** PC Control Adapter MVP.
+- **Sprint 41:** ConversationLoop MVP.
+- **Sprint 42:** Personal Memory & Preferences.
+- **Sprint 43:** RoutineEngine MVP.
 
 ## Sprint 36 - Completed
 
@@ -146,9 +150,7 @@ The former near-term developer roadmap remains parked:
 - PermissionManager preview integration calisir.
 - `ai intent` execution yapmaz.
 
-## Active Personal Assistant Roadmap
-
-### Sprint 40 - PC Control Adapter MVP
+## Sprint 40 - Completed
 
 **Amac:** Windows icin safe PC control adapter MVP'sini tasarlamak ve implementasyona baslamak.
 
@@ -178,7 +180,7 @@ The former near-term developer roadmap remains parked:
 - Destructive actions blocked/deferred listesinde kalir.
 - Adapter accepts only approved actions.
 
-### Sprint 41 - ConversationLoop MVP
+## Sprint 41 - Completed
 
 **Amac:** Text-first conversation loop ve future voice loop davranisini tasarlamak.
 
@@ -203,7 +205,7 @@ The former near-term developer roadmap remains parked:
 - Confirmation turn stale action'a baglanmaz.
 - New command cannot accidentally confirm old action.
 
-### Sprint 42 - Personal Memory & Preferences
+## Sprint 42 - Completed
 
 **Amac:** Personal memory modelini privacy-first sekilde tanimlamak.
 
@@ -228,7 +230,7 @@ The former near-term developer roadmap remains parked:
 - Forget/delete akisi tanimli.
 - Memory writes require policy and audit.
 
-### Sprint 43 - RoutineEngine MVP
+## Sprint 43 - Completed
 
 **Amac:** Repeated personal workflows icin routine definition ve preview modelini tasarlamak.
 

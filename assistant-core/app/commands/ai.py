@@ -968,6 +968,7 @@ def ai_routine(
 ):
     from app.routines.engine import RoutineEngine
     from app.routines.service import RoutineService
+    from app.actions.types import ActionSource
     from rich.console import Console
     import json
     
@@ -987,13 +988,12 @@ def ai_routine(
     if not text:
         console.print("[red]Rutin ismi belirtmediniz.[/red]")
         return
-        
-    routine_name, operation = service.parse_routine_request(text)
+
+    routine_name, _ = service.parse_routine_request(text)
     if not routine_name:
-        routine_name = text # fallback
-        
+        routine_name = text
+
     if show_preview:
-        from app.actions.types import ActionSource
         src_enum = ActionSource(source) if source in [e.value for e in ActionSource] else ActionSource.TEXT
         preview = engine.preview_routine(routine_name, source=src_enum)
         if json_output:
@@ -1005,17 +1005,19 @@ def ai_routine(
             for step in preview.steps:
                 console.print(f"  - Step: {step.label} ({step.action_type})")
         return
-        
-    # Default is run
-    res = engine.run_routine(routine_name)
+
+    res = service.handle_text(text)
     if json_output:
-        print(res.model_dump_json(indent=2))
-    else:
-        if res.status == "blocked":
-            console.print(f"[red]BLOCKED[/red]: {res.message}")
-        elif res.status == "awaiting_confirmation":
-            console.print(f"[yellow]CONFIRMATION REQUIRED[/yellow]: {res.message}")
+        if hasattr(res, "model_dump_json"):
+            print(res.model_dump_json(indent=2))
         else:
-            console.print(f"[green]SUCCESS[/green]: {res.message}")
-
-
+            print(json.dumps({"message": service.format_response(res)}, ensure_ascii=False, indent=2))
+    else:
+        formatted = service.format_response(res)
+        status_value = getattr(getattr(res, "status", None), "value", None)
+        if status_value == "blocked":
+            console.print(f"[red]BLOCKED[/red]: {formatted}")
+        elif status_value == "awaiting_confirmation":
+            console.print(f"[yellow]CONFIRMATION REQUIRED[/yellow]: {formatted}")
+        else:
+            console.print(f"[green]SUCCESS[/green]: {formatted}")

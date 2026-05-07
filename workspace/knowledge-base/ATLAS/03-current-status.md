@@ -10,6 +10,10 @@
 - **Sprint 37 status:** completed intent/action schema contract; no runtime execution.
 - **Sprint 38 status:** completed PermissionManager decision flow; no personal action execution.
 - **Sprint 39 status:** completed IntentRouter MVP; user text to safe preview flow is available.
+- **Sprint 40 status:** completed PC Control Adapter MVP; safe dry-run PC plan generation is available.
+- **Sprint 41 status:** completed ConversationLoop MVP; text-first session state and response building are available.
+- **Sprint 42 status:** completed Personal Memory MVP; explicit remember/forget/show flow is available.
+- **Sprint 43 status:** completed RoutineEngine MVP; built-in routine preview, risk aggregation, and routine CLI are available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -101,14 +105,11 @@ This is still non-executing. No adapter, browser action, media action, or termin
 
 ## D) Missing Personal Assistant Runtime Layers
 
-These are not implemented yet and are the focus of Sprint 40+:
+These are not implemented yet and are the focus of Sprint 44+:
 
 - ActionRouter runtime
 - SkillRegistry
-- PC control adapter
-- Browser/media/file adapter execution
-- Routine engine
-- Personal memory and preferences runtime
+- Browser/media/file execution beyond safe preview
 - Device registry
 - Room model
 - Home control adapter
@@ -116,10 +117,10 @@ These are not implemented yet and are the focus of Sprint 40+:
 - Speech-to-text adapter
 - Text-to-speech adapter
 - Wake word listener
-- ConversationLoop
 - Desktop tray / permission panel
 - Permission UI
 - Durable action audit log
+- Durable routine scheduler / daemon
 - Notification / reminder / calendar assistant
 - Mobile bridge
 
@@ -190,6 +191,74 @@ Not implemented:
 - Voice runtime.
 - ActionRouter runtime.
 
+## Sprint 40 Status
+
+Sprint 40 is complete as a safe PC preview planning sprint.
+
+Completed:
+
+- `app/control` defines preview-only PC plans and results.
+- `ai pc-preview` CLI is available.
+- Approved low/safe ATLAS actions can be translated into dry-run PC plans.
+
+Not implemented:
+
+- Real PC action execution.
+- Shell or PowerShell executor.
+- Destructive system actions.
+
+## Sprint 41 Status
+
+Sprint 41 is complete as a text-first conversation sprint.
+
+Completed:
+
+- `app/conversation` defines session state, response types, and response building.
+- `ai chat` CLI is available.
+- Intent preview, permission response, and PC dry-run planning are combined into a single conversation response flow.
+
+Not implemented:
+
+- Voice runtime.
+- Background agent loop.
+- Durable session storage.
+
+## Sprint 42 Status
+
+Sprint 42 is complete as a privacy-first personal memory sprint.
+
+Completed:
+
+- `app/personal_memory` defines in-memory memory items, policy, parsing, and service logic.
+- `ai memory-personal` CLI is available.
+- Explicit remember, forget, and show flows are covered by tests.
+
+Not implemented:
+
+- Durable memory storage.
+- Sync or export runtime.
+- Automatic passive memory capture.
+
+## Sprint 43 Status
+
+Sprint 43 is complete as a routine preview sprint.
+
+Completed:
+
+- `app/routines` defines `RoutineDefinition`, `RoutineStep`, `RoutinePreview`, and `RoutineResult`.
+- Built-in routines exist for `calisma modu`, `oyun modu`, `uyku modu`, `toplanti modu`, `eve geldim`, and `evden cikiyorum`.
+- Each routine step is evaluated through `PermissionManager`.
+- `ai routine` CLI is available.
+- `ConversationLoop` can answer routine requests through preview-only responses.
+- Optional read-only PersonalMemory preference lookup can override generic app targets.
+
+Not implemented:
+
+- Real routine execution.
+- Scheduler / daemon.
+- Home or PC runtime execution from routine steps.
+- Routine writes back into personal memory.
+
 ## Next Sprint
 
-Sprint 40 should be **PC Control Adapter MVP**. It should consume approved low/safe action previews without introducing unrestricted execution.
+Sprint 44 should be **Voice Core Architecture**. It should define push-to-talk-first boundaries, Turkish STT/TTS evaluation criteria, privacy rules, and voice confirmation escalation before any microphone runtime exists.

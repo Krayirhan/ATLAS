@@ -3,6 +3,7 @@ from app.routines.models import (
     RoutineStep,
     RoutinePreview,
     RoutineResult,
+    RoutineStepResult,
     RoutineCategory,
     RoutineSource,
     RoutineStatus

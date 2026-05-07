@@ -66,7 +66,8 @@ class ConversationLoop:
         routine_service = RoutineService()
         routine_name, operation = routine_service.parse_routine_request(request.message)
         if operation != "unknown":
-            res_message = routine_service.handle_text(request.message)
+            routine_result = routine_service.handle_text(request.message)
+            res_message = routine_service.format_response(routine_result)
             resp_type = ConversationResponseType.ANSWER
             
             if "engellendi" in res_message.lower():
