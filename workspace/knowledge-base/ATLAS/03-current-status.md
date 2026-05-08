@@ -37,13 +37,14 @@ Sprint 52 adds the first bounded execution-planning layer without opening real e
 Completed in Sprint 52:
 
 - `app/execution` package
-- `ExecutionPlan`, `ExecutionDecision`, `ExecutionPreparationResult`, `ExecutionResult`
-- low-risk allowlist model for `chrome`, `notepad`, `calculator`, `vscode`
-- `ExecutionGate.evaluate()` and `ExecutionGate.prepare_*()` flow
+- `ExecutionRequest`, `ExecutionEligibility`, `ExecutionPlan`, `ExecutionResult`, `RollbackPlan`
+- low-risk allowlist eligibility model for `Chrome`, `Notepad`, `Calculator`, `VS Code`
+- `SafeExecutionGate.evaluate()`, `build_plan()`, `execute()`, `cancel()`, `deny()` flow
 - panel approved item to execution candidate handoff
 - `ai execution` CLI
 - default-off execution policy with `execution_enabled=false`
 - blocked policy for PowerShell, cmd, unrestricted shell, destructive file ops, secret reads, and registry edits
+- `real_execution_attempted=false` audit contract
 
 ## Available User-Facing Preview / Planning Surfaces
 
@@ -78,6 +79,7 @@ The following are still **not implemented**:
 Preview and execution-planning flows must keep these invariants false:
 
 - `execution_attempted`
+- `real_execution_attempted`
 - `physical_device_touched`
 - `network_used`
 - `microphone_used`
@@ -87,6 +89,13 @@ Preview and execution-planning flows must keep these invariants false:
 - `os_notification_sent`
 - `credential_accessed`
 - `shell_used`
+- `unrestricted_shell_available`
+- `execution_gate_enabled`
+
+The following policy invariants must stay true:
+
+- `allowlist_required`
+- `panel_approval_required`
 
 ## Current Runtime Layers
 
@@ -111,8 +120,9 @@ python -m pytest -q
 python -m app.cli doctor --full
 python -m app.cli config validate
 python -m app.cli project validate ATLAS
-python -m app.cli ai execution --project ATLAS --allowlist
-python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --preview "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --preview "Sifrelerimi oku"
+python -m app.cli ai execution --project ATLAS --check-allowlist pc.open_app
 python -m app.cli ai demo --project ATLAS --all --show-safety
 python -m app.cli ai hardening --project ATLAS --all --json
 python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light

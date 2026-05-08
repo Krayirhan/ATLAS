@@ -19,20 +19,10 @@ from app.demo.models import (
 )
 from app.demo.policy import build_safety_summary, validate_safety
 from app.demo.scenarios import BUILTIN_SCENARIOS, get_scenarios_by_category
+from app.quality.models import SAFETY_INVARIANT_EXPECTED
 
 
-_SAFE_BASE_FLAGS: dict[str, bool] = {
-    "execution_attempted": False,
-    "physical_device_touched": False,
-    "network_used": False,
-    "microphone_used": False,
-    "wake_word_used": False,
-    "audio_retained": False,
-    "external_calendar_used": False,
-    "os_notification_sent": False,
-    "credential_accessed": False,
-    "shell_used": False,
-}
+_SAFE_BASE_FLAGS: dict[str, bool] = dict(SAFETY_INVARIANT_EXPECTED)
 
 
 class DemoRunner:

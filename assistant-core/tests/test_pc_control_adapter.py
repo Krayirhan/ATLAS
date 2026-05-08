@@ -42,10 +42,10 @@ def test_adapter_system_info():
     assert plan.execution_allowed
     assert plan.executable
     
-    # Test execute
     result = adapter.execute(plan)
-    assert result.executed
-    assert "os" in result.data
+    assert result.executed is False
+    assert result.audit_metadata["execution_attempted"] is False
+    assert result.audit_metadata["real_execution_attempted"] is False
 
 def test_adapter_open_app_dry_run():
     adapter = PCControlAdapter()
@@ -85,6 +85,7 @@ def test_adapter_open_app_dry_run():
     result = adapter.execute(plan)
     assert result.executed is False
     assert result.dry_run is True
+    assert result.audit_metadata["real_execution_attempted"] is False
 
 def test_adapter_blocked_action():
     adapter = PCControlAdapter()
@@ -125,3 +126,4 @@ def test_adapter_blocked_action():
     
     result = adapter.execute(plan)
     assert result.executed is False
+    assert result.audit_metadata["shell_used"] is False

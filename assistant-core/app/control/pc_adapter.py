@@ -84,16 +84,6 @@ class PCControlAdapter:
 
     def execute(self, plan: PCControlPlan) -> PCControlResult:
         if plan.blocked_reason or not plan.executable:
-            # Check if it was merely unsupported for execution but supported for dry-run
-            if plan.dry_run and not plan.blocked_reason and plan.capability.dry_run_supported:
-                return PCControlResult(
-                    action_id=plan.action_id,
-                    status=PCControlStatus.PREVIEWED,
-                    executed=False,
-                    dry_run=True,
-                    message=f"Dry run complete for {plan.action_type}"
-                )
-            
             status = PCControlStatus.BLOCKED if plan.blocked_reason else PCControlStatus.UNSUPPORTED
             return PCControlResult(
                 action_id=plan.action_id,
@@ -101,45 +91,35 @@ class PCControlAdapter:
                 executed=False,
                 dry_run=plan.dry_run,
                 message=f"Execution blocked or unsupported: {plan.blocked_reason or 'Not supported'}",
-                error_message=plan.blocked_reason
+                error_message=plan.blocked_reason,
+                audit_metadata={"execution_attempted": False, "real_execution_attempted": False, "shell_used": False},
             )
-            
+
         if plan.dry_run:
             return PCControlResult(
                 action_id=plan.action_id,
                 status=PCControlStatus.PREVIEWED,
                 executed=False,
                 dry_run=True,
-                message=f"Dry run complete for {plan.action_type}"
+                message=f"Dry run complete for {plan.action_type}",
+                audit_metadata={"execution_attempted": False, "real_execution_attempted": False, "shell_used": False},
             )
-            
+
         if not plan.execution_allowed:
             return PCControlResult(
                 action_id=plan.action_id,
                 status=PCControlStatus.BLOCKED,
                 executed=False,
                 dry_run=plan.dry_run,
-                message="Execution not allowed by safety gate"
+                message="Execution not allowed by safety gate",
+                audit_metadata={"execution_attempted": False, "real_execution_attempted": False, "shell_used": False},
             )
-            
-        # MVP: Only pc.system_info is executed
-        if plan.action_type == "pc.system_info":
-            info = self.get_system_info()
-            return PCControlResult(
-                action_id=plan.action_id,
-                status=PCControlStatus.EXECUTED,
-                executed=True,
-                dry_run=False,
-                message="System info retrieved",
-                data=info,
-                audit_metadata={"execution_attempted": True}
-            )
-            
-        # Anything else that reaches here in MVP is ready but not executed
+
         return PCControlResult(
             action_id=plan.action_id,
-            status=PCControlStatus.READY,
+            status=PCControlStatus.SKIPPED,
             executed=False,
             dry_run=plan.dry_run,
-            message=f"Action {plan.action_type} ready but real execution is not implemented in MVP"
+            message=f"Action {plan.action_type} safe execution gate nedeniyle runtime'a gecmedi",
+            audit_metadata={"execution_attempted": False, "real_execution_attempted": False, "shell_used": False},
         )

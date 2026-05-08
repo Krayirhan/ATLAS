@@ -9,6 +9,7 @@ Sprint 51 hardens the Sprint 50 preview demo into a clearer and safer V1 demo ba
 The following must remain `false` across demo and preview surfaces:
 
 - `execution_attempted`
+- `real_execution_attempted`
 - `physical_device_touched`
 - `network_used`
 - `microphone_used`
@@ -18,6 +19,13 @@ The following must remain `false` across demo and preview surfaces:
 - `os_notification_sent`
 - `credential_accessed`
 - `shell_used`
+- `unrestricted_shell_available`
+- `execution_gate_enabled`
+
+The following must remain `true` across the same surfaces:
+
+- `allowlist_required`
+- `panel_approval_required`
 
 Covered surfaces:
 
@@ -118,6 +126,7 @@ These are local artifacts. New generated outputs should not be committed as sour
 Sprint 52 consumes this hardening baseline and preserves it:
 
 - `execution_attempted=false` stays false for preview and disabled execution-planning paths
+- `real_execution_attempted=false` stays false for all `ai execution` flows
 - shell, PowerShell, and cmd remain blocked
 - panel approval does not start execution
 - voice, home, scheduler, notification, and calendar boundaries stay closed

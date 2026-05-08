@@ -9,7 +9,7 @@ The `PCControlAdapter` bridges the gap between the `IntentRouter`/`PermissionMan
 ### Supported Action Capability Table
 | Action | Supported | Dry-Run | Execution | Risk Level |
 |---|---|---|---|---|
-| pc.system_info | Yes | Yes | Yes | Low |
+| pc.system_info | Yes | Yes | No | Low |
 | pc.open_app | Yes | Yes | No | Low |
 | pc.open_folder | Yes | Yes | No | Low |
 | browser.search | Yes | Yes | No | Low |
@@ -20,7 +20,7 @@ The `PCControlAdapter` bridges the gap between the `IntentRouter`/`PermissionMan
 | secret.read | No | No | No | Blocked |
 
 ### Dry-Run Default
-The default execution behavior for the adapter is `dry_run=True`. It evaluates permissions and creates a `PCControlPlan` without performing any side-effects, generating a `PCControlResult` with status `PREVIEWED` or `BLOCKED`.
+The default execution behavior for the adapter is `dry_run=True`. It evaluates permissions and creates a `PCControlPlan` without performing any side-effects, generating a `PCControlResult` with status `PREVIEWED`, `BLOCKED`, `UNSUPPORTED`, or `SKIPPED`.
 
 ### Execution Boundary
 - **Terminal executor**: NO
@@ -28,6 +28,7 @@ The default execution behavior for the adapter is `dry_run=True`. It evaluates p
 - **Home device control**: NO
 - **Voice runtime**: NO
 - **Actual App Launch**: NO
+- **Real system-info execution**: NO in Sprint 52
 
 ### Blocked Action List
 Actions like `file.delete`, `shell.execute_unrestricted`, and `secret.read` are explicitly listed in `_BLOCKED_ACTIONS` and denied at the safety gate layer.
@@ -41,3 +42,7 @@ python -m app.cli ai pc-preview --project ATLAS --show-plan "Belgeler klasörün
 
 ### Sprint 41 Dependency
 Sprint 41 will introduce the ConversationLoop MVP, linking the adapter into an interactive loop.
+
+## Sprint 52 Clarification
+
+`PCControlAdapter.execute()` remains non-executing. Safe Execution Gate is now the only allowed planning boundary for future PC runtime work, and both layers keep `execution_attempted=false`.

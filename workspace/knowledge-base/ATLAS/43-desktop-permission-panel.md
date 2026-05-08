@@ -51,10 +51,11 @@ Approve means:
 Sprint 52 now adds a planning-only handoff:
 
 - approved panel item may be mapped into an execution candidate
-- the handoff goes through `ExecutionGate`, not directly to a runtime
+- the handoff goes through `SafeExecutionGate`, not directly to a runtime
 - `execution_enabled=false` keeps runtime execution disabled
 - expired / denied / cancelled / blocked / clarification-required items still cannot pass
 - panel approve remains a state change only
+- approved item result is `armed_for_future`, not `executed`
 
 ## Copy Rule
 

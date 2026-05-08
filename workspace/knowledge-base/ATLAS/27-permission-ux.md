@@ -303,6 +303,13 @@ Sprint 48 adds permission visibility without execution:
 - panel item copy must say that execution did not happen
 - local JSON persistence must stay bounded and sanitize sensitive-looking text
 
+Sprint 52 extends this UX contract into Safe Execution Gate handoff:
+
+- panel approval can produce only `armed_for_future`, never runtime execution
+- expired, blocked, denied, cancelled, and clarification-required items cannot enter execution handoff
+- allowlist and panel approval remain mandatory even for low-risk PC actions
+- `--execute` wording must still clearly say `gercek islem yapilmadi`
+
 ## Sprint 49 Reminder / Calendar Clarification
 
 Sprint 49 keeps the same permission guarantees and extends them to personal assistant preview flows:

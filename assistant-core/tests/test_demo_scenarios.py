@@ -4,6 +4,7 @@ import pytest
 
 from app.demo.models import CommandSurface, DemoCategory, DemoScenario
 from app.demo.scenarios import BUILTIN_SCENARIOS, get_scenario, get_scenarios_by_category
+from app.quality.models import SAFETY_INVARIANT_EXPECTED
 
 
 def test_minimum_scenario_count():
@@ -16,18 +17,7 @@ def test_scenario_ids_are_unique():
 
 
 def test_all_scenarios_have_expected_safety_flags():
-    required_flags = {
-        "execution_attempted",
-        "physical_device_touched",
-        "network_used",
-        "microphone_used",
-        "wake_word_used",
-        "audio_retained",
-        "external_calendar_used",
-        "os_notification_sent",
-        "credential_accessed",
-        "shell_used",
-    }
+    required_flags = set(SAFETY_INVARIANT_EXPECTED)
     for scenario in BUILTIN_SCENARIOS:
         missing = required_flags - set(scenario.expected_safety_flags.keys())
         assert not missing, f"Scenario {scenario.scenario_id} missing flags: {missing}"
@@ -43,13 +33,12 @@ def test_all_scenarios_have_input_text():
         assert scenario.input_text, f"Scenario {scenario.scenario_id} has empty input_text"
 
 
-def test_all_expected_safety_flags_are_false():
-    """All expected safety flags in built-in scenarios must be False (safe)."""
+def test_all_expected_safety_flags_match_invariant_defaults():
     for scenario in BUILTIN_SCENARIOS:
         for flag, value in scenario.expected_safety_flags.items():
-            assert value is False, (
+            assert value is SAFETY_INVARIANT_EXPECTED[flag], (
                 f"Scenario {scenario.scenario_id}: expected_safety_flags[{flag}] "
-                f"must be False but is {value}"
+                f"must be {SAFETY_INVARIANT_EXPECTED[flag]} but is {value}"
             )
 
 

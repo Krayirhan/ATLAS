@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 from app.actions.types import ActionSource
+from app.execution.models import ExecutionStatus
+from app.execution.service import ExecutionService
 from app.panel.models import PanelItemStatus, PanelItemType, PanelOperationStatus
 from app.panel.policy import utcnow
 from app.panel.service import PermissionPanelService
@@ -131,3 +133,33 @@ def test_approve_reminder_item_does_not_schedule_real_reminder(tmp_path, monkeyp
     assert approved.status is PanelOperationStatus.APPROVED
     assert approved.decision.execution_attempted is False
     assert approved.decision.execution_allowed is False
+
+
+def test_approved_preview_item_handoff_stays_non_executing() -> None:
+    service = build_service()
+    created = service.submit_text("Chrome'u ac")
+    service.approve_item(created.item.item_id)
+    execution_service = ExecutionService(panel_store=service.store)
+    plan = execution_service.from_panel_item(created.item.item_id)
+    result = execution_service.execute_plan(plan)
+    assert result.status is ExecutionStatus.ARMED_FOR_FUTURE
+    assert result.executed is False
+
+
+def test_clarification_item_handoff_is_denied() -> None:
+    service = build_service()
+    created = service.submit_text("Isigi ac")
+    execution_service = ExecutionService(panel_store=service.store)
+    plan = execution_service.from_panel_item(created.item.item_id)
+    assert plan.eligible is False
+
+
+def test_expired_item_handoff_is_expired() -> None:
+    service = build_service()
+    created = service.submit_text("Chrome'u ac")
+    created.item.expires_at = utcnow() - timedelta(seconds=5)
+    service.store.update(created.item)
+    execution_service = ExecutionService(panel_store=service.store)
+    plan = execution_service.from_panel_item(created.item.item_id)
+    result = execution_service.execute_plan(plan)
+    assert result.status is ExecutionStatus.EXPIRED

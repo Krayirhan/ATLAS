@@ -38,7 +38,7 @@ Sprint 51 hardened the V1 demo. Sprint 52 adds a bounded execution-planning laye
 - Added `app/execution` package:
   `models.py`, `allowlist.py`, `policy.py`, `gate.py`, `service.py`, `audit.py`
 - Added typed models:
-  `ExecutionPlan`, `ExecutionDecision`, `ExecutionPreparationResult`, `ExecutionResult`
+  `ExecutionRequest`, `ExecutionEligibility`, `ExecutionPlan`, `ExecutionResult`, `RollbackPlan`
 - Added low-risk allowlist items:
   `chrome`, `notepad`, `calculator`, `vscode`
 - Added policy rules:
@@ -46,9 +46,9 @@ Sprint 51 hardened the V1 demo. Sprint 52 adds a bounded execution-planning laye
 - Added panel-to-execution handoff:
   approved panel items can be mapped into execution candidates, but `execution_enabled=false` keeps runtime disabled
 - Added CLI:
-  `python -m app.cli ai execution --project ATLAS --allowlist`
-  `python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"`
-  `python -m app.cli ai execution --project ATLAS --show-policy`
+  `python -m app.cli ai execution --project ATLAS --preview "Chrome'u ac"`
+  `python -m app.cli ai execution --project ATLAS --check-allowlist pc.open_app`
+  `python -m app.cli ai execution --project ATLAS --show-audit --preview "Chrome'u ac"`
 
 ## Key Commands
 
@@ -62,9 +62,9 @@ python -m app.cli project validate ATLAS
 
 python -m app.cli ai demo --project ATLAS --all --show-safety
 python -m app.cli ai hardening --project ATLAS --all --json
-python -m app.cli ai execution --project ATLAS --allowlist
-python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
-python -m app.cli ai execution --project ATLAS --show-policy
+python -m app.cli ai execution --project ATLAS --preview "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --preview "Sifrelerimi oku"
+python -m app.cli ai execution --project ATLAS --check-allowlist pc.open_app
 ```
 
 ## Execution Boundary

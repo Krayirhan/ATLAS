@@ -6,19 +6,9 @@
 from __future__ import annotations
 
 from app.demo.models import CommandSurface, DemoCategory, DemoScenario
+from app.quality.models import SAFETY_INVARIANT_EXPECTED
 
-_SAFE_FLAGS = {
-    "execution_attempted": False,
-    "physical_device_touched": False,
-    "network_used": False,
-    "microphone_used": False,
-    "wake_word_used": False,
-    "audio_retained": False,
-    "external_calendar_used": False,
-    "os_notification_sent": False,
-    "credential_accessed": False,
-    "shell_used": False,
-}
+_SAFE_FLAGS = dict(SAFETY_INVARIANT_EXPECTED)
 
 BUILTIN_SCENARIOS: list[DemoScenario] = [
     # A — Chat / PC preview

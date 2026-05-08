@@ -42,23 +42,25 @@ User input
 - policy evaluation
 - panel-to-execution handoff
 - disabled executor result
-- audit metadata with `execution_attempted=false`
+- audit metadata with `execution_attempted=false` and `real_execution_attempted=false`
 
 Canonical sub-flow:
 
 ```text
 PC preview or approved panel item
-  -> ExecutionPlan
-  -> ExecutionGate.evaluate()
-  -> ExecutionDecision
-  -> ExecutionGate.prepare_*()
-  -> disabled / not_approved / unsupported / blocked result
+  -> ExecutionRequest
+  -> SafeExecutionGate.evaluate()
+  -> ExecutionEligibility
+  -> SafeExecutionGate.build_plan()
+  -> SafeExecutionGate.execute()
+  -> previewed / armed_for_future / blocked / expired result
 ```
 
 Rules:
 
 - `execution_enabled=false` by default
 - `execute()` does not launch apps or processes
+- panel approval is required before any future runtime can be considered executable
 - no PowerShell, cmd, or unrestricted shell
 - no free-form path execution
 - no direct user text to command string mapping

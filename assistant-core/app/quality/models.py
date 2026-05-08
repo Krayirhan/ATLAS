@@ -10,8 +10,9 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-SAFETY_INVARIANT_FLAGS: tuple[str, ...] = (
+SAFETY_INVARIANT_FALSE_FLAGS: tuple[str, ...] = (
     "execution_attempted",
+    "real_execution_attempted",
     "physical_device_touched",
     "network_used",
     "microphone_used",
@@ -21,7 +22,21 @@ SAFETY_INVARIANT_FLAGS: tuple[str, ...] = (
     "os_notification_sent",
     "credential_accessed",
     "shell_used",
+    "unrestricted_shell_available",
+    "execution_gate_enabled",
 )
+
+SAFETY_INVARIANT_TRUE_FLAGS: tuple[str, ...] = (
+    "allowlist_required",
+    "panel_approval_required",
+)
+
+SAFETY_INVARIANT_FLAGS: tuple[str, ...] = SAFETY_INVARIANT_FALSE_FLAGS + SAFETY_INVARIANT_TRUE_FLAGS
+
+SAFETY_INVARIANT_EXPECTED: dict[str, bool] = {
+    **{flag: False for flag in SAFETY_INVARIANT_FALSE_FLAGS},
+    **{flag: True for flag in SAFETY_INVARIANT_TRUE_FLAGS},
+}
 
 
 class SafetyInvariantCheck(BaseModel):

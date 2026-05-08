@@ -21,6 +21,7 @@ from app.personal_assistant.notifications import NotificationService
 from app.personal_assistant.reminders import ReminderService
 from app.quality.models import (
     SAFETY_INVARIANT_FLAGS,
+    SAFETY_INVARIANT_EXPECTED,
     SafetyInvariantCheck,
     SafetyInvariantReport,
 )
@@ -30,11 +31,11 @@ from app.voice.models import VoicePipelineRequest, VoiceSource
 from app.voice.pipeline import VoicePipeline
 
 
-DEFAULT_FALSE_FLAGS: dict[str, bool] = {flag: False for flag in SAFETY_INVARIANT_FLAGS}
+DEFAULT_INVARIANT_FLAGS: dict[str, bool] = dict(SAFETY_INVARIANT_EXPECTED)
 
 
 def normalize_flags(*payloads: dict[str, Any] | None) -> dict[str, bool]:
-    flags = dict(DEFAULT_FALSE_FLAGS)
+    flags = dict(DEFAULT_INVARIANT_FLAGS)
     for payload in payloads:
         if not payload:
             continue
@@ -45,7 +46,12 @@ def normalize_flags(*payloads: dict[str, Any] | None) -> dict[str, bool]:
 
 
 def validate_invariant_flags(flags: dict[str, bool]) -> list[str]:
-    return [f"{flag}=true olmamali." for flag, value in flags.items() if value]
+    problems: list[str] = []
+    for flag, expected in SAFETY_INVARIANT_EXPECTED.items():
+        actual = bool(flags.get(flag, False))
+        if actual != expected:
+            problems.append(f"{flag} expected {str(expected).lower()} but got {str(actual).lower()}.")
+    return problems
 
 
 @contextmanager

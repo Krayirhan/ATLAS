@@ -19,7 +19,7 @@ It still does not contain real PC execution, real home execution, a scheduler, O
 | Area | Sprint 52 status |
 |---|---|
 | `app/execution` | Added execution models, allowlist, policy, gate, service, and audit helpers |
-| `ai execution` | Added CLI for `--allowlist`, `--prepare`, `--evaluate`, `--from-panel`, `--execute`, `--json`, `--show-policy` |
+| `ai execution` | Added CLI for `--preview`, `--from-panel`, `--check-allowlist`, `--json`, `--show-audit`, `--mode`, and `--execute` |
 | Allowlist | Added low-risk planning entries for `chrome`, `notepad`, `calculator`, `vscode` |
 | Panel handoff | Added approved panel item to execution candidate mapping |
 | Runtime safety | `execution_enabled=false` by default; `execute()` stays disabled |
@@ -50,9 +50,9 @@ python -m pytest -q
 python -m app.cli doctor --full
 python -m app.cli ai demo --project ATLAS --all --show-safety
 python -m app.cli ai hardening --project ATLAS --all --json
-python -m app.cli ai execution --project ATLAS --allowlist
-python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
-python -m app.cli ai execution --project ATLAS --show-policy
+python -m app.cli ai execution --project ATLAS --preview "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --check-allowlist pc.open_app
+python -m app.cli ai execution --project ATLAS --show-audit --preview "Chrome'u ac"
 ```
 
 ## Execution Boundary

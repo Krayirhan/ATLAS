@@ -799,23 +799,23 @@ def _ai_hardening(
 @ai.command("execution")
 def _ai_execution(
     project: str = typer.Option(..., "--project"),
-    prepare: str | None = typer.Option(None, "--prepare"),
+    preview: str | None = typer.Option(None, "--preview"),
     from_panel: str | None = typer.Option(None, "--from-panel"),
-    allowlist: bool = typer.Option(False, "--allowlist"),
-    evaluate: str | None = typer.Option(None, "--evaluate"),
-    execute: str | None = typer.Option(None, "--execute"),
+    check_allowlist: str | None = typer.Option(None, "--check-allowlist"),
     as_json: bool = typer.Option(False, "--json"),
-    show_policy: bool = typer.Option(False, "--show-policy"),
+    show_audit: bool = typer.Option(False, "--show-audit"),
+    mode: str = typer.Option("preview_only", "--mode"),
+    execute: bool = typer.Option(False, "--execute"),
 ) -> None:
     ai_execution(
         project=project,
-        prepare=prepare,
+        preview=preview,
         from_panel=from_panel,
-        allowlist=allowlist,
-        evaluate=evaluate,
-        execute=execute,
+        check_allowlist=check_allowlist,
         as_json=as_json,
-        show_policy=show_policy,
+        show_audit=show_audit,
+        mode=mode,
+        execute=execute,
     )
 
 

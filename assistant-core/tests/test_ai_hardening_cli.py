@@ -29,6 +29,9 @@ def test_ai_hardening_all_json_outputs_valid_json() -> None:
     assert payload["project_name"] == "ATLAS"
     assert payload["safety_report"]["failed"] == 0
     assert payload["latency_report"]["total_measurements"] == 8
+    first_flags = payload["safety_report"]["checks"][0]["flags"]
+    assert first_flags["real_execution_attempted"] is False
+    assert first_flags["allowlist_required"] is True
 
 
 def test_ai_hardening_markdown_no_write_works() -> None:

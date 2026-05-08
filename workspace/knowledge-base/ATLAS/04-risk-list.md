@@ -8,19 +8,28 @@
 2. **Execution gate bypass**
    A future helper may bypass `ExecutionGate`, skip allowlist checks, or treat a preview result as if execution were already approved.
 
-3. **Allowlist spoofing**
+3. **Allowlist drift / target spoofing**
    A free-form target, alias mismatch, or injected path may accidentally resolve to an unsupported app or future executable path.
 
-4. **PowerShell/cmd or shell creep**
+4. **PowerShell/cmd or unrestricted shell creep**
    A future implementation may reintroduce PowerShell, cmd, shell strings, `subprocess`, or arbitrary argument passing under the name of low-risk automation.
 
-5. **Panel approval replay / stale approval**
+5. **Panel approval replay / expired approval execution**
    Old, expired, denied, or cancelled panel items may be replayed into execution handoff if state handling is weak.
 
-6. **Secret leakage / credential exposure**
+6. **Accidental real execution**
+   A bug in gate, adapter, or CLI wiring may cross the preview boundary and trigger a real app, file, or system side effect.
+
+7. **Rollback false confidence**
+   Users may assume rollback exists operationally when Sprint 52 only defines a rollback contract and metadata shape.
+
+8. **Secret leakage / credential exposure**
    A future memory, docs, logging, or artifact flow may expose secrets, tokens, `.env`-backed values, or credential-like content that must stay unread and unpersisted.
 
-7. **Generated artifact leakage**
+9. **Execution audit gap**
+   A missing or partial audit record may hide whether approval, allowlist, or execution-disabled policy actually applied.
+
+10. **Generated artifact leakage**
    Demo, hardening, report, and state artifacts may look like source deliverables or accidentally enter git.
 
 ## Sprint 52 Mitigations
@@ -28,7 +37,7 @@
 - `ExecutionGate` adds a typed policy boundary before any future runtime.
 - `execution_enabled=false` remains the default for every execution plan.
 - Allowlist planning is limited to canonical low-risk app entries:
-  `chrome`, `notepad`, `calculator`, `vscode`
+  `Chrome`, `Notepad`, `Calculator`, `VS Code`
 - PowerShell, cmd, unrestricted shell, destructive file ops, registry edit, secret read, and credential read stay blocked.
 - Panel handoff now recognizes approved vs expired/denied/cancelled/blocked item state before execution readiness.
 - `ai execution` exposes planning and policy visibility without opening runtime execution.

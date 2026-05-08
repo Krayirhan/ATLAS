@@ -37,6 +37,7 @@ Completed:
 - `ai execution` CLI
 - disabled-by-default executor result
 - execution regressions and docs update
+- rollback/cancel contract without real runtime
 
 Acceptance outcome:
 
@@ -45,6 +46,7 @@ Acceptance outcome:
 - panel handoff is explicit
 - `execution_enabled=false` remains the default
 - real app launch still does not happen
+- Sprint 52 completed
 
 ## Sprint 53 - Low-Risk PC Execution MVP
 

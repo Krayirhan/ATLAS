@@ -5,6 +5,7 @@ import pytest
 from app.demo.models import DemoCategory, DemoReport, DemoResult
 from app.demo.policy import validate_safety
 from app.demo.runner import DemoRunner
+from app.quality.models import SAFETY_INVARIANT_EXPECTED
 
 
 @pytest.fixture()
@@ -111,23 +112,12 @@ def test_run_all_returns_report(runner: DemoRunner):
     assert report.passed_scenarios + report.failed_scenarios == report.total_scenarios
 
 
-def test_run_all_safety_flags_all_false(runner: DemoRunner):
+def test_run_all_safety_flags_match_invariant_defaults(runner: DemoRunner):
     report = runner.run_all()
     violations = report.safety_summary.get("violations", [])
     assert violations == [], f"Safety violations found: {violations}"
     for result in report.results:
-        assert set(result.safety_flags.keys()) == {
-            "execution_attempted",
-            "physical_device_touched",
-            "network_used",
-            "microphone_used",
-            "wake_word_used",
-            "audio_retained",
-            "external_calendar_used",
-            "os_notification_sent",
-            "credential_accessed",
-            "shell_used",
-        }
+        assert set(result.safety_flags.keys()) == set(SAFETY_INVARIANT_EXPECTED)
 
 
 def test_run_all_report_summary(runner: DemoRunner):
