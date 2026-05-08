@@ -2,29 +2,30 @@
 
 ## Product Vision
 
-ATLAS is a local-first personal AI assistant foundation for Windows. It is built around safe text and future voice interaction, explicit permission handling, preview-first action planning, and bounded local state.
+ATLAS is a local-first personal AI assistant foundation for Windows. It is built around explicit permission handling, preview-first action planning, bounded local state, and strict non-shell safety boundaries.
 
-ATLAS is not a real execution assistant yet. The current product line is a demonstrable V1 preview/control plane.
+ATLAS is still not a real execution assistant. Sprint 52 adds the Safe Execution Gate planning layer, but real PC and home execution remain disabled.
 
 ## Current Status
 
 | Item | Value |
 |---|---|
-| Release baseline | V1 RC - GO for preview-only assistant flows |
-| Current sprint | Sprint 51 - Safety / Latency / UX Hardening completed |
+| Release baseline | V1 RC - GO for preview-first assistant flows |
+| Current sprint | Sprint 52 - Safe Execution Gate / Low-Risk PC Execution Planning completed |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
 | Default provider | `ollama` |
 | Validation | `python -m pytest -q`, `python -m app.cli doctor --full` |
 
-Sprint 50 brought the end-to-end personal assistant demo together. Sprint 51 hardens that demo with a central safety invariant suite, latency reporting, a new `ai hardening` CLI, stricter panel timeout/cancel behavior, stronger voice confirmation copy, and clearer Turkish preview UX.
+Sprint 51 hardened the V1 demo. Sprint 52 adds a bounded execution-planning layer under `app/execution`, a low-risk allowlist, panel-to-execution handoff modeling, typed execution plan/result contracts, and a new `ai execution` CLI. This sprint still does not open real app launch, shell, PowerShell, cmd, or process execution.
 
 ## What Works Now
 
 - Text-first conversation preview through `ai chat`
 - Mock voice preview through `ai voice`
 - PC preview planning through `ai pc-preview`
+- Safe Execution Gate planning through `ai execution`
 - Device and home preview flows through `ai device` and `ai home-preview`
 - Reminder draft, calendar draft/query preview, and notification preview flows
 - Permission panel backend through `ai panel`
@@ -32,17 +33,22 @@ Sprint 50 brought the end-to-end personal assistant demo together. Sprint 51 har
 - Hardening audit surface through `ai hardening`
 - Read-only agent layer: `MainAgent`, `ToolApprovalAgent`, `SecurityAuditorAgent`, `DocumentationAgent`, `PlannerAgent`, `ProjectQAAgent`, `MemoryAgent`
 
-## Sprint 51 Highlights
+## Sprint 52 Highlights
 
-- Safety invariants are validated centrally:
-  `execution_attempted`, `physical_device_touched`, `network_used`, `microphone_used`, `wake_word_used`, `audio_retained`, `external_calendar_used`, `os_notification_sent`, `credential_accessed`, `shell_used`
-- `python -m app.cli ai hardening --project ATLAS` supports:
-  `--safety`, `--latency`, `--all`, `--json`, `--markdown`, `--no-write`, `--output`
-- Latency budgets exist for:
-  `ai chat`, `ai voice`, `ai routine`, `ai reminder`, `ai calendar`, `ai panel`, `ai home-preview`, `ai demo --all`
-- Permission panel runtime now has explicit confirmation timeout policy and blocks approve on expired/cancelled/denied/blocked/clarification items.
-- Voice runtime stays mock-only, keeps `execution_attempted=false`, and uses stricter confirmation wording for risky voice requests.
-- CLI copy now emphasizes `onizleme`, `onay gerekiyor`, `engellendi`, `belirsiz hedef`, `hatirlatici taslagi`, `takvim taslagi`, `mock ses akisi`, and `gercek islem yapilmadi`.
+- Added `app/execution` package:
+  `models.py`, `allowlist.py`, `policy.py`, `gate.py`, `service.py`, `audit.py`
+- Added typed models:
+  `ExecutionPlan`, `ExecutionDecision`, `ExecutionPreparationResult`, `ExecutionResult`
+- Added low-risk allowlist items:
+  `chrome`, `notepad`, `calculator`, `vscode`
+- Added policy rules:
+  `PowerShell`, `cmd`, unrestricted shell, secret/credential reads, destructive file ops, and registry edits stay blocked
+- Added panel-to-execution handoff:
+  approved panel items can be mapped into execution candidates, but `execution_enabled=false` keeps runtime disabled
+- Added CLI:
+  `python -m app.cli ai execution --project ATLAS --allowlist`
+  `python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"`
+  `python -m app.cli ai execution --project ATLAS --show-policy`
 
 ## Key Commands
 
@@ -55,27 +61,27 @@ python -m app.cli config validate
 python -m app.cli project validate ATLAS
 
 python -m app.cli ai demo --project ATLAS --all --show-safety
-python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
-python -m app.cli ai chat --project ATLAS "Chrome'u aç"
-python -m app.cli ai voice --project ATLAS --mock-transcript "Salon ışığını aç" --show-safety
-python -m app.cli ai panel --project ATLAS --submit "Salon ışığını aç"
+python -m app.cli ai hardening --project ATLAS --all --json
+python -m app.cli ai execution --project ATLAS --allowlist
+python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --show-policy
 ```
 
 ## Execution Boundary
 
-These remain out of scope in Sprint 51:
+Sprint 52 still forbids:
 
-- No real Chrome/app opening
+- No real Chrome, Notepad, Calculator, or VS Code launch
 - No real folder opening
-- No real Home Assistant or MQTT runtime
-- No physical device state change
-- No real OS notification delivery
-- No real external calendar API
+- No `subprocess.run`, `os.startfile`, PowerShell, cmd, or shell executor
+- No file delete, move, overwrite, or registry edit execution
+- No real Home Assistant, MQTT, or physical device control
+- No real scheduler, OS notification delivery, or external calendar write
 - No real microphone capture
 - No wake word / always-listening
-- No background scheduler / daemon
-- No shell / terminal executor
 - No credential or `.env` reading
+
+`ExecutionGate.execute()` always returns a safe non-executing result in Sprint 52.
 
 ## Artifact Policy
 
@@ -83,15 +89,13 @@ These remain out of scope in Sprint 51:
 - Hardening reports belong under `workspace/outputs/hardening/`
 - Generated V1/report artifacts stay under `workspace/outputs/reports/`
 - Local runtime state stays under `workspace/state/*.json`
-- Generated artifacts should not be committed as new Sprint 51 outputs
-
-Historical tracked report artifacts already exist under `workspace/outputs/reports/`; Sprint 51 keeps them as history but treats new generated outputs as local artifacts.
+- Generated artifacts are local outputs and should not be newly committed
 
 ## Next Sprint
 
-Sprint 52 is **Safe Execution Gate / Low-Risk PC Execution Planning**.
+Sprint 53 is **Low-Risk PC Execution MVP**.
 
-The next step is not broad execution. The next step is a tightly bounded execution gate for a small, explicit low-risk PC allowlist, with audit, rollback expectations, and unchanged blocked/high-risk boundaries.
+The next step is still not broad execution. Sprint 53 should open, at most, a very small low-risk app-open runtime under the Safe Execution Gate with explicit audit and rollback constraints.
 
 ## Repo
 

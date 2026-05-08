@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_demo, ai_device, ai_doctor, ai_docs_audit, ai_hardening, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_demo, ai_device, ai_doctor, ai_docs_audit, ai_execution, ai_hardening, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -793,6 +793,29 @@ def _ai_hardening(
         as_markdown=as_markdown,
         no_write=no_write,
         output=output,
+    )
+
+
+@ai.command("execution")
+def _ai_execution(
+    project: str = typer.Option(..., "--project"),
+    prepare: str | None = typer.Option(None, "--prepare"),
+    from_panel: str | None = typer.Option(None, "--from-panel"),
+    allowlist: bool = typer.Option(False, "--allowlist"),
+    evaluate: str | None = typer.Option(None, "--evaluate"),
+    execute: str | None = typer.Option(None, "--execute"),
+    as_json: bool = typer.Option(False, "--json"),
+    show_policy: bool = typer.Option(False, "--show-policy"),
+) -> None:
+    ai_execution(
+        project=project,
+        prepare=prepare,
+        from_panel=from_panel,
+        allowlist=allowlist,
+        evaluate=evaluate,
+        execute=execute,
+        as_json=as_json,
+        show_policy=show_policy,
     )
 
 

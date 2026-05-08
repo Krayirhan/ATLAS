@@ -1,20 +1,21 @@
-# Sprint 48 / 51 - Desktop Permission Panel Backend
+# Sprint 48 / 51 / 52 - Desktop Permission Panel Backend
 
 ## Purpose
 
-The permission panel remains a backend and CLI visibility layer. Sprint 51 hardens its approval policy without opening execution.
+The permission panel remains a backend and CLI visibility layer. Sprint 51 hardened its approval policy. Sprint 52 adds a planning-only handoff into the Safe Execution Gate without opening execution.
 
 ## Current Capabilities
 
-- submit/list/show/approve/deny/cancel/clear
+- submit / list / show / approve / deny / cancel / clear
 - safe local JSON or in-memory store
 - blocked / clarification / confirmation visibility
 - reminder and calendar item support
+- approved panel item to execution candidate handoff
 - approve remains preview-only
 
 ## Confirmation Timeout / Cancel Policy
 
-Each actionable item now carries:
+Each actionable item carries:
 
 - `default_timeout_seconds`
 - `expires_at`
@@ -45,11 +46,25 @@ Approve means:
 - no calendar write starts
 - no PC/home execution starts
 
+## Sprint 52 Handoff Boundary
+
+Sprint 52 now adds a planning-only handoff:
+
+- approved panel item may be mapped into an execution candidate
+- the handoff goes through `ExecutionGate`, not directly to a runtime
+- `execution_enabled=false` keeps runtime execution disabled
+- expired / denied / cancelled / blocked / clarification-required items still cannot pass
+- panel approve remains a state change only
+
 ## Copy Rule
 
 Every panel surface must make this clear:
 
 `Bu sadece onizlemedir; gercek islem yapilmadi.`
+
+For approved items:
+
+`Onay kaydedildi ama gercek islem baslatilmadi.`
 
 ## Current Non-Goals
 
@@ -57,8 +72,8 @@ Every panel surface must make this clear:
 - no GUI framework
 - no notification badge runtime
 - no background daemon
-- no execution handoff yet
+- no real execution handoff
 
-## Sprint 52 Dependency
+## Sprint 53 Dependency
 
-If ATLAS ever introduces a safe execution gate, panel handoff must remain explicit and separately audited.
+If ATLAS ever introduces a real low-risk PC runtime, panel handoff must remain explicit, separately audited, and bounded by the Safe Execution Gate.

@@ -10,19 +10,20 @@ The package now contains:
 - Mock voice pipeline with no real microphone runtime
 - Read-only agent layer
 - Sprint 51 hardening layer under `app/quality`
+- Sprint 52 Safe Execution Gate planning layer under `app/execution`
 
 It still does not contain real PC execution, real home execution, a scheduler, OS notification delivery, external calendar writes, microphone capture, wake word, or a shell executor.
 
-## Sprint 51 Additions
+## Sprint 52 Additions
 
-| Area | Sprint 51 status |
+| Area | Sprint 52 status |
 |---|---|
-| `app/quality` | Added safety suite, latency suite, hardening report models, report formatter |
-| `ai hardening` | Added CLI for `--safety`, `--latency`, `--all`, `--json`, `--markdown`, `--no-write`, `--output` |
-| `app/panel` | Added explicit confirmation timeout policy; approve rules tightened |
-| `app/voice` | Added stricter runtime confirmation copy and low-confidence clarification behavior |
-| CLI UX | Preview vs execution wording clarified in Turkish |
-| Tests | Added safety, latency, hardening CLI, and approval timeout regressions |
+| `app/execution` | Added execution models, allowlist, policy, gate, service, and audit helpers |
+| `ai execution` | Added CLI for `--allowlist`, `--prepare`, `--evaluate`, `--from-panel`, `--execute`, `--json`, `--show-policy` |
+| Allowlist | Added low-risk planning entries for `chrome`, `notepad`, `calculator`, `vscode` |
+| Panel handoff | Added approved panel item to execution candidate mapping |
+| Runtime safety | `execution_enabled=false` by default; `execute()` stays disabled |
+| Tests | Added execution models, allowlist, gate, and CLI regressions |
 
 ## Main Packages
 
@@ -31,6 +32,7 @@ It still does not contain real PC execution, real home execution, a scheduler, O
 | `app/actions` | Intent/action/risk/permission contracts and deterministic routing |
 | `app/conversation` | Text-first conversation loop and response shaping |
 | `app/control` | PC preview planning only |
+| `app/execution` | Safe execution planning, allowlist checks, panel handoff, disabled executor |
 | `app/devices` | Device registry, alias resolution, capability-aware preview planning |
 | `app/home` | Mock home preview adapter, no network/device execution |
 | `app/panel` | Pending approval queue and preview-only state changes |
@@ -47,19 +49,24 @@ cd E:\ATLAS\assistant-core
 python -m pytest -q
 python -m app.cli doctor --full
 python -m app.cli ai demo --project ATLAS --all --show-safety
-python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
+python -m app.cli ai hardening --project ATLAS --all --json
+python -m app.cli ai execution --project ATLAS --allowlist
+python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
+python -m app.cli ai execution --project ATLAS --show-policy
 ```
 
 ## Execution Boundary
 
-Everything in `assistant-core` remains preview-first:
+Everything in `assistant-core` remains preview-first or planning-only:
 
-- `execution_attempted=false` is the default contract across preview flows
+- `execution_attempted=false` stays the default contract across preview and execution-planning flows
 - Panel approval does not start execution
+- `ExecutionGate.execute()` does not call `subprocess`, `os.startfile`, PowerShell, cmd, or shell
+- Allowlist matches canonical app names only; user text is not converted into command strings or executable paths
 - Home/device flows do not touch physical devices or use the network
 - Reminder/calendar flows do not start schedulers or external writes
 - Voice flow does not use a real microphone and does not retain audio
-- Demo and hardening flows do not open shell execution paths
+- Demo, hardening, and execution-planning flows do not open shell execution paths
 
 ## Artifact Policy
 
@@ -68,4 +75,4 @@ Everything in `assistant-core` remains preview-first:
 - Generated reports: `workspace/outputs/reports/`
 - Local state: `workspace/state/*.json`
 
-New generated artifacts are local outputs, not Sprint 51 source deliverables.
+New generated artifacts are local outputs, not source deliverables.

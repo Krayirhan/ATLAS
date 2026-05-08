@@ -22,63 +22,65 @@
 - Sprint 49: Reminder / calendar / notification preview
 - Sprint 50: End-to-end personal assistant demo
 - Sprint 51: Safety / Latency / UX Hardening
+- Sprint 52: Safe Execution Gate / Low-Risk PC Execution Planning
 
-## Sprint 51 - Completed
+## Sprint 52 - Completed
 
-**Goal:** Harden the V1 demo without opening real execution.
+**Goal:** Define the first bounded execution gate for a very small low-risk PC allowlist without opening real runtime execution.
 
 Completed:
 
-- central safety invariant suite
-- latency measurement and typed report
-- `ai hardening` CLI
-- panel confirmation timeout / cancel policy
-- stricter voice confirmation runtime wording
-- Turkish preview UX polish
-- docs cleanup and artifact policy clarification
+- `app/execution` package and typed execution contracts
+- low-risk allowlist model
+- Safe Execution Gate policy and audit metadata
+- panel approved item to execution candidate handoff
+- `ai execution` CLI
+- disabled-by-default executor result
+- execution regressions and docs update
 
 Acceptance outcome:
 
-- preview-only safety boundary preserved
-- hardening CLI works for safety, latency, JSON, Markdown, and no-write paths
-- demo and regression surfaces remain operational
+- allowlist exists
+- `PowerShell` / `cmd` / unrestricted shell remain blocked
+- panel handoff is explicit
+- `execution_enabled=false` remains the default
+- real app launch still does not happen
 
-## Sprint 52 - Safe Execution Gate / Low-Risk PC Execution Planning
-
-**Goal:** Define the first bounded execution gate for a very small low-risk PC allowlist.
+## Sprint 53 - Low-Risk PC Execution MVP
 
 Planned scope:
 
-- execution gate contract
-- low-risk PC allowlist
-- audit requirements
-- rollback / failure expectations
-- panel-to-execution handoff policy
+- open a very small runtime path for approved low-risk app opens only
+- keep allowlist canonical and path-free
+- audit every runtime attempt
+- preserve no-shell and no-freeform-command guarantees
+- preserve panel approval boundary and rollback expectations
 
 Still out of scope:
 
 - unrestricted shell
+- free-form path execution
 - real home/device write execution
 - reminder scheduler
 - wake word / always-listening
 - external calendar write
 
-## Sprint 53 - Desktop UX Shell
+## Sprint 54 - Real Push-to-Talk STT/TTS Integration Planning
 
-Candidate scope after Sprint 52 only:
+Candidate scope after Sprint 53 only:
 
-- desktop panel shell
-- clearer pending approval visibility
-- local status surfaces
+- microphone privacy model
+- push-to-talk session model
+- transcript confidence and retry policy
+- no wake word runtime yet
+
+## Sprint 55 - Desktop Tray Runtime MVP
+
+Candidate scope after Sprint 53 and Sprint 54 only:
+
+- tray shell planning
+- local status and approval visibility
 - no autonomous background execution
-
-## Sprint 54 - Reminder Runtime Planning
-
-Candidate scope after execution gate and desktop policy are stable:
-
-- safe scheduler planning
-- stale reminder handling
-- local notification authenticity rules
 
 ## Roadmap Rule
 

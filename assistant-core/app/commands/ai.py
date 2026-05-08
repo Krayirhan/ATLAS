@@ -1713,3 +1713,150 @@ def ai_hardening(
                 console.print(f"       [yellow]warn[/yellow]: {_safe_console_text(warning)}")
     console.print("")
     console.print("Not: Bu komut preview-only hardening akisidir; gercek islem yapilmadi.")
+
+
+def ai_execution(
+    project: str,
+    prepare: str | None = None,
+    from_panel: str | None = None,
+    allowlist: bool = False,
+    evaluate: str | None = None,
+    execute: str | None = None,
+    as_json: bool = False,
+    show_policy: bool = False,
+) -> None:
+    from app.execution.service import ExecutionService
+
+    console = Console()
+    selected = sum(
+        1
+        for item in (
+            prepare is not None,
+            from_panel is not None,
+            allowlist,
+            evaluate is not None,
+            execute is not None,
+            show_policy,
+        )
+        if item
+    )
+    if selected != 1:
+        console.print(
+            "[red]Tek bir execution modu secmelisin: --allowlist, --prepare, --evaluate, --from-panel, --execute veya --show-policy.[/red]"
+        )
+        raise typer.Exit(1)
+
+    service = ExecutionService(project_name=project)
+
+    if allowlist:
+        items = service.list_allowlist()
+        if as_json:
+            typer.echo(json.dumps([item.model_dump(mode="json") for item in items], ensure_ascii=False, indent=2))
+            return
+        table = Table(title="ATLAS Safe Execution Gate Allowlist")
+        table.add_column("Key")
+        table.add_column("Display")
+        table.add_column("Action")
+        table.add_column("Targets")
+        table.add_column("Risk")
+        table.add_column("Approval")
+        table.add_column("Enabled")
+        for item in items:
+            table.add_row(
+                item.key,
+                item.display_name,
+                item.action_type.value,
+                ", ".join(item.allowed_targets),
+                item.risk_level.value,
+                str(item.requires_panel_approval),
+                str(item.enabled),
+            )
+        console.print(table)
+        console.print("Not: Bu allowlist gelecekteki bounded execution planning icindir; gercek app acma yapilmaz.")
+        return
+
+    if show_policy:
+        payload = service.show_policy()
+        if as_json:
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        console.print("[bold]ATLAS Safe Execution Gate Policy[/bold]")
+        console.print(f"execution_enabled_default: {payload['execution_enabled_default']}")
+        console.print("blocked_keywords: " + ", ".join(payload["blocked_keywords"]))
+        console.print("blocked_action_types: " + ", ".join(payload["blocked_action_types"]))
+        console.print("ready_risk_levels: " + ", ".join(payload["ready_risk_levels"]))
+        for note in payload["notes"]:
+            console.print(f"- {_safe_console_text(note)}")
+        console.print("Not: Bu policy gercek execution acmaz.")
+        return
+
+    if evaluate is not None:
+        plan, decision = service.evaluate_text(evaluate)
+        payload = {
+            "project": project,
+            "plan": plan.model_dump(mode="json"),
+            "decision": decision.model_dump(mode="json"),
+        }
+        if as_json:
+            typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+            return
+        console.print(f"[bold]Project[/bold]: {project}")
+        console.print(f"[bold]Decision Status[/bold]: {decision.status.value}")
+        console.print(f"[bold]Allowed[/bold]: {decision.allowed}")
+        console.print(f"[bold]Reason[/bold]: {_safe_console_text(decision.reason)}")
+        console.print(f"[bold]Action[/bold]: {plan.original_action_type}")
+        console.print(f"[bold]Target[/bold]: {_safe_console_text(plan.resolved_target or plan.target or 'none')}")
+        console.print(f"[bold]Allowlist[/bold]: {plan.allowlist_key or 'none'}")
+        if decision.requirements:
+            console.print("[bold]Requirements[/bold]")
+            for item in decision.requirements:
+                console.print(f"- {_safe_console_text(item)}")
+        console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
+        return
+
+    if prepare is not None:
+        result = service.prepare_text(prepare)
+        if as_json:
+            typer.echo(result.model_dump_json(indent=2))
+            return
+        console.print(f"[bold]Project[/bold]: {project}")
+        console.print(f"[bold]Status[/bold]: {result.status.value}")
+        console.print(f"[bold]Message[/bold]: {_safe_console_text(result.message)}")
+        console.print(f"[bold]Execution ID[/bold]: {result.plan.execution_id}")
+        console.print(f"[bold]Action[/bold]: {result.plan.original_action_type}")
+        console.print(f"[bold]Target[/bold]: {_safe_console_text(result.plan.resolved_target or result.plan.target or 'none')}")
+        console.print(f"[bold]Allowlist[/bold]: {result.plan.allowlist_key or 'none'}")
+        console.print(f"[bold]Approved[/bold]: {result.plan.approved}")
+        console.print(f"[bold]Safe To Execute[/bold]: {result.plan.safe_to_execute}")
+        console.print(f"[bold]Execution Enabled[/bold]: {result.plan.execution_enabled}")
+        console.print(f"[bold]Preview[/bold]: {_safe_console_text(result.plan.command_preview)}")
+        console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
+        return
+
+    if from_panel is not None:
+        result = service.prepare_panel_item(from_panel)
+        if as_json:
+            typer.echo(result.model_dump_json(indent=2))
+            return
+        console.print(f"[bold]Project[/bold]: {project}")
+        console.print(f"[bold]Panel Item[/bold]: {from_panel}")
+        console.print(f"[bold]Status[/bold]: {result.status.value}")
+        console.print(f"[bold]Message[/bold]: {_safe_console_text(result.message)}")
+        console.print(f"[bold]Execution ID[/bold]: {result.plan.execution_id}")
+        console.print(f"[bold]Action[/bold]: {result.plan.original_action_type}")
+        console.print(f"[bold]Target[/bold]: {_safe_console_text(result.plan.resolved_target or result.plan.target or 'none')}")
+        console.print(f"[bold]Approved[/bold]: {result.plan.approved}")
+        console.print(f"[bold]Execution Enabled[/bold]: {result.plan.execution_enabled}")
+        console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
+        return
+
+    result = service.execute_prepared(execute or "")
+    if as_json:
+        typer.echo(result.model_dump_json(indent=2))
+        return
+    console.print(f"[bold]Project[/bold]: {project}")
+    console.print(f"[bold]Status[/bold]: {result.status.value}")
+    console.print(f"[bold]Message[/bold]: {_safe_console_text(result.message)}")
+    if result.error_code:
+        console.print(f"[bold]Error Code[/bold]: {result.error_code}")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")

@@ -2,7 +2,7 @@
 
 ## Release Baseline
 
-- **Release:** V1 RC - GO for preview-only assistant flows.
+- **Release:** V1 RC - GO for preview-first assistant flows.
 - **Canonical root:** `E:\ATLAS`
 - **Assistant core:** `E:\ATLAS\assistant-core`
 - **Knowledge base:** `E:\ATLAS\workspace\knowledge-base\ATLAS`
@@ -28,27 +28,29 @@
 - **Sprint 49:** Reminder / Calendar / Notification preview completed
 - **Sprint 50:** End-to-End Personal Assistant Demo completed
 - **Sprint 51:** Safety / Latency / UX Hardening completed
+- **Sprint 52:** Safe Execution Gate / Low-Risk PC Execution Planning completed
 
-## Sprint 51 Outcome
+## Sprint 52 Outcome
 
-Sprint 51 moves ATLAS from a showable preview demo to a harder V1 demo baseline.
+Sprint 52 adds the first bounded execution-planning layer without opening real execution.
 
-Completed in Sprint 51:
+Completed in Sprint 52:
 
-- central safety invariant suite
-- latency measurement and typed latency report
-- `ai hardening` CLI
-- confirmation timeout / cancel policy for panel items
-- stricter voice confirmation wording and low-confidence clarification
-- clearer Turkish preview UX copy
-- docs cleanup for current status and hardening behavior
-- generated artifact policy clarification
+- `app/execution` package
+- `ExecutionPlan`, `ExecutionDecision`, `ExecutionPreparationResult`, `ExecutionResult`
+- low-risk allowlist model for `chrome`, `notepad`, `calculator`, `vscode`
+- `ExecutionGate.evaluate()` and `ExecutionGate.prepare_*()` flow
+- panel approved item to execution candidate handoff
+- `ai execution` CLI
+- default-off execution policy with `execution_enabled=false`
+- blocked policy for PowerShell, cmd, unrestricted shell, destructive file ops, secret reads, and registry edits
 
-## Available User-Facing Preview Surfaces
+## Available User-Facing Preview / Planning Surfaces
 
 - `ai chat`
 - `ai voice`
 - `ai pc-preview`
+- `ai execution`
 - `ai device`
 - `ai home-preview`
 - `ai routine`
@@ -73,7 +75,7 @@ The following are still **not implemented**:
 - shell / terminal executor
 - credential or `.env` reading
 
-Preview flows must keep these invariants false:
+Preview and execution-planning flows must keep these invariants false:
 
 - `execution_attempted`
 - `physical_device_touched`
@@ -91,6 +93,7 @@ Preview flows must keep these invariants false:
 - `app/actions`: schema, risk, permission, router contracts
 - `app/conversation`: text-first conversation and response shaping
 - `app/control`: PC preview plans only
+- `app/execution`: Safe Execution Gate, allowlist, disabled executor
 - `app/devices`: room/device registry and preview planning
 - `app/home`: mock home preview adapter
 - `app/panel`: pending queue and non-executing approval state
@@ -108,8 +111,10 @@ python -m pytest -q
 python -m app.cli doctor --full
 python -m app.cli config validate
 python -m app.cli project validate ATLAS
+python -m app.cli ai execution --project ATLAS --allowlist
+python -m app.cli ai execution --project ATLAS --prepare "Chrome'u ac"
 python -m app.cli ai demo --project ATLAS --all --show-safety
-python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
+python -m app.cli ai hardening --project ATLAS --all --json
 python -m app.cli ai docs-audit --project ATLAS --provider mock --scope all-light
 python -m app.cli ai security-audit --project ATLAS --provider mock --scope all-light
 python -m app.cli audit v1-rc
@@ -117,6 +122,6 @@ python -m app.cli audit v1-rc
 
 ## Next Sprint
 
-Sprint 52 is **Safe Execution Gate / Low-Risk PC Execution Planning**.
+Sprint 53 is **Low-Risk PC Execution MVP**.
 
-The next step is a bounded execution gate, not unrestricted execution.
+The next step is still a very small bounded runtime, not unrestricted execution.

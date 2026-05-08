@@ -3,36 +3,41 @@
 ## Highest Active Risks
 
 1. **Preview confused with execution**
-   User may think Chrome opened, a light changed, a reminder was scheduled, or a calendar event was written when the system only produced a preview.
+   User may think Chrome opened, a light changed, a reminder was scheduled, or a calendar event was written when the system only produced a preview or execution plan.
 
-2. **Voice misconfirmation**
-   A risky voice request may be accepted too casually if low confidence, short confirmation, or stale context are not handled strictly.
+2. **Execution gate bypass**
+   A future helper may bypass `ExecutionGate`, skip allowlist checks, or treat a preview result as if execution were already approved.
 
-3. **Panel approval drift**
-   Future code may accidentally treat approve as execution, or allow expired/cancelled/blocked/clarification items to pass.
+3. **Allowlist spoofing**
+   A free-form target, alias mismatch, or injected path may accidentally resolve to an unsupported app or future executable path.
 
-4. **Execution boundary regression**
-   A future adapter or helper may introduce network access, shell usage, microphone capture, scheduler behavior, or physical device writes.
+4. **PowerShell/cmd or shell creep**
+   A future implementation may reintroduce PowerShell, cmd, shell strings, `subprocess`, or arbitrary argument passing under the name of low-risk automation.
 
-5. **Secret leakage / credential exposure**
+5. **Panel approval replay / stale approval**
+   Old, expired, denied, or cancelled panel items may be replayed into execution handoff if state handling is weak.
+
+6. **Secret leakage / credential exposure**
    A future memory, docs, logging, or artifact flow may expose secrets, tokens, `.env`-backed values, or credential-like content that must stay unread and unpersisted.
 
-6. **Generated artifact leakage**
+7. **Generated artifact leakage**
    Demo, hardening, report, and state artifacts may look like source deliverables or accidentally enter git.
 
-## Sprint 51 Mitigations
+## Sprint 52 Mitigations
 
-- Central safety invariants now check:
-  `execution_attempted`, `physical_device_touched`, `network_used`, `microphone_used`, `wake_word_used`, `audio_retained`, `external_calendar_used`, `os_notification_sent`, `credential_accessed`, `shell_used`
-- `ai hardening` measures preview-only safety and latency without opening execution.
-- Panel approval now keeps a clear timeout model and blocks approve on expired/cancelled/denied/blocked/clarification items.
-- Voice runtime adds stricter confirmation wording and low-confidence clarification behavior.
-- CLI copy now repeats preview-only wording in Turkish.
-- Demo safety validation now fails on missing safety flags as well as true flags.
+- `ExecutionGate` adds a typed policy boundary before any future runtime.
+- `execution_enabled=false` remains the default for every execution plan.
+- Allowlist planning is limited to canonical low-risk app entries:
+  `chrome`, `notepad`, `calculator`, `vscode`
+- PowerShell, cmd, unrestricted shell, destructive file ops, registry edit, secret read, and credential read stay blocked.
+- Panel handoff now recognizes approved vs expired/denied/cancelled/blocked item state before execution readiness.
+- `ai execution` exposes planning and policy visibility without opening runtime execution.
+- Audit metadata keeps `execution_attempted=false`, `shell_used=false`, and `credential_accessed=false`.
 
 ## Current Controls
 
 - `PermissionManager` and `IntentRouter` remain preview-only.
+- `ExecutionGate.execute()` returns disabled and does not call `subprocess`, `os.startfile`, PowerShell, cmd, or shell.
 - `MainAgent`, `ToolApprovalAgent`, and `SecurityAuditorAgent` remain read-only.
 - `MockHomeControlAdapter` keeps `network_used=false`, `physical_device_touched=false`, `execution_attempted=false`.
 - Reminder/calendar flows keep `external_calendar_used=false`, `os_notification_sent=false`, `execution_attempted=false`.
@@ -42,18 +47,20 @@
 
 ## Remaining Gaps
 
-- Real execution gate does not exist yet.
+- Real low-risk PC runtime does not exist yet.
+- Real home execution does not exist yet.
 - Real microphone runtime does not exist yet.
 - Real scheduler does not exist yet.
 - Real OS notification delivery does not exist yet.
 - Real external calendar integration does not exist yet.
 - Durable encrypted local state is not implemented.
 
-## Sprint 52 Dependency
+## Sprint 53 Dependency
 
-Sprint 52 should address bounded execution planning only after:
+Sprint 53 should open only a very narrow low-risk PC execution MVP after:
 
-- safety invariants stay stable
-- panel handoff rules are explicit
-- low-risk PC allowlist is documented
-- audit and rollback expectations are defined
+- Safe Execution Gate invariants stay stable
+- allowlist spoofing tests stay green
+- panel replay and expiry handling stay explicit
+- audit requirements are enforced before runtime
+- no unrestricted shell path exists anywhere in the flow

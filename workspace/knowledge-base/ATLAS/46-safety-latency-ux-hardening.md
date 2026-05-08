@@ -40,17 +40,6 @@ Targets:
 - mock voice surface: under `2500 ms`
 - heavier `ai demo --all --no-write`: under `7000 ms`
 
-Measured surfaces:
-
-- `ai chat "Chrome'u aç"`
-- `ai voice --mock-transcript "Salon ışığını aç"`
-- `ai routine "Çalışma modunu başlat"`
-- `ai reminder "Bana 20 dakika sonra su içmeyi hatırlat"`
-- `ai calendar "Yarın 10'a toplantı ekle"`
-- `ai panel --submit "Salon ışığını aç"`
-- `ai home-preview "Salon ışığını aç"`
-- `ai demo --all --no-write`
-
 ## Hardening CLI Usage
 
 ```powershell
@@ -58,7 +47,6 @@ python -m app.cli ai hardening --project ATLAS --safety
 python -m app.cli ai hardening --project ATLAS --latency
 python -m app.cli ai hardening --project ATLAS --all --json
 python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
-python -m app.cli ai hardening --project ATLAS --all --markdown --output workspace/outputs/hardening/sprint-51-hardening.md
 ```
 
 Rules:
@@ -69,7 +57,7 @@ Rules:
 
 ## Confirmation Timeout / Cancel Policy
 
-Panel items now use an explicit timeout model:
+Panel items use an explicit timeout model:
 
 - `default_timeout_seconds`
 - `expires_at`
@@ -112,7 +100,7 @@ The user-facing CLI should prefer wording that makes preview status obvious:
 - `workspace/outputs/reports/` for generated reports
 - `workspace/state/*.json` for local runtime state
 
-These are local artifacts. New generated outputs should not be committed as Sprint 51 source deliverables.
+These are local artifacts. New generated outputs should not be committed as source deliverables.
 
 ## What Remains Non-Executable
 
@@ -125,19 +113,13 @@ These are local artifacts. New generated outputs should not be committed as Spri
 - wake word / always-listening
 - shell / terminal executor
 
-## V1 Readiness Criteria
+## Sprint 52 Carry-Forward
 
-Sprint 51 considers ATLAS V1-demo-ready when:
+Sprint 52 consumes this hardening baseline and preserves it:
 
-- safety invariant suite passes
-- latency report can be generated
-- hardening CLI works
-- panel approval stays non-executing
-- voice safety wording is explicit
-- preview vs execution distinction is visible to the user
+- `execution_attempted=false` stays false for preview and disabled execution-planning paths
+- shell, PowerShell, and cmd remain blocked
+- panel approval does not start execution
+- voice, home, scheduler, notification, and calendar boundaries stay closed
 
-## Sprint 52 Dependency
-
-Sprint 52 is **Safe Execution Gate / Low-Risk PC Execution Planning**.
-
-Sprint 52 must add only a bounded execution gate for a small low-risk PC allowlist. High-risk, home, scheduler, calendar write, shell, and microphone boundaries stay closed.
+Sprint 53 may open only a very small low-risk PC runtime if these hardening invariants stay green.

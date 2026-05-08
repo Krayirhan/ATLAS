@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document captures the preview-first architecture for ATLAS after Sprint 51 hardening.
+This document captures the preview-first architecture for ATLAS after Sprint 52 Safe Execution Gate planning.
 
 ## Canonical Flow
 
@@ -12,6 +12,7 @@ User input
   -> IntentRouter / PersonalAssistantService
   -> ActionCandidate + PermissionDecision
   -> Preview planner (PC / device / home / routine / reminder / calendar / panel)
+  -> Safe Execution Gate planning (optional, disabled by default)
   -> Safety + latency hardening
   -> User-facing response / report
 ```
@@ -24,24 +25,53 @@ User input
 | Conversation | Implemented |
 | Intent / permission | Implemented preview-only |
 | PC preview | Implemented |
+| Safe Execution Gate | Implemented planning-only in Sprint 52 |
 | Device / home preview | Implemented |
 | Reminder / calendar preview | Implemented |
 | Panel backend | Implemented |
 | Demo runner | Implemented |
 | Quality hardening | Implemented in Sprint 51 |
-| Real execution gate | Not implemented |
+| Real execution runtime | Not implemented |
+
+## Safe Execution Gate Layer
+
+`app/execution` adds a bounded planning layer:
+
+- typed execution models
+- low-risk allowlist
+- policy evaluation
+- panel-to-execution handoff
+- disabled executor result
+- audit metadata with `execution_attempted=false`
+
+Canonical sub-flow:
+
+```text
+PC preview or approved panel item
+  -> ExecutionPlan
+  -> ExecutionGate.evaluate()
+  -> ExecutionDecision
+  -> ExecutionGate.prepare_*()
+  -> disabled / not_approved / unsupported / blocked result
+```
+
+Rules:
+
+- `execution_enabled=false` by default
+- `execute()` does not launch apps or processes
+- no PowerShell, cmd, or unrestricted shell
+- no free-form path execution
+- no direct user text to command string mapping
 
 ## Sprint 51 Quality Layer
 
-`app/quality` adds a new hardening layer:
+`app/quality` still measures deterministic preview surfaces only:
 
 - safety suite
 - latency suite
 - hardening report models
 - Markdown / JSON formatter
 - `ai hardening` CLI
-
-This layer does not execute actions. It measures deterministic preview surfaces only.
 
 ## Voice Safety Architecture
 
@@ -65,7 +95,7 @@ Rules:
 
 ## Panel Confirmation Architecture
 
-Panel items now carry explicit timeout policy:
+Panel items now carry explicit timeout policy and execution handoff constraints:
 
 - `default_timeout_seconds`
 - `expires_at`
@@ -75,10 +105,11 @@ Panel items now carry explicit timeout policy:
 - blocked item cannot be approved
 - clarification-required item cannot be approved
 - approve never starts execution
+- approved item may become an execution candidate only through `ExecutionGate`
 
 ## Execution Boundary
 
-Sprint 51 still forbids:
+Sprint 52 still forbids:
 
 - real PC execution
 - real home execution
@@ -91,4 +122,4 @@ Sprint 51 still forbids:
 
 ## Next Dependency
 
-Sprint 52 may add a bounded execution gate only after these contracts stay stable.
+Sprint 53 may open only a very small low-risk PC runtime under this gate. The architectural boundary remains explicit and audited.
