@@ -26,6 +26,9 @@
 - **Sprint 44:** Voice Core Architecture.
 - **Sprint 45:** STT/TTS MVP.
 - **Sprint 46:** DeviceRegistry + Room Model.
+- **Sprint 47:** Home Control Adapter Design.
+- **Sprint 48:** Desktop Tray / Permission Panel.
+- **Sprint 49:** Notification / Reminder / Calendar Assistant.
 
 ## Sprint 36 - Completed
 
@@ -338,70 +341,100 @@ The former near-term developer roadmap remains parked:
 - Kamera/kapi tarzı hedefler blocked veya unsupported.
 - No physical device execution.
 
-### Sprint 47 - Home Control Adapter Design
+## Sprint 47 - Completed
 
-**Amac:** Home Assistant first candidate ve MQTT alternative ile home control tasarimini yapmak.
-
-**Kapsam:**
-
-- Home Assistant first candidate.
-- MQTT alternative.
-- Cloud providers later.
-- State read before write.
-- Approval rules.
-- Device registry dependency.
-
-**Kapsam disi:**
-
-- Physical device runtime execution before PermissionManager and DeviceRegistry are ready.
-- Cloud account binding.
-
-**Acceptance criteria:**
-
-- No physical device action until PermissionManager and DeviceRegistry are ready.
-
-### Sprint 48 - Desktop Tray / Permission Panel
-
-**Amac:** Local desktop UX icin permission panel, status, logs ve settings tasarimini yapmak.
+**Amac:** Device preview katmanini preview-first home adapter contract'ina baglamak.
 
 **Kapsam:**
 
-- Tray status.
-- Pending action panel.
-- Confirm/cancel.
-- Audit view.
-- Settings.
+- `app/home` package
+- `HomeControlAdapter` contract
+- `MockHomeControlAdapter`
+- `HomeControlPlan` / `HomeControlResult`
+- state-read vs state-write boundary
+- `DeviceActionPlan -> HomeControlPlan` mapping
+- `ai home-preview` CLI
+- no-network / no-execution safety tests
 
 **Kapsam disi:**
 
-- Full dashboard product.
-- Mobile bridge.
+- Home Assistant client
+- MQTT client
+- physical device control
+- network discovery
+- cloud providers
 
 **Acceptance criteria:**
 
-- Riskli action kullaniciya net preview ile gorunur.
-- Cancel path always visible.
+- `Salon isigini ac` home preview + confirmation required.
+- `Klimayi 24 derece yap` home preview + confirmation required.
+- `Isigi ac` clarification/unsupported.
+- no Home Assistant or MQTT runtime.
+- no physical device execution.
 
-### Sprint 49 - Notification / Reminder / Calendar Assistant
+## Sprint 48 - Completed
 
-**Amac:** Local-first reminder and notification assistant layer'ini tasarlamak.
+**Amac:** Pending confirmation ve blocked/clarification preview akislarini gorunur hale getiren panel backend'ini kurmak.
 
 **Kapsam:**
 
-- `reminder.create`.
-- Notification summary.
-- Local schedule.
-- Future calendar adapter boundary.
+- `app/panel` package
+- panel item / decision / state models
+- in-memory + safe local JSON store
+- submit/list/show/approve/deny/cancel/clear flows
+- `ai panel` CLI
+- no-execution approval visibility
+- desktop tray UX dokumani
 
 **Kapsam disi:**
 
-- Cloud calendar sync by default.
-- Email reading.
+- real tray runtime
+- GUI framework
+- background daemon
+- post-approval execution
 
 **Acceptance criteria:**
 
-- Reminder actions have confirmation when needed.
-- Personal data policy documented.
+- submit/list/show works
+- approve/deny/cancel model status updates work
+- blocked/clarification items cannot be approved
+- execution remains disabled
+
+## Sprint 49 - Completed
+
+**Amac:** Local-first reminder / notification / calendar assistant MVP'sini kurmak.
+
+**Tamamlanan kapsam:**
+
+- `app/personal_assistant` package
+- reminder models, calendar draft/query models, notification preview models
+- local in-memory + safe local JSON store
+- `ReminderService`
+- `CalendarService`
+- `NotificationService`
+- `ConversationLoop` reminder/calendar interception
+- `PermissionPanelService` reminder/calendar item support
+- `ai reminder`
+- `ai calendar`
+- optional `ai notification-preview`
+- local-first privacy / blocked-content policy
+
+**Kapsam disi kalanlar:**
+
+- real OS notification
+- background scheduler / daemon
+- Google Calendar / Outlook integration
+- cloud sync
+- email / push notification delivery
+- external calendar write
+
+**Acceptance criteria status:**
+
+- reminder create confirmation ister
+- calendar draft confirmation ister
+- calendar query safe local preview verir
+- panel approve real scheduling baslatmaz
+- no OS notification / no external calendar / no scheduler boundaries korunur
 
 ### Sprint 50 - End-to-End Personal Assistant Demo
 
@@ -449,6 +482,29 @@ The former near-term developer roadmap remains parked:
 - Validation suite passes.
 - Riskli action confirmation rate is 100%.
 - User-visible failure messages are clear.
+
+### Sprint 52 - Safe Execution Gate / Low-Risk PC Execution Planning
+
+**Amac:** Preview-only assistant'tan kontrollu execution kapisina gecis icin low-risk PC execution planini tasarlamak.
+
+**Kapsam:**
+
+- execution gate contract
+- low-risk PC action allowlist
+- audit and rollback expectations
+- panel/confirmation handoff policy
+
+**Kapsam disi:**
+
+- unrestricted shell
+- home/device write execution
+- reminder scheduler
+
+**Acceptance criteria:**
+
+- execution gate before adapter work is documented
+- low-risk PC scope is explicit
+- blocked/high-risk boundaries remain unchanged
 
 ## V2 / V3 Scope Note
 

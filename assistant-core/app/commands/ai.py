@@ -798,6 +798,12 @@ def _parse_action_source(source: str) -> ActionSource:
     return mapping[normalized]
 
 
+def _parse_personal_source(source: str):
+    from app.personal_assistant.models import ReminderSource
+
+    return ReminderSource(_parse_action_source(source).value)
+
+
 def _intent_preview_payload(project: str, result: IntentPreviewResult) -> dict[str, object]:
     return {
         "project": project,
@@ -937,6 +943,230 @@ def ai_device(
         if result.plan.blocked_reason:
             console.print(f"[bold]Blocked Reason[/bold]: {_safe_console_text(result.plan.blocked_reason)}")
     console.print("[bold]Execution[/bold]: none")
+
+
+def ai_home_preview(
+    project: str,
+    text: str | None = None,
+    as_json: bool = False,
+    show_plan: bool = False,
+    adapter_status: bool = False,
+    capabilities: bool = False,
+    source: str = "text",
+) -> None:
+    from app.home.service import HomeControlService
+
+    console = Console()
+    service = HomeControlService()
+
+    if adapter_status:
+        status = service.adapter_status()
+        if as_json:
+            typer.echo(json.dumps(_json_safe(status), ensure_ascii=False, indent=2))
+            return
+        for key, value in status.items():
+            console.print(f"{key}: {value}")
+        return
+
+    if capabilities:
+        items = service.list_capabilities()
+        if as_json:
+            typer.echo(json.dumps(_json_safe(items), ensure_ascii=False, indent=2))
+            return
+        for item in items:
+            console.print(
+                f"- {item['capability']} "
+                f"(read={item['state_read_supported']}, write={item['state_write_supported']}, "
+                f"exec={item['execution_supported']}, dry_run={item['dry_run_supported']})"
+            )
+        return
+
+    if not text:
+        console.print("[red]Home preview icin bir metin belirtmelisin.[/red]")
+        raise typer.Exit(1)
+
+    source_enum = _parse_action_source(source)
+    plan, result = service.preview_plan(text, source=source_enum)
+    payload = {
+        "project": project,
+        "text": text,
+        "plan": asdict(plan) if plan is not None else None,
+        "result": asdict(result),
+    }
+    if as_json:
+        typer.echo(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2))
+        return
+
+    console.print(f"[bold]Project[/bold]: {project}")
+    console.print(f"[bold]Status[/bold]: {result.status.value}")
+    console.print(f"[bold]Message[/bold]: {_safe_console_text(result.message)}")
+    if show_plan and plan is not None:
+        console.print(f"[bold]Plan[/bold]: {_safe_console_text(plan.summary)}")
+        console.print(f"[bold]Adapter[/bold]: {plan.adapter_name}")
+        console.print(f"[bold]Capability[/bold]: {plan.capability}")
+        console.print(f"[bold]State Read[/bold]: {plan.state_read}")
+        console.print(f"[bold]State Write[/bold]: {plan.state_write}")
+        console.print(f"[bold]Risk[/bold]: {plan.risk_level.value}")
+        console.print(f"[bold]Confirmation Required[/bold]: {plan.requires_confirmation}")
+        console.print(f"[bold]Safe To Execute[/bold]: {plan.safe_to_execute}")
+        if plan.blocked_reason:
+            console.print(f"[bold]Blocked Reason[/bold]: {_safe_console_text(plan.blocked_reason)}")
+    console.print("[bold]Execution[/bold]: none")
+
+
+def _panel_operation_payload(project: str, result) -> dict[str, object]:
+    return {
+        "project": project,
+        "status": result.status.value,
+        "message": result.message,
+        "item": result.item.model_dump(mode="json") if result.item is not None else None,
+        "items": [item.model_dump(mode="json") for item in result.items],
+        "decision": result.decision.model_dump(mode="json") if result.decision is not None else None,
+        "warnings": result.warnings,
+        "metadata": result.metadata,
+    }
+
+
+def ai_panel(
+    project: str,
+    submit: str | None = None,
+    list_items: bool = False,
+    show: str | None = None,
+    approve: str | None = None,
+    deny: str | None = None,
+    cancel: str | None = None,
+    clear: bool = False,
+    as_json: bool = False,
+    status: str | None = None,
+    source: str = "text",
+) -> None:
+    from app.panel.formatting import format_operation
+    from app.panel.service import PermissionPanelService
+
+    console = Console()
+    service = PermissionPanelService()
+    source_enum = _parse_action_source(source)
+
+    if submit is not None:
+        result = service.submit_text(submit, source=source_enum, project_name=project)
+    elif list_items:
+        result = service.list_items(status=status)
+    elif show is not None:
+        result = service.show_item(show)
+    elif approve is not None:
+        result = service.approve_item(approve)
+    elif deny is not None:
+        result = service.deny_item(deny)
+    elif cancel is not None:
+        result = service.cancel_item(cancel)
+    elif clear:
+        result = service.clear_items()
+    else:
+        console.print("[red]Bir panel islemi secmelisin.[/red]")
+        raise typer.Exit(1)
+
+    if as_json:
+        typer.echo(json.dumps(_json_safe(_panel_operation_payload(project, result)), ensure_ascii=False, indent=2))
+        return
+
+    console.print(format_operation(result))
+
+
+def ai_reminder(
+    project: str,
+    text: str | None = None,
+    list_items: bool = False,
+    cancel: str | None = None,
+    as_json: bool = False,
+    source: str = "text",
+) -> None:
+    from app.personal_assistant.reminders import ReminderService
+
+    console = Console()
+    service = ReminderService()
+    reminder_source = _parse_personal_source(source)
+
+    if list_items:
+        result = service.list_reminders()
+    elif cancel is not None:
+        result = service.cancel_reminder(cancel)
+    else:
+        if not text:
+            console.print("[red]Reminder istegi veya --list/--cancel belirtmelisin.[/red]")
+            raise typer.Exit(1)
+        result = service.create_reminder(text, source=reminder_source)
+
+    if as_json:
+        typer.echo(result.model_dump_json(indent=2))
+        return
+
+    console.print(_safe_console_text(service.format_result(result)))
+
+
+def ai_calendar(
+    project: str,
+    text: str | None = None,
+    list_drafts: bool = False,
+    cancel_draft: str | None = None,
+    as_json: bool = False,
+    source: str = "text",
+) -> None:
+    from app.personal_assistant.calendar import CalendarService
+    from app.personal_assistant.models import CalendarOperation
+    from app.personal_assistant.parser import parse_calendar_request
+
+    console = Console()
+    service = CalendarService()
+    reminder_source = _parse_personal_source(source)
+
+    if list_drafts:
+        result = service.list_event_drafts()
+    elif cancel_draft is not None:
+        result = service.cancel_event_draft(cancel_draft)
+    else:
+        if not text:
+            console.print("[red]Calendar istegi veya --list-drafts/--cancel-draft belirtmelisin.[/red]")
+            raise typer.Exit(1)
+        operation, _ = parse_calendar_request(text)
+        if operation is CalendarOperation.QUERY:
+            result = service.query_calendar(text, source=reminder_source)
+        elif operation is CalendarOperation.DRAFT_EVENT:
+            result = service.create_event_draft(text, source=reminder_source)
+        else:
+            result = service.query_calendar(text, source=reminder_source)
+
+    if as_json:
+        typer.echo(result.model_dump_json(indent=2))
+        return
+
+    console.print(_safe_console_text(service.format_result(result)))
+
+
+def ai_notification_preview(
+    project: str,
+    title: str,
+    body: str,
+    channel: str = "cli",
+    as_json: bool = False,
+) -> None:
+    from app.personal_assistant.models import NotificationChannel
+    from app.personal_assistant.notifications import NotificationService
+
+    console = Console()
+    service = NotificationService()
+    try:
+        channel_enum = NotificationChannel(channel)
+    except ValueError as exc:
+        raise typer.BadParameter("channel must be one of: cli, future_desktop, future_os, future_mobile") from exc
+
+    result = service.build_notification_preview(title=title, body=body, channel=channel_enum)
+    if as_json:
+        typer.echo(result.model_dump_json(indent=2))
+        return
+
+    if result.notification is not None:
+        console.print(_safe_console_text(service.format_notification(result.notification)))
+    console.print(_safe_console_text(result.message))
 
 
 def ai_chat(

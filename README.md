@@ -12,7 +12,7 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 |---|---|
 | Product direction | Personal control assistant foundation |
 | Release baseline | V1 RC - GO for the existing local control plane |
-| Sprint focus | Sprint 46 - DeviceRegistry + Room Model completed; Sprint 47 next |
+| Sprint focus | Sprint 49 - Notification / Reminder / Calendar Assistant completed; Sprint 50 next |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
@@ -20,9 +20,9 @@ ATLAS is not primarily a developer assistant. The current developer-oriented age
 | Test command | `python -m pytest -q` from `assistant-core` |
 | Health command | `python -m app.cli doctor --full` |
 
-The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place.
+The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place. Sprint 49 now adds local reminder/calendar/notification preview flows, confirmation-aware panel integration, and dedicated reminder/calendar CLI surfaces without enabling background execution.
 
-The missing product layers are real microphone capture, real local STT/TTS engines, ActionRouter, home control adapter execution, permission UI, desktop panel, durable scheduling, and mobile bridge.
+The missing product layers are real microphone capture, real local STT/TTS engines, ActionRouter, real home control adapter execution, desktop tray runtime, durable scheduling, real OS notification delivery, external calendar sync, and mobile bridge.
 
 ## Core Architecture
 
@@ -44,6 +44,7 @@ ATLAS now separates the project into three tracks:
    - Windows PC control
    - routines
    - personal memory
+   - reminders, notification copy, and calendar drafts
    - home/device automation
 
 3. **Parked devtools subsystem**
@@ -148,9 +149,9 @@ Developer-oriented automation must not become the default roadmap again unless e
 | Sprint 44 | Voice Core Architecture - completed |
 | Sprint 45 | STT/TTS MVP - completed |
 | Sprint 46 | DeviceRegistry + Room Model - completed |
-| Sprint 47 | Home Control Adapter Design |
-| Sprint 48 | Desktop Tray / Permission Panel |
-| Sprint 49 | Notification / Reminder / Calendar Assistant |
+| Sprint 47 | Home Control Adapter Design - completed |
+| Sprint 48 | Desktop Tray / Permission Panel - completed |
+| Sprint 49 | Notification / Reminder / Calendar Assistant - completed |
 | Sprint 50 | End-to-End Personal Assistant Demo |
 | Sprint 51 | Safety / Latency / UX Hardening |
 
@@ -162,16 +163,17 @@ Developer-oriented automation must not become the default roadmap again unless e
 - Wake word runtime
 - ActionRouter
 - SkillRegistry
-- Permission UI
-- Home control adapter
-- Home control adapter runtime
-- Desktop tray or dashboard
+- Real home control adapter runtime
+- Real OS notification runtime
+- Background reminder scheduler / daemon
+- Real external calendar adapter runtime
+- Desktop tray runtime
 - Always-listening opt-in model
 - Mobile companion bridge
 
 ## Next Sprint
 
-Sprint 47 should be **Home Control Adapter Design**. It should build on the completed device registry, room model, alias resolution, and capability matrix without enabling physical device execution yet.
+Sprint 50 should be **End-to-End Personal Assistant Demo**. It should combine text, optional mock voice, reminder/calendar preview, panel confirmation visibility, and safe PC/routine preview flows into one coherent demo path.
 
 ## Repo
 

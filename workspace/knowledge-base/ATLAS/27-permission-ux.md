@@ -14,7 +14,7 @@ No medium, high, blocked, unknown, ambiguous, destructive, privacy-sensitive, or
 |---|---|---|---|---|
 | `safe_readonly` | `pc.system_info`, `file.search`, `device.state_query` | Optional but preferred | No | Future adapter may read; audit required |
 | `low` | `pc.open_app`, `pc.open_folder`, `browser.search`, media control | Optional; required if privacy-sensitive | Usually no | Auto only after later policy; audit required |
-| `medium` | `reminder.create`, `routine.run`, `device.turn_on` | Required | Explicit confirm | No execution without user approval |
+| `medium` | `reminder.create`, `calendar.event_draft`, `routine.run`, `device.turn_on` | Required | Explicit confirm | No execution without user approval |
 | `high` | `pc.shutdown`, `device.open_door`, high-impact routine | Required | Explicit confirm + warning | May remain deferred; no execution after timeout |
 | `blocked` | `file.delete`, `secret.read`, unrestricted shell | Block explanation only | No | Never execute; suggest safe alternative |
 | `ambiguous` | "Isigi ac" with no room/device | Clarification only | No | No action candidate until clarified |
@@ -177,7 +177,7 @@ Clarification copy examples:
 
 | Channel | Status | Notes |
 |---|---|---|
-| CLI | Foundation | Can show preview and ask manual confirmation in future |
+| CLI | Foundation | Can show preview and feed Sprint 48 panel queue |
 | Desktop panel | Future | Preferred for PC/home actions |
 | Voice confirmation | Future | Must handle misrecognition, timeout, and cancel |
 | Mobile confirmation | Future | Requires secure bridge and authentication |
@@ -203,6 +203,7 @@ Turkish prompt examples:
 | Risk | Prompt |
 |---|---|
 | medium | `Hatirlatici olusturulacak: yarin 09:00 - ilac. Onayliyor musun?` |
+| medium | `Takvim taslagi olusturulacak: yarin 10:00 - toplanti. Onayliyor musun? Bu sadece local draft olarak kalacak.` |
 | medium | `Salon isigini acacagim. Bu fiziksel cihaz durumunu degistirir. Onayliyor musun?` |
 | high | `Bilgisayari uyku moduna alacagim. Devam eden isler etkilenebilir. Onayliyor musun?` |
 | blocked | `Bu islem engelli: registry degisikligi ATLAS tarafindan calistirilmaz.` |
@@ -280,6 +281,7 @@ These systems share the same security philosophy but are not the same layer.
 
 Sprint 38 turns this UX contract into `PermissionManager & Action Approval Flow`. It still avoids real PC/home execution. Sprint 39 should feed this layer through `IntentRouter` output.
 Sprint 39 now feeds this layer through deterministic `IntentRouter` output. Sprint 40 should keep the same UX guarantees while adding PC adapters.
+Sprint 47 extends the same UX guarantees into preview-only home control planning through `DeviceActionPlanner`, `HomeControlPlanner`, and `MockHomeControlAdapter`.
 
 ## Sprint 44 Voice Clarification
 
@@ -290,3 +292,34 @@ Sprint 44 keeps the same permission model and applies stricter rules for voice:
 - medium/high voice actions always require explicit confirmation
 - high-risk voice actions require repeat-back summary
 - wake word remains disabled until later privacy and false-positive controls exist
+
+## Sprint 48 Panel Clarification
+
+Sprint 48 adds permission visibility without execution:
+
+- confirmation-required items can be queued in `app/panel`
+- blocked and clarification-required items can be shown but not approved
+- approve only changes model state to an execution-disabled preview status
+- panel item copy must say that execution did not happen
+- local JSON persistence must stay bounded and sanitize sensitive-looking text
+
+## Sprint 49 Reminder / Calendar Clarification
+
+Sprint 49 keeps the same permission guarantees and extends them to personal assistant preview flows:
+
+- `reminder.create` remains `confirmation_required`
+- `calendar.event_draft` remains `confirmation_required`
+- `calendar.query` stays `safe_readonly`
+- reminder and calendar panel items must say that real scheduling or external calendar writing did not happen
+- sensitive reminder text should be blocked or redacted before local persistence
+- voice-source reminder or calendar create requests require explicit confirmation and stay local-only
+
+## Sprint 47 Home Preview Clarification
+
+Sprint 47 keeps home control on a strict preview-first boundary:
+
+- `device.state_query` can use a safe read-only preview/result path
+- `device.turn_on`, `device.turn_off`, `device.set_brightness`, and `device.set_temperature` remain confirmation-required
+- ambiguous room/device targets must stop before any home adapter plan is treated as actionable
+- camera, lock, door, or security-like requests remain blocked or unsupported
+- `MockHomeControlAdapter` must report `execution_attempted=false`, `network_used=false`, and `physical_device_touched=false`

@@ -1,5 +1,6 @@
 from app.conversation.loop import ConversationLoop
 from app.conversation.models import ConversationResponseType
+import app.personal_assistant.store as personal_assistant_store
 
 
 def test_conversation_loop_chrome():
@@ -95,4 +96,40 @@ def test_conversation_loop_device_clarification():
 def test_conversation_loop_device_temperature_confirmation():
     loop = ConversationLoop()
     response = loop.handle_text("Klimayi 24 derece yap", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.CONFIRMATION_REQUIRED
+
+
+def test_conversation_loop_reminder_confirmation(tmp_path, monkeypatch):
+    monkeypatch.setattr(personal_assistant_store, "_default_store_path", lambda: tmp_path / "personal-assistant.json")
+    personal_assistant_store._global_store = None
+    loop = ConversationLoop()
+    response = loop.handle_text("Bana 20 dakika sonra su icmeyi hatirlat", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.CONFIRMATION_REQUIRED
+    assert "scheduler" in response.assistant_message.lower()
+
+
+def test_conversation_loop_reminder_list(tmp_path, monkeypatch):
+    monkeypatch.setattr(personal_assistant_store, "_default_store_path", lambda: tmp_path / "personal-assistant.json")
+    personal_assistant_store._global_store = None
+    loop = ConversationLoop()
+    loop.handle_text("Bana 20 dakika sonra su icmeyi hatirlat", project_name="ATLAS")
+    response = loop.handle_text("Hatirlaticilarimi goster", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.ANSWER
+    assert "Hatirlaticilar:" in response.assistant_message
+
+
+def test_conversation_loop_calendar_query(tmp_path, monkeypatch):
+    monkeypatch.setattr(personal_assistant_store, "_default_store_path", lambda: tmp_path / "personal-assistant.json")
+    personal_assistant_store._global_store = None
+    loop = ConversationLoop()
+    response = loop.handle_text("Bugun takvimimde ne var?", project_name="ATLAS")
+    assert response.response_type == ConversationResponseType.ACTION_PREVIEW
+    assert "Harici calendar entegrasyonu kapali" in response.assistant_message
+
+
+def test_conversation_loop_calendar_draft(tmp_path, monkeypatch):
+    monkeypatch.setattr(personal_assistant_store, "_default_store_path", lambda: tmp_path / "personal-assistant.json")
+    personal_assistant_store._global_store = None
+    loop = ConversationLoop()
+    response = loop.handle_text("Yarin 10a toplanti ekle", project_name="ATLAS")
     assert response.response_type == ConversationResponseType.CONFIRMATION_REQUIRED

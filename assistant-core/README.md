@@ -1,8 +1,8 @@
 # assistant-core
 
-`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, Sprint 39 deterministic intent routing, Sprint 40 PC preview planning, Sprint 41 conversation loop MVP, Sprint 42 personal memory MVP, Sprint 43 routine preview MVP, Sprint 44 voice architecture decisions, Sprint 45 mock STT/TTS voice pipeline MVP, and Sprint 46 device registry plus room-model target resolution. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
+`assistant-core` is the Python CLI and local assistant foundation for ATLAS. It currently contains the healthy V1 control plane, read-only AI/agent core, Sprint 37 action contracts, Sprint 38 permission decision flow, Sprint 39 deterministic intent routing, Sprint 40 PC preview planning, Sprint 41 conversation loop MVP, Sprint 42 personal memory MVP, Sprint 43 routine preview MVP, Sprint 44 voice architecture decisions, Sprint 45 mock STT/TTS voice pipeline MVP, Sprint 46 device registry plus room-model target resolution, Sprint 47 home control adapter contracts with a mock preview flow, Sprint 48 permission panel backend plus CLI visibility, and Sprint 49 local reminder/calendar/notification preview support. Its technical direction is aligned around a personal control assistant, not a developer-agent product.
 
-Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview and decision logic. Sprint 39 added deterministic text-to-intent preview routing. Sprint 40 added safe PC dry-run planning. Sprint 41 added a text-first conversation loop. Sprint 42 added privacy-first personal memory. Sprint 43 added preview-only routines. Sprint 44 added the voice architecture and safety contracts. Sprint 45 added a mock-only voice package and CLI. Sprint 46 added an in-memory device registry, room model, alias resolution, and preview-only device planning. It still does not add microphone runtime, real STT/TTS engines, wake word runtime, home control runtime, or unrestricted command execution.
+Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview and decision logic. Sprint 39 added deterministic text-to-intent preview routing. Sprint 40 added safe PC dry-run planning. Sprint 41 added a text-first conversation loop. Sprint 42 added privacy-first personal memory. Sprint 43 added preview-only routines. Sprint 44 added the voice architecture and safety contracts. Sprint 45 added a mock-only voice package and CLI. Sprint 46 added an in-memory device registry, room model, alias resolution, and preview-only device planning. Sprint 47 added `app/home` contracts, a mock home adapter, and `ai home-preview`. Sprint 48 added `app/panel`, a pending approval queue, and `ai panel`. Sprint 49 adds `app/personal_assistant`, `ai reminder`, `ai calendar`, and optional `ai notification-preview`. It still does not add microphone runtime, real STT/TTS engines, wake word runtime, real home control runtime, real OS notifications, external calendar sync, or unrestricted command execution.
 
 ## Current Technical Foundation
 
@@ -14,7 +14,10 @@ Sprint 37 added model/enumeration contracts. Sprint 38 added permission preview 
 | `app/actions` | Implemented schema, permission, and router contracts | Intent/action/risk/preview/permission/router/result model foundation |
 | `app/voice` | Implemented mock-only voice contracts and pipeline | Mock STT/TTS, transcript safety, no microphone runtime |
 | `app/devices` | Implemented registry/resolver/planner foundation | Device registry, room model, alias resolution, capability matrix, no home execution |
-| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent/routine/chat/voice commands |
+| `app/home` | Implemented contract-level home preview foundation | Home control plan/result models, mock adapter, no network/home execution |
+| `app/personal_assistant` | Implemented local preview foundation | Reminder service, calendar draft/query service, notification copy builder, safe local store |
+| `app/panel` | Implemented permission visibility foundation | Pending confirmation queue, model-only approve/deny/cancel, safe local store |
+| `app/commands/ai.py` | Implemented CLI surface | Current AI doctor/ask/agent/routine/chat/voice/device/home-preview/panel/reminder/calendar/notification-preview commands |
 | `app/cli.py` | Implemented Typer app | Control plane and validation entrypoint |
 
 ## app/ai - Local LLM Runtime
@@ -98,6 +101,7 @@ Initial action types:
 - `browser.search`
 - `routine.run`
 - `reminder.create`
+- `calendar.event_draft`
 - `device.turn_on`
 - `device.turn_off`
 - `device.set_brightness`
@@ -149,6 +153,63 @@ Not implemented:
 - MQTT
 - network discovery
 - physical device control
+
+## app/home
+
+Current responsibility:
+
+- `HomeControlAdapter` contract
+- `HomeControlPlan` / `HomeControlResult`
+- state-read vs state-write boundary
+- `MockHomeControlAdapter`
+- preview-only home planning
+- `ai home-preview` CLI
+
+Not implemented:
+
+- Home Assistant client
+- MQTT client
+- any network call
+- physical device state write
+- real home execution
+
+## app/panel
+
+Current responsibility:
+
+- pending confirmation queue
+- blocked / clarification / preview visibility
+- model-only approve / deny / cancel
+- in-memory or safe local JSON store
+- `ai panel` CLI
+
+Not implemented:
+
+- desktop tray runtime
+- GUI framework
+- approve sonrası gerçek execution
+
+Sprint 49 extends this backend so reminder and calendar confirmation items can be queued without enabling real scheduling or external calendar writes.
+
+## app/personal_assistant
+
+Current responsibility:
+
+- local reminder definition and local-only reminder store
+- local calendar query preview against local drafts only
+- calendar event draft creation with confirmation-required status
+- notification copy / preview generation
+- `ConversationLoop` reminder/calendar interception before generic router fallback
+- `ai reminder`, `ai calendar`, and optional `ai notification-preview` CLI commands
+
+Not implemented:
+
+- OS notification delivery
+- background scheduler or daemon
+- reminder firing runtime
+- Google Calendar or Outlook integration
+- cloud sync
+- email or push notification delivery
 
 ## Future app/control
 
@@ -208,3 +269,4 @@ python -m app.cli audit v1-rc
 - Personal action execution before PermissionManager and adapter boundaries are tested.
 - Wake word without privacy and permission design.
 - Home/device control before permission and device registry are ready.
+- Real OS notifications or external calendar writes before local-first safety hardening.

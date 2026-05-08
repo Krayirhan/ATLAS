@@ -59,6 +59,7 @@ Intent answers: "What type of request is the user making?"
 | `routine.preview` | Preview routine steps |
 | `reminder.create` | Create reminder |
 | `calendar.query` | Read calendar information |
+| `calendar.event_draft` | Create local calendar draft preview |
 | `device.state_query` | Read device state |
 | `device.turn_on` | Turn on device |
 | `device.turn_off` | Turn off device |
@@ -133,6 +134,7 @@ Action answers: "What would ATLAS do if the request is approved?"
 | Action type | Description | Confirmation |
 |---|---|---|
 | `reminder.create` | Create reminder | Yes |
+| `calendar.event_draft` | Create local calendar draft | Yes |
 | `routine.create` | Create routine definition | Yes |
 | `routine.run` | Run routine with non-destructive steps | Yes |
 | `device.turn_on` | Turn on device | Yes |

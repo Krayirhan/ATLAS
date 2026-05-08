@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_device, ai_doctor, ai_docs_audit, ai_intent_preview, ai_main, ai_memory, ai_pc_preview, ai_chat, ai_plan, ai_review, ai_security_audit, ai_voice, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_device, ai_doctor, ai_docs_audit, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -616,6 +616,111 @@ def _ai_device(
         as_json=as_json,
         show_plan=show_plan,
         source=source,
+    )
+
+
+@ai.command("home-preview")
+def _ai_home_preview(
+    text: str = typer.Argument(None, help="Home control command to preview"),
+    project: str = typer.Option(..., "--project"),
+    as_json: bool = typer.Option(False, "--json"),
+    show_plan: bool = typer.Option(False, "--show-plan"),
+    adapter_status: bool = typer.Option(False, "--adapter-status"),
+    capabilities: bool = typer.Option(False, "--capabilities"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    ai_home_preview(
+        project=project,
+        text=text,
+        as_json=as_json,
+        show_plan=show_plan,
+        adapter_status=adapter_status,
+        capabilities=capabilities,
+        source=source,
+    )
+
+
+@ai.command("panel")
+def _ai_panel(
+    project: str = typer.Option(..., "--project"),
+    submit: str | None = typer.Option(None, "--submit"),
+    list_items: bool = typer.Option(False, "--list"),
+    show: str | None = typer.Option(None, "--show"),
+    approve: str | None = typer.Option(None, "--approve"),
+    deny: str | None = typer.Option(None, "--deny"),
+    cancel: str | None = typer.Option(None, "--cancel"),
+    clear: bool = typer.Option(False, "--clear"),
+    as_json: bool = typer.Option(False, "--json"),
+    status: str | None = typer.Option(None, "--status"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    ai_panel(
+        project=project,
+        submit=submit,
+        list_items=list_items,
+        show=show,
+        approve=approve,
+        deny=deny,
+        cancel=cancel,
+        clear=clear,
+        as_json=as_json,
+        status=status,
+        source=source,
+    )
+
+
+@ai.command("reminder")
+def _ai_reminder(
+    text: str = typer.Argument(None, help="Reminder command"),
+    project: str = typer.Option(..., "--project"),
+    list_items: bool = typer.Option(False, "--list"),
+    cancel: str | None = typer.Option(None, "--cancel"),
+    as_json: bool = typer.Option(False, "--json"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    ai_reminder(
+        project=project,
+        text=text,
+        list_items=list_items,
+        cancel=cancel,
+        as_json=as_json,
+        source=source,
+    )
+
+
+@ai.command("calendar")
+def _ai_calendar(
+    text: str = typer.Argument(None, help="Calendar command"),
+    project: str = typer.Option(..., "--project"),
+    list_drafts: bool = typer.Option(False, "--list-drafts"),
+    cancel_draft: str | None = typer.Option(None, "--cancel-draft"),
+    as_json: bool = typer.Option(False, "--json"),
+    source: str = typer.Option("text", "--source"),
+) -> None:
+    ai_calendar(
+        project=project,
+        text=text,
+        list_drafts=list_drafts,
+        cancel_draft=cancel_draft,
+        as_json=as_json,
+        source=source,
+    )
+
+
+@ai.command("notification-preview")
+def _ai_notification_preview(
+    project: str = typer.Option(..., "--project"),
+    title: str = typer.Option(..., "--title"),
+    body: str = typer.Option(..., "--body"),
+    channel: str = typer.Option("cli", "--channel"),
+    as_json: bool = typer.Option(False, "--json"),
+) -> None:
+    ai_notification_preview(
+        project=project,
+        title=title,
+        body=body,
+        channel=channel,
+        as_json=as_json,
     )
 
 

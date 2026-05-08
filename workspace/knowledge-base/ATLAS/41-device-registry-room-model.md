@@ -211,4 +211,11 @@ Coverage includes:
 
 ## Next Dependency
 
-Sprint 47 should define **Home Control Adapter Design** on top of this registry and target-resolution layer.
+Sprint 47 now defines **Home Control Adapter Design** on top of this registry and target-resolution layer.
+
+Sprint 47 consumes this layer through:
+
+- `DeviceActionPlan -> HomeControlPlan` mapping
+- mock state-read and state-write preview flow
+- `ai home-preview` CLI
+- continued no-execution and no-network boundary

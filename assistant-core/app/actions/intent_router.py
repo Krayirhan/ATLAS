@@ -550,6 +550,24 @@ class IntentRouter:
                 action_candidate=ActionType.DEVICE_OPEN_DOOR,
                 safety_notes=["Kapi veya kilit aksiyonlari fiziksel guvenlik nedeniyle MVP'de blocked."],
             )
+        state_query_match = re.search(r"(acik mi|kapali mi|durumu ne|kac derece|durumunu goster)", normalized_text)
+        if state_query_match:
+            room_name = self._extract_room(normalized_text)
+            device_name = self._extract_device(normalized_text)
+            if "klima" in normalized_text or "termostat" in normalized_text:
+                device_name = "klima"
+            target = f"{room_name} {device_name}".strip() if device_name else (room_name or "device")
+            return lambda intent_id, raw_text, norm: self._intent(
+                intent_id=intent_id,
+                category=IntentCategory.DEVICE_STATE_QUERY,
+                raw_text=raw_text,
+                normalized_text=norm,
+                confidence=0.88 if device_name else 0.72,
+                entities={"room_name": room_name, "device_name": device_name, "query_type": "state"},
+                target=target,
+                action_type=ActionType.DEVICE_STATE_QUERY,
+                safety_notes=["Safe read-only device state query."],
+            )
         temperature_match = re.search(r"(klimayi|termostatini|klima|termostat)\s+(\d{1,2})\s+derece\s+yap", normalized_text)
         if temperature_match:
             room_name = self._extract_room(normalized_text)

@@ -35,11 +35,13 @@ User Input
 | Intent Layer | Classify user request into `IntentResult`, confidence, entities, ambiguity | Sprint 39 deterministic router exists |
 | AI Reasoning Layer | Ollama-backed interpretation, bounded context, answer-only reasoning | Existing `app/ai` foundation |
 | Main Coordination Layer | Decide whether request is answer, clarification, plan, or action candidate | Existing `MainAgent` foundation |
+| Personal Assistant Tools Layer | Local reminder, calendar draft/query, and notification preview flows | Sprint 49 local preview foundation exists |
 | Action Layer | Canonical `ActionCandidate`, action type, target, parameters, source, expected result | Schema defined in Sprint 37 |
 | Risk Layer | Default risk, voice-source risk, target ambiguity, blocked categories | Schema defined in Sprint 37 |
 | Permission Layer | Preview, confirmation, denial, block, timeout, cancel | Sprint 38 target |
 | Device Identity Layer | Canonical rooms, device aliases, capability matrix, target resolution | Sprint 46 preview-only foundation exists |
-| Adapter Layer | Execute approved PC, browser, media, routine, or future device actions | PC preview exists; home execution not implemented |
+| Adapter Layer | Execute approved PC, browser, media, routine, or future device actions | PC preview exists; home adapter contract exists; home execution not implemented |
+| Permission Visibility Layer | Pending queue, blocked/clarification visibility, future tray/panel state | Sprint 48 backend foundation exists |
 | Audit Layer | Capture intent, action, risk, permission, result, timestamps | Contract defined; runtime pending |
 | UI Layer | Permission panel, status, logs, settings, routine editor | Future desktop layer |
 
@@ -66,6 +68,7 @@ Responsibilities:
 - Handle cancel and interruption.
 - Expire stale confirmations.
 - Pass a final user request to `IntentRouter`.
+- Route local reminder/calendar requests through `PersonalAssistantService` before the generic preview path.
 - Return text, future TTS, or UI response.
 
 Sprint 37 does not implement `ConversationLoop`.
@@ -163,6 +166,17 @@ Responsibilities:
 - Route supported actions to the future adapter family only after permission gates.
 
 Sprint 37 defines the schema. Sprint 39 adds deterministic runtime preview routing without execution.
+
+### PersonalAssistantService
+
+Sprint 49 adds a local-first helper layer under `ConversationLoop` for:
+
+- reminder create/list/cancel preview flows
+- calendar query against local drafts only
+- calendar event draft creation
+- notification copy preview generation
+
+This layer does not create a real scheduler, does not emit OS notifications, and does not call Google Calendar, Outlook, email, or push services.
 
 ### ActionCandidate
 
@@ -335,4 +349,7 @@ The target architecture must preserve current boundaries:
 | Sprint 39 | `IntentRouter` produces `IntentResult` and action candidates |
 | Sprint 40 | `PCControlAdapter` consumes approved actions only |
 | Sprint 43 | `RoutineEngine` uses action preview and child-action risk aggregation |
-| Sprint 47 | Home control waits for `DeviceRegistry`, room model, and permission enforcement |
+| Sprint 47 | Home preview contract consumes `DeviceRegistry`, room model, capability matrix, and permission enforcement |
+| Sprint 48 | Permission panel backend should surface pending confirmation and audit state without execution |
+| Sprint 49 | Reminder/calendar local preview layer consumes panel state safely; no scheduler, no OS notification, no external calendar write |
+| Sprint 50 | End-to-end demo should combine panel, reminder/calendar preview, and safe PC/routine preview flows |

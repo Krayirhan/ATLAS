@@ -4,7 +4,7 @@
 
 Home control is a later ATLAS capability. This document defines the architecture boundary and safety requirements before any physical device action is implemented.
 
-Sprint 46 now completes the prerequisite identity layer:
+Sprint 46 completed the prerequisite identity layer:
 
 - canonical device ids
 - room model
@@ -13,7 +13,7 @@ Sprint 46 now completes the prerequisite identity layer:
 - preview-only device planning
 - no real device execution
 
-No home automation runtime is implemented in Sprint 36.
+Sprint 47 completes the contract-level home preview layer, still without real device execution.
 
 ## Integration Candidates
 
@@ -36,6 +36,14 @@ Home control requires these systems first:
 - capability model
 - state read/write distinction
 - audit trail
+
+Sprint 47 now adds:
+
+- `app/home` package
+- `HomeControlAdapter` contract
+- `MockHomeControlAdapter`
+- `HomeControlPlan` / `HomeControlResult`
+- `ai home-preview` CLI
 
 ## DeviceRegistry Dependency
 
@@ -102,6 +110,14 @@ State write is riskier:
 
 State write requires permission policy and correct device identity.
 
+Sprint 47 boundary:
+
+- state read may return mock/demo read results
+- state write remains preview-only
+- `safe_to_execute=false`
+- no network usage
+- no physical device touch
+
 ## Approval Policy
 
 | Home action | Default risk | Handling |
@@ -127,8 +143,10 @@ State write requires permission policy and correct device identity.
 
 1. DeviceRegistry.
 2. Room Model.
-3. State read adapter.
-4. Action preview for write actions.
-5. Confirmation UX.
-6. Limited low/medium write actions.
-7. Hardening and audit review.
+3. HomeControlAdapter contract.
+4. Mock home preview adapter.
+5. State-read preview path.
+6. Action preview for write actions.
+7. Confirmation UX.
+8. Limited low/medium write actions later.
+9. Hardening and audit review.

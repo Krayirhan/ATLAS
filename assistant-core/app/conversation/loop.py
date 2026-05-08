@@ -19,6 +19,15 @@ from dataclasses import asdict
 from app.personal_memory.service import PersonalMemoryService
 from app.personal_memory.intents import MemoryIntentParser
 from app.personal_memory.models import MemoryOperation, MemoryOperationStatus
+from app.personal_assistant.models import (
+    CalendarOperation,
+    CalendarOperationResult,
+    CalendarStatus,
+    ReminderOperation,
+    ReminderOperationResult,
+    ReminderResultStatus,
+)
+from app.personal_assistant.service import PersonalAssistantService
 
 class ConversationLoop:
     def __init__(self):
@@ -27,6 +36,7 @@ class ConversationLoop:
         self.device_planner = DeviceActionPlanner(router=self.router)
         self.state_manager = get_state_manager()
         self.response_builder = ResponseBuilder()
+        self.personal_assistant = PersonalAssistantService()
 
     def handle(self, request: ConversationRequest) -> ConversationResponse:
         state = self.state_manager.get_state(request.session_id)
@@ -60,6 +70,25 @@ class ConversationLoop:
                 intent_category=state.last_intent,
                 action_type=state.last_action,
                 decision_status="none"
+            ))
+            self.state_manager.save_state(state)
+            return response
+
+        personal_result = self.personal_assistant.handle_text(request.message, source=request.source)
+        if personal_result is not None:
+            response = self._build_personal_assistant_response(request, personal_result)
+            state.last_intent = response.intent.get("category") if response.intent else "personal_assistant"
+            state.last_action = response.metadata.get("action_type")
+            state.pending_clarification = response.clarification_required
+            state.pending_confirmation = response.confirmation_required
+            state.turns.append(ConversationTurn(
+                turn_id=str(uuid.uuid4()),
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=response.assistant_message,
+                intent_category=state.last_intent or "personal_assistant",
+                action_type=state.last_action or "none",
+                decision_status=response.metadata.get("decision_status", "none"),
             ))
             self.state_manager.save_state(state)
             return response
@@ -159,6 +188,126 @@ class ConversationLoop:
         self.state_manager.save_state(state)
         
         return response
+
+    def _build_personal_assistant_response(self, request: ConversationRequest, result: ReminderOperationResult | CalendarOperationResult) -> ConversationResponse:
+        if isinstance(result, ReminderOperationResult):
+            message = self.personal_assistant.reminder_service.format_result(result)
+            reminder = result.reminder
+            action_type = {
+                ReminderOperation.CREATE: "reminder.create",
+                ReminderOperation.LIST: "reminder.list",
+                ReminderOperation.CANCEL: "reminder.cancel",
+                ReminderOperation.PREVIEW: "reminder.preview",
+            }.get(result.operation, "reminder.unknown")
+            risk_level = "safe_readonly"
+            response_type = ConversationResponseType.ANSWER
+            confirmation_required = False
+            blocked = False
+            decision_status = "listed"
+            if result.status is ReminderResultStatus.PENDING_CONFIRMATION:
+                risk_level = "medium"
+                response_type = ConversationResponseType.CONFIRMATION_REQUIRED
+                confirmation_required = True
+                decision_status = "confirmation_required"
+            elif result.status is ReminderResultStatus.BLOCKED:
+                risk_level = "blocked"
+                response_type = ConversationResponseType.BLOCKED
+                blocked = True
+                decision_status = "blocked"
+            elif result.status is ReminderResultStatus.PREVIEW:
+                response_type = ConversationResponseType.ACTION_PREVIEW
+                decision_status = "preview"
+            intent = {
+                "category": action_type,
+                "target": reminder.title if reminder is not None else "",
+                "requires_clarification": False,
+            }
+            metadata = {
+                "source": request.source.value,
+                "action_type": action_type,
+                "risk_level": risk_level,
+                "target": reminder.title if reminder is not None else "",
+                "decision_status": decision_status,
+                "personal_assistant": {
+                    "scope": "reminder",
+                    "operation": result.operation.value,
+                    "status": result.status.value,
+                    "target": reminder.title if reminder is not None else "",
+                    "risk_level": risk_level,
+                    "panel_title": "Reminder preview" if result.operation is ReminderOperation.CREATE else "Reminder local state",
+                    "panel_summary": message,
+                },
+            }
+            return ConversationResponse(
+                session_id=request.session_id,
+                user_message=request.message,
+                assistant_message=message,
+                response_type=response_type,
+                intent=intent,
+                confirmation_required=confirmation_required,
+                blocked=blocked,
+                warnings=result.warnings,
+                audit_metadata=result.audit_metadata,
+                metadata=metadata,
+            )
+
+        message = self.personal_assistant.calendar_service.format_result(result)
+        draft = result.event_draft
+        action_type = {
+            CalendarOperation.QUERY: "calendar.query",
+            CalendarOperation.DRAFT_EVENT: "calendar.event_draft",
+            CalendarOperation.LIST_LOCAL: "calendar.list_local",
+            CalendarOperation.CANCEL_DRAFT: "calendar.cancel_draft",
+        }.get(result.operation, "calendar.unknown")
+        risk_level = "safe_readonly"
+        response_type = ConversationResponseType.ANSWER
+        confirmation_required = False
+        blocked = False
+        decision_status = result.status.value
+        if result.status is CalendarStatus.PENDING_CONFIRMATION:
+            risk_level = "medium"
+            response_type = ConversationResponseType.CONFIRMATION_REQUIRED
+            confirmation_required = True
+            decision_status = "confirmation_required"
+        elif result.status is CalendarStatus.SAFE_QUERY_PREVIEW:
+            response_type = ConversationResponseType.ACTION_PREVIEW
+        elif result.status is CalendarStatus.BLOCKED:
+            risk_level = "blocked"
+            response_type = ConversationResponseType.BLOCKED
+            blocked = True
+        intent = {
+            "category": action_type,
+            "target": draft.title if draft is not None else result.query.date_text if result.query is not None else "",
+            "requires_clarification": False,
+        }
+        metadata = {
+            "source": request.source.value,
+            "action_type": action_type,
+            "risk_level": risk_level,
+            "target": draft.title if draft is not None else result.query.date_text if result.query is not None else "",
+            "decision_status": decision_status,
+            "personal_assistant": {
+                "scope": "calendar",
+                "operation": result.operation.value,
+                "status": result.status.value,
+                "target": draft.title if draft is not None else result.query.date_text if result.query is not None else "",
+                "risk_level": risk_level,
+                "panel_title": "Calendar draft preview" if result.operation is CalendarOperation.DRAFT_EVENT else "Calendar query preview",
+                "panel_summary": message,
+            },
+        }
+        return ConversationResponse(
+            session_id=request.session_id,
+            user_message=request.message,
+            assistant_message=message,
+            response_type=response_type,
+            intent=intent,
+            confirmation_required=confirmation_required,
+            blocked=blocked,
+            warnings=result.warnings,
+            audit_metadata=result.audit_metadata,
+            metadata=metadata,
+        )
 
     def _is_device_like(self, message: str, candidate) -> bool:
         normalized = message.lower()

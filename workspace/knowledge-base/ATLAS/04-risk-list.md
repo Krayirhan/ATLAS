@@ -78,22 +78,57 @@
 68. **Network discovery creep** - Convenience work may add LAN discovery before policy and privacy review.
 69. **Physical world side effect risk** - Device writes can change lights, climate, locks, or security state in the real world.
 70. **Room/device privacy** - Registry data can reveal home layout, devices, and behavioral patterns.
+71. **Home adapter accidentally executes** - A preview-only home adapter could cross into real device control if the execution boundary regresses.
+72. **Network call without opt-in** - Home preview work could start making implicit network calls before explicit consent and adapter selection exist.
+73. **Home Assistant token exposure** - Future adapter wiring could leak secrets if credentials are loaded or logged unsafely.
+74. **MQTT topic injection** - Broad or malformed topics could address the wrong capability or device class.
+75. **Physical device state mismatch** - Preview/demo state could be confused with real device state.
+76. **Stale device state** - A future adapter may act on outdated state if freshness is not tracked.
+77. **State read mistaken for state write** - User or code may treat a safe query as a modifying action.
+78. **State write without confirmation** - Home write actions could bypass confirmation if planner/adapter contracts drift.
+79. **Camera/lock/security capability privacy risk** - High-sensitivity home classes can expose privacy or physical security risk.
+80. **Cloud provider privacy risk** - Vendor cloud APIs expand the privacy surface beyond the local environment.
+81. **No-network boundary regression** - Mock-only home flows may silently gain network behavior over time.
+82. **User confuses approve with execution** - A panel approval may be mistaken for real action execution if copy is unclear.
+83. **Stale pending approval** - An old pending item may remain visible or appear valid after context changed.
+84. **Blocked item approved by bug** - A panel policy regression could allow blocked items into approved state.
+85. **Clarification item approved by bug** - A missing-target item could be marked approved without clarification.
+86. **Panel stores sensitive data** - Raw prompt or secret-like text may be stored unsafely in local panel state.
+87. **Panel item expires but still visible** - Expired items may continue to look actionable.
+88. **Approval replay** - An old item id may be reused or approved repeatedly in error.
+89. **Execution boundary bypass** - A future panel handler may accidentally call a real adapter after approval.
+90. **Desktop tray notification spoofing future risk** - Future OS-level notifications may misrepresent preview as execution.
+91. **Persistent panel store privacy risk** - Local JSON queue may reveal device/routine intent history if overshared.
 
 ## Privacy and Data Risks
 
-71. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
-72. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
-73. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
-74. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
-75. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
+92. **Secret leakage via AI path** - `.env`, keys, keystores, browser profiles, and raw logs must remain blocked.
+93. **Personal data leakage** - Personal memory, preferences, routines, devices, and command history can expose sensitive behavior.
+94. **NotebookLM data mistake** - Manual exports can accidentally include private or secret data.
+95. **Full disk exposure** - MCP or future file adapters must not expose `C:\Users`, full disks, or blocked roots.
+96. **D: drive legacy problem** - `D:\ATLAS` and writes to `D:` remain blocked by policy.
 
 ## Runtime and Reliability Risks
 
-76. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
-77. **Ollama warmup/load time** - Cold model start can delay the first answer.
-78. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
-79. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
-80. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
+97. **Local model latency** - Ollama model load or slow generation can make the assistant feel unresponsive.
+98. **Ollama warmup/load time** - Cold model start can delay the first answer.
+99. **Agent route error** - MainAgent or future IntentRouter can choose the wrong sub-agent or action route.
+100. **Audit depth mismatch** - Static audits can pass while a future runtime action path is unsafe.
+101. **Knowledge-base drift** - Roadmap/status docs can become stale and mislead AI answers.
+
+## Reminder / Calendar Risks
+
+102. **User thinks reminder is actually scheduled** - preview-only reminder copy can be mistaken for a real background timer.
+103. **Calendar draft mistaken for external write** - local draft copy can be mistaken for Google Calendar or Outlook creation.
+104. **Sensitive reminder content** - reminder text may contain credentials, identity, finance, or medical hints.
+105. **Reminder cancellation mismatch** - a fuzzy cancel target may cancel the wrong local reminder.
+106. **Stale local reminder** - old preview-only reminders may remain visible after the user assumes they expired.
+107. **Timezone/date ambiguity** - Turkish time phrases such as `aksam`, `yarin 9'da`, or weekday references may resolve incorrectly.
+108. **Missing due time** - a reminder or event title may be stored without a trustworthy due time.
+109. **Notification copy implies execution** - preview text may sound like a real OS notification or fired reminder.
+110. **Panel approval mistaken for scheduling** - approving a reminder/calendar item may be confused with starting a scheduler or external write.
+111. **Future OS notification permission risk** - a later desktop bridge may overreach before explicit notification consent exists.
+112. **External calendar credential risk** - a future Google/Outlook adapter can widen secret/token exposure.
 
 ## Current Controls
 
@@ -110,6 +145,10 @@
 - Sprint 38 audit metadata sets `execution_attempted=false`.
 - Sprint 39 IntentRouter keeps MVP parsing deterministic and local; no LLM or adapter path is used.
 - Sprint 39 blocks shell-like or secret-reading phrasing at the router layer before any execution boundary exists.
+- Sprint 47 `MockHomeControlAdapter` keeps `execution_attempted=false`, `network_used=false`, and `physical_device_touched=false`.
+- Sprint 48 panel policy blocks approve on blocked, clarification-required, or expired items and keeps `execution_attempted=false`.
+- Sprint 49 personal assistant policy blocks secret-like reminder/calendar text, keeps preview copy local-only, and stores reminder/calendar state in a bounded local JSON file.
+- Sprint 49 reminder/calendar audit metadata keeps `execution_attempted=false`, `external_calendar_used=false`, and `os_notification_sent=false`.
 
 ## Missing Controls
 
@@ -120,7 +159,13 @@
 - Transcript confidence enforcement runtime.
 - Audio retention/deletion runtime policy enforcement.
 - Home adapter runtime on top of device registry and room model.
+- Real Home Assistant or MQTT adapter credential policy.
+- Home adapter stale-state freshness and source attribution.
+- Desktop tray runtime and notification authenticity controls.
+- Persistent panel store encryption or stronger local privacy policy if queue history expands.
 - Durable personal memory storage policy.
 - Routine scheduler and cancellation runtime.
+- Reminder scheduler authenticity and missed-reminder UX policy.
+- External calendar authentication and token policy if adapters are added later.
 - Desktop permission panel.
 - Durable action and routine audit log.

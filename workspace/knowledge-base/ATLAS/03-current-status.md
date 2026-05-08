@@ -17,6 +17,9 @@
 - **Sprint 44 status:** completed Voice Core Architecture; push-to-talk-first voice direction, privacy boundaries, and STT/TTS selection guidance are defined.
 - **Sprint 45 status:** completed STT/TTS MVP; mock voice pipeline and `ai voice` CLI are available.
 - **Sprint 46 status:** completed DeviceRegistry + Room Model; in-memory registry, alias resolution, and `ai device` CLI are available.
+- **Sprint 47 status:** completed Home Control Adapter Design; contract-level home planning, mock adapter, and `ai home-preview` CLI are available.
+- **Sprint 48 status:** completed Desktop Tray / Permission Panel backend; pending queue, model-only decisions, and `ai panel` CLI are available.
+- **Sprint 49 status:** completed Notification / Reminder / Calendar Assistant; `ReminderService`, `CalendarService`, notification preview, `ai reminder`, `ai calendar`, and ConversationLoop reminder/calendar support are available.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core
@@ -37,6 +40,7 @@ These modules are preserved as the core technical foundation:
 - **Action schema foundation:** `app/actions` contains Sprint 37 enum/dataclass contracts.
 - **PermissionManager foundation:** `app/actions` contains Sprint 38 preview, permission decision, confirm/deny/cancel, and audit metadata contracts.
 - **IntentRouter foundation:** `app/actions/intent_router.py` parses text into `IntentResult`, `ActionCandidate`, and `PermissionDecision` preview output.
+- **PersonalAssistant foundation:** `app/personal_assistant` now provides local reminder models, calendar draft/query preview, notification copy preview, and safe local JSON persistence.
 - **Tests / doctor / audit:** `pytest`, `doctor --full`, `config validate`, `project validate ATLAS`, `ai doctor`, and `audit v1-rc` are the core health signals.
 
 Current AI safety boundary:
@@ -113,16 +117,17 @@ These are not implemented yet and are the focus of Sprint 44+:
 - ActionRouter runtime
 - SkillRegistry
 - Browser/media/file execution beyond safe preview
-- Home control adapter
+- Home control adapter execution
 - Voice runtime
 - real speech-to-text runtime
 - real text-to-speech runtime
 - Wake word runtime
-- Desktop tray / permission panel
-- Permission UI
+- Desktop tray runtime
 - Durable action audit log
 - Durable routine scheduler / daemon
-- Notification / reminder / calendar assistant
+- Real OS notification delivery
+- External calendar API integration
+- Background reminder scheduler / daemon
 - Mobile bridge
 - Network discovery
 
@@ -324,29 +329,72 @@ Not implemented:
 - voice-driven PC or home execution
 - audio retention system
 
-## Sprint 45 Status
+## Sprint 47 Status
 
-Sprint 45 is complete as a mock-only voice pipeline sprint.
+Sprint 47 is complete as a home preview contract sprint.
 
 Completed:
 
-- `app/voice` defines speech, transcript, TTS, and pipeline models.
-- STT/TTS adapter contracts are implemented.
-- `MockSTTAdapter` and `MockTTSAdapter` are implemented.
-- `VoicePipeline` connects transcript -> `ConversationLoop` -> mock TTS result.
-- `ai voice` CLI is available.
-- `source=voice` path is now exercised through a safe mock flow.
+- `app/home` defines `HomeControlAdapter`, `HomeControlPlan`, `HomeControlResult`, and state read/write request/result models.
+- `MockHomeControlAdapter` exists and never performs real network or physical device execution.
+- `HomeControlPlanner` maps `DeviceActionPlan` into preview-only home plans.
+- `ai home-preview` CLI is available.
+- Home Assistant is documented as the first real adapter candidate.
+- MQTT is documented as an alternative, not a default.
 
 Not implemented:
 
-- real microphone capture
-- real STT engine
-- real TTS engine
-- wake word runtime
-- always-listening mode
-- voice-driven action execution
-- audio retention
+- real home execution
+- Home Assistant client
+- MQTT client
+- network discovery
+- token or credential loading
+- physical device state changes
+- durable home state sync
+
+## Sprint 48 Status
+
+Sprint 48 is complete as a permission visibility and queue sprint.
+
+Completed:
+
+- `app/panel` defines panel item, decision, state, and operation models.
+- Pending confirmation queue exists through in-memory or safe local JSON store.
+- `PermissionPanelService` can submit text through `ConversationLoop` and persist preview/block/clarification items.
+- `ai panel` CLI can submit, list, show, approve, deny, cancel, and clear panel items.
+- Approve updates model state only and does not start real execution.
+
+Not implemented:
+
+- desktop tray runtime
+- GUI framework
+- background tray daemon
+- post-approval real execution
+- notification badges or OS-level notifications
+
+## Sprint 49 Status
+
+Sprint 49 is complete as a local-first reminder/calendar/notification preview sprint.
+
+Completed:
+
+- `app/personal_assistant` defines reminder, calendar, notification, parser, policy, service, and store layers.
+- `ReminderService` supports create, list, preview, and cancel over local-only state.
+- `CalendarService` supports safe local query preview and local event drafts.
+- notification preview copy exists through `NotificationService`.
+- `ConversationLoop` now intercepts reminder/calendar requests before the generic router fallback.
+- `PermissionPanelService` can queue reminder and calendar confirmation items.
+- `ai reminder` and `ai calendar` CLIs are available.
+
+Not implemented:
+
+- real OS notification delivery
+- background scheduler / daemon
+- reminder firing runtime
+- Google Calendar or Outlook integration
+- external calendar write
+- email or push notification delivery
 
 ## Next Sprint
 
-Sprint 46 should be **DeviceRegistry + Room Model**. It should define canonical device identity, aliasing, room mapping, and capability constraints before any real home control runtime is added.
+Sprint 50 should be **End-to-End Personal Assistant Demo**. It should combine reminder/calendar preview, panel visibility, safe PC preview, routine preview, and mock voice flows into one coherent demo path.

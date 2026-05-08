@@ -34,6 +34,7 @@ DEFAULT_ACTION_RISK: dict[ActionType, RiskLevel] = {
     ActionType.PC_VOLUME_SET: RiskLevel.LOW,
     ActionType.PC_VOLUME_MUTE_TOGGLE: RiskLevel.LOW,
     ActionType.REMINDER_CREATE: RiskLevel.MEDIUM,
+    ActionType.CALENDAR_EVENT_DRAFT: RiskLevel.MEDIUM,
     ActionType.ROUTINE_CREATE: RiskLevel.MEDIUM,
     ActionType.ROUTINE_RUN: RiskLevel.MEDIUM,
     ActionType.DEVICE_TURN_ON: RiskLevel.MEDIUM,
