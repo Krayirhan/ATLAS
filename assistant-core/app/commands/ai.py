@@ -1434,3 +1434,167 @@ def _voice_pipeline_payload(project: str, result) -> dict[str, object]:
         "execution_attempted": result.execution_attempted,
         "metadata": result.metadata,
     }
+
+
+def ai_demo(
+    project: str,
+    list_scenarios: bool = False,
+    scenario_id: str | None = None,
+    category: str | None = None,
+    run_all: bool = False,
+    as_json: bool = False,
+    as_markdown: bool = False,
+    output: str | None = None,
+    show_safety: bool = False,
+    no_write: bool = False,
+) -> None:
+    """Sprint 50 end-to-end personal assistant demo runner."""
+    import re
+    from pathlib import Path
+
+    from app.demo.models import DemoCategory
+    from app.demo.report import build_json, build_markdown, validate_output_path, write_report
+    from app.demo.runner import DemoRunner
+    from app.demo.scenarios import BUILTIN_SCENARIOS
+
+    console = Console()
+    runner = DemoRunner(project_name=project)
+
+    # --list
+    if list_scenarios:
+        scenarios = runner.list_scenarios()
+        if as_json:
+            typer.echo(
+                json.dumps(
+                    [
+                        {
+                            "scenario_id": s.scenario_id,
+                            "title": s.title,
+                            "category": s.category.value,
+                            "command_surface": s.command_surface.value,
+                            "expected_response_type": s.expected_response_type,
+                            "tags": s.tags,
+                        }
+                        for s in scenarios
+                    ],
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            )
+            return
+        table = Table(title="ATLAS Demo Scenarios")
+        table.add_column("#", style="dim")
+        table.add_column("ID")
+        table.add_column("Title")
+        table.add_column("Category")
+        table.add_column("Surface")
+        for i, s in enumerate(scenarios, 1):
+            table.add_row(str(i), s.scenario_id, s.title, s.category.value, s.command_surface.value)
+        console.print(table)
+        return
+
+    # Determine what to run
+    report = None
+    single_result = None
+
+    if scenario_id is not None:
+        single_result = runner.run_scenario(scenario_id)
+    elif category is not None:
+        try:
+            cat_enum = DemoCategory(category)
+        except ValueError:
+            console.print(f"[red]Unknown category: {category}. Valid: {[c.value for c in DemoCategory]}[/red]")
+            raise typer.Exit(1)
+        report = runner.run_category(cat_enum)
+    elif run_all:
+        report = runner.run_all()
+    else:
+        console.print(
+            "[yellow]No action specified. Use --list, --scenario, --category, or --all.[/yellow]"
+        )
+        raise typer.Exit(0)
+
+    # Single scenario output
+    if single_result is not None:
+        if as_json:
+            typer.echo(single_result.model_dump_json(indent=2))
+            return
+        badge = "[green]PASS[/green]" if single_result.passed else "[red]FAIL[/red]"
+        console.print(f"[bold]Scenario[/bold]: {single_result.title}")
+        console.print(f"[bold]Result[/bold]: {badge}")
+        console.print(f"[bold]Response Type[/bold]: {single_result.response_type}")
+        console.print(f"[bold]Assistant[/bold]: {_safe_console_text(single_result.assistant_message)}")
+        if show_safety:
+            console.print("[bold]Safety Flags[/bold]")
+            for flag, val in single_result.safety_flags.items():
+                color = "red" if val else "green"
+                console.print(f"  [{color}]{flag}[/{color}]: {val}")
+        if single_result.warnings:
+            console.print("[bold]Warnings[/bold]")
+            for w in single_result.warnings:
+                console.print(f"  - {_safe_console_text(w)}")
+        return
+
+    # Report output (run_all / run_category)
+    if report is None:
+        return
+
+    if as_json:
+        typer.echo(build_json(report))
+        return
+
+    md_text = build_markdown(report)
+
+    if as_markdown:
+        if output and not no_write:
+            out_path = Path(output)
+            # Resolve relative paths against ATLAS root
+            if not out_path.is_absolute():
+                atlas_root = Path(__file__).resolve().parents[3]
+                out_path = atlas_root / output
+            try:
+                validate_output_path(out_path, Path(__file__).resolve().parents[3])
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/red]")
+                raise typer.Exit(1)
+            write_report(report, out_path, as_markdown=True)
+            console.print(f"[green]Report written to: {out_path}[/green]")
+        elif not no_write and not output:
+            typer.echo(md_text)
+        else:
+            typer.echo(md_text)
+        return
+
+    # Default rich output
+    badge_total = f"[green]{report.passed_scenarios}[/green]/[red]{report.failed_scenarios}[/red]"
+    console.print(f"[bold]ATLAS Demo Report[/bold] — Project: {report.project_name}")
+    console.print(f"Scenarios: {report.total_scenarios}  Passed/Failed: {badge_total}")
+    console.print("")
+
+    for result in report.results:
+        badge = "[green]PASS[/green]" if result.passed else "[red]FAIL[/red]"
+        console.print(f"  {badge} [{result.command_surface.value}] {result.title}")
+        console.print(f"       -> {_safe_console_text(result.assistant_message[:120])}")
+        if result.warnings:
+            for w in result.warnings[:2]:
+                console.print(f"       [yellow]warn[/yellow]: {_safe_console_text(w)}")
+
+    if show_safety:
+        console.print("")
+        console.print("[bold]Safety Summary[/bold]")
+        ss = report.safety_summary
+        console.print(f"  Safe: {ss.get('safe_scenarios')}  Unsafe: {ss.get('unsafe_scenarios')}")
+        for flag, val in ss.get("execution_boundary", {}).items():
+            color = "red" if val else "green"
+            console.print(f"  [{color}]{flag}[/{color}]: {val}")
+        violations = ss.get("violations", [])
+        if violations:
+            console.print("[red]Violations:[/red]")
+            for v in violations:
+                console.print(f"  - {v['scenario_id']}: {v['violation']}")
+        else:
+            console.print("[green]No safety violations.[/green]")
+
+    console.print("")
+    for rec in report.recommendations:
+        console.print(f"  • {rec}")

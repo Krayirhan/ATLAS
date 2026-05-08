@@ -20,6 +20,7 @@
 - **Sprint 47 status:** completed Home Control Adapter Design; contract-level home planning, mock adapter, and `ai home-preview` CLI are available.
 - **Sprint 48 status:** completed Desktop Tray / Permission Panel backend; pending queue, model-only decisions, and `ai panel` CLI are available.
 - **Sprint 49 status:** completed Notification / Reminder / Calendar Assistant; `ReminderService`, `CalendarService`, notification preview, `ai reminder`, `ai calendar`, and ConversationLoop reminder/calendar support are available.
+- **Sprint 50 status:** completed End-to-End Personal Assistant Demo; `app/demo` package, 14 built-in scenarios, `DemoRunner`, `ai demo` CLI, Markdown/JSON report generation, safety policy validation, and 56 new tests are available. Generated demo report artifacts are not committed.
 - **Important boundary:** `D:\ATLAS` is not an operational root. BenimFormum is not part of this sprint.
 
 ## A) Completed Core

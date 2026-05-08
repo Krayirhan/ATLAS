@@ -149,6 +149,23 @@
 - Sprint 48 panel policy blocks approve on blocked, clarification-required, or expired items and keeps `execution_attempted=false`.
 - Sprint 49 personal assistant policy blocks secret-like reminder/calendar text, keeps preview copy local-only, and stores reminder/calendar state in a bounded local JSON file.
 - Sprint 49 reminder/calendar audit metadata keeps `execution_attempted=false`, `external_calendar_used=false`, and `os_notification_sent=false`.
+- Sprint 50 `DemoSafetyPolicy` validates all 10 safety flags on every `DemoResult`; any true flag fails the scenario.
+- Sprint 50 demo output path validation prevents traversal outside `workspace/outputs/demo/`.
+- Sprint 50 `DemoRunner` never opens real PC/home/voice/calendar/notification execution paths.
+
+## Sprint 50 Demo-Specific Risks
+
+| Risk | Mitigation |
+|------|-----------|
+| Demo mistaken for real execution | Safety summary printed with every run; "Execution: none" in every CLI output |
+| Generated report contains sensitive text | Output path gated to `workspace/outputs/demo/`; not committed to git |
+| Scenario output drift | Safety flag regression tests run in pytest; 56 tests cover all 14 scenarios |
+| Safety flag regression | `DemoSafetyPolicy` validates all 10 flags; any True flag fails the demo |
+| Output path traversal | `validate_output_path` enforces `workspace/outputs/demo/` prefix |
+| Stale demo scenario | Scenarios reference real services; regression suite catches breakage |
+| Overclaiming product readiness | Demo report includes "Known Limitations" section; Sprint 51 is next |
+| User expects Chrome/light to actually open | Assistant message and CLI always say "gercek execution yok" |
+| Panel approval mistaken as execution | `execution_attempted=False` enforced after approve in tests |
 
 ## Missing Controls
 

@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_device, ai_doctor, ai_docs_audit, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_demo, ai_device, ai_doctor, ai_docs_audit, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -742,6 +742,34 @@ def _ai_docs_audit(
         as_json=as_json,
         max_files=max_files,
         max_chars_per_file=max_chars_per_file,
+    )
+
+
+@ai.command("demo")
+def _ai_demo(
+    project: str = typer.Option(..., "--project"),
+    list_scenarios: bool = typer.Option(False, "--list", help="List all available demo scenarios"),
+    scenario_id: str | None = typer.Option(None, "--scenario", help="Run a specific scenario by ID"),
+    category: str | None = typer.Option(None, "--category", help="Run all scenarios in a category"),
+    run_all: bool = typer.Option(False, "--all", help="Run all demo scenarios"),
+    as_json: bool = typer.Option(False, "--json", help="Output as JSON"),
+    as_markdown: bool = typer.Option(False, "--markdown", help="Output as Markdown report"),
+    output: str | None = typer.Option(None, "--output", help="Write report to file (workspace/outputs/demo/)"),
+    show_safety: bool = typer.Option(False, "--show-safety", help="Show safety flag summary"),
+    no_write: bool = typer.Option(False, "--no-write", help="Suppress file writing"),
+) -> None:
+    """Sprint 50 end-to-end personal assistant demo runner."""
+    ai_demo(
+        project=project,
+        list_scenarios=list_scenarios,
+        scenario_id=scenario_id,
+        category=category,
+        run_all=run_all,
+        as_json=as_json,
+        as_markdown=as_markdown,
+        output=output,
+        show_safety=show_safety,
+        no_write=no_write,
     )
 
 

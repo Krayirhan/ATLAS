@@ -436,29 +436,47 @@ The former near-term developer roadmap remains parked:
 - panel approve real scheduling baslatmaz
 - no OS notification / no external calendar / no scheduler boundaries korunur
 
-### Sprint 50 - End-to-End Personal Assistant Demo
+## Sprint 50 - Completed
 
-**Amac:** Text/voice command'dan permission ve safe PC/routine action sonucuna kadar demo akislarini birlestirmek.
+**Amac:** ATLAS'in tum onizleme modüllerini tek bir guvenli, uctan uca, gosterilebilir kisisel asistan demo akisinda birlestirmek.
 
-**Kapsam:**
+**Tamamlanan kapsam:**
 
-- Text command.
-- Optional voice command.
-- Intent.
-- Action preview.
-- Approval.
-- Safe PC/routine result.
-- Audit.
+- `app/demo` package (`models.py`, `scenarios.py`, `runner.py`, `policy.py`, `report.py`)
+- 14 built-in demo senaryosu (chat, voice, pc_preview, device, home_preview, routine, memory, reminder, calendar, panel, safety, mixed)
+- `DemoScenario / DemoResult / DemoReport` modelleri
+- `DemoRunner` (list_scenarios, run_scenario, run_all, run_category, validate_safety)
+- `DemoSafetyPolicy` (10 safety flag validation)
+- Markdown + JSON report generation
+- `ai demo` CLI komutu (--list, --scenario, --all, --category, --json, --markdown, --show-safety, --no-write, --output)
+- 56 yeni test (test_demo_scenarios, test_demo_runner, test_ai_demo_cli)
+- Tum mevcut CLI komutlari regresyon testleri
+- KB dokumanlari guncellendi (03-current-status, 04-risk-list, 06-next-sprints, 25-assistant-architecture, 43-desktop-permission-panel, 44-notification-reminder-calendar-assistant)
+- Yeni dokuman olusturuldu: `45-end-to-end-personal-assistant-demo.md`
 
-**Kapsam disi:**
+**Kapsam disi kalanlar:**
 
-- Unsafe home write actions.
-- Autonomous coding.
+- Gercek Chrome / uygulama acma
+- Gercek ev cihazi komutlari
+- Gercek OS notification
+- Gercek takvim API entegrasyonu
+- Gercek mikrofon / STT/TTS
+- Gercek scheduler / daemon
+- Desktop GUI / tray runtime
+- Home Assistant / MQTT
 
-**Acceptance criteria:**
+**Acceptance criteria status:**
 
-- En az 5 safe user flow calisir.
-- High risk commands execute etmez.
+- app/demo package olusturuldu
+- 14 built-in senaryo (>= 12 gereksinim karsilandi)
+- DemoRunner calisir
+- ai demo CLI calisiyor
+- --list, --scenario, --category, --all, --json, --markdown --no-write calisir
+- Tum scenaryo safety flags = false
+- Gercek PC/home/OS/calendar execution yok
+- pytest: 463 passed
+- doctor --full: ok
+- audit v1-rc: GO
 
 ### Sprint 51 - Safety / Latency / UX Hardening
 
