@@ -27,3 +27,10 @@ assistant-core/atlas_assistant_core.egg-info/
 
 # Local SQLite (re-create with memory init)
 workspace/memory/*.db
+
+# Preview/demo/generated local artifacts
+workspace/outputs/demo/
+workspace/outputs/hardening/
+workspace/outputs/reports/ATLAS/*.md
+workspace/outputs/reports/V1/v1-rc-audit-*.md
+workspace/state/*.json

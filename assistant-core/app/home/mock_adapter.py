@@ -66,7 +66,7 @@ class MockHomeControlAdapter:
             accepted=request.requires_confirmation,
             executed=False,
             dry_run=True,
-            message=f"{request.device_id} icin mock state-write preview. Gercek cihaz degismedi.",
+            message=f"{request.device_id} icin onizleme yazma plani hazirlandi. Gercek cihaz degismedi.",
             metadata={"network_used": False, "physical_device_touched": False, "execution_attempted": False},
         )
 
@@ -94,7 +94,7 @@ class MockHomeControlAdapter:
             message = plan.blocked_reason or "Home control action MVP policy tarafindan unsupported."
         else:
             status = HomeControlStatus.AWAITING_CONFIRMATION
-            message = f"{plan.device_id} icin mock home write preview hazir. Gercek execution yok."
+            message = f"{plan.device_id} icin home onizlemesi hazir. Onay gerekiyor. Gercek cihaz degismedi."
         return HomeControlResult(
             plan_id=plan.plan_id,
             status=status,

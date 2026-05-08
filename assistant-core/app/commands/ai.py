@@ -781,7 +781,7 @@ def ai_intent_preview(
         console.print("[bold]Warnings[/bold]")
         for warning in result.warnings:
             console.print(f"- {_safe_console_text(warning)}")
-    console.print("[bold]Execution[/bold]: none")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
 
 
 def _parse_action_source(source: str) -> ActionSource:
@@ -865,6 +865,7 @@ def ai_pc_preview(
     console.print(f"[bold]Result Message[/bold]: {result.message}")
     if result.data:
         console.print(f"[bold]Data[/bold]: {json.dumps(result.data, indent=2, ensure_ascii=False)}")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
 
 
 def ai_device(
@@ -942,7 +943,7 @@ def ai_device(
         console.print(f"[bold]Safe To Execute[/bold]: {result.plan.safe_to_execute}")
         if result.plan.blocked_reason:
             console.print(f"[bold]Blocked Reason[/bold]: {_safe_console_text(result.plan.blocked_reason)}")
-    console.print("[bold]Execution[/bold]: none")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
 
 
 def ai_home_preview(
@@ -1011,7 +1012,7 @@ def ai_home_preview(
         console.print(f"[bold]Safe To Execute[/bold]: {plan.safe_to_execute}")
         if plan.blocked_reason:
             console.print(f"[bold]Blocked Reason[/bold]: {_safe_console_text(plan.blocked_reason)}")
-    console.print("[bold]Execution[/bold]: none")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
 
 
 def _panel_operation_payload(project: str, result) -> dict[str, object]:
@@ -1326,11 +1327,11 @@ def ai_routine(
         formatted = service.format_response(res)
         status_value = getattr(getattr(res, "status", None), "value", None)
         if status_value == "blocked":
-            console.print(f"[red]BLOCKED[/red]: {formatted}")
+            console.print(f"[red]ENGELLENDI[/red]: {formatted}")
         elif status_value == "awaiting_confirmation":
-            console.print(f"[yellow]CONFIRMATION REQUIRED[/yellow]: {formatted}")
+            console.print(f"[yellow]ONAY GEREKIYOR[/yellow]: {formatted}")
         else:
-            console.print(f"[green]SUCCESS[/green]: {formatted}")
+            console.print(f"[green]ONIZLEME[/green]: {formatted}")
 
 
 def ai_voice(
@@ -1372,12 +1373,13 @@ def ai_voice(
         return
 
     console.print(f"[bold]Project[/bold]: {project}")
-    console.print(f"[bold]Source[/bold]: {result.metadata.get('source', source.value)}")
+    console.print("[bold]Source[/bold]: mock ses akisi")
     if show_transcript:
         console.print(f"[bold]Transcript[/bold]: {_safe_console_text(result.transcript.text or '(empty)')}")
         console.print(f"[bold]Transcript Confidence[/bold]: {result.transcript.confidence}")
     console.print(f"[bold]Response[/bold]: {_safe_console_text(result.conversation_response.assistant_message if result.conversation_response else 'none')}")
     console.print(f"[bold]Response Type[/bold]: {result.conversation_response.response_type.value if result.conversation_response else 'none'}")
+    console.print("[bold]Note[/bold]: gercek mikrofon kullanilmadi")
 
     if show_safety:
         console.print("[bold]Safety[/bold]")
@@ -1385,6 +1387,8 @@ def ai_voice(
         console.print(f"- microphone_used: {result.microphone_used}")
         console.print(f"- wake_word_used: {result.wake_word_used}")
         console.print(f"- execution_attempted: {result.execution_attempted}")
+        console.print("- mock ses akisi: True")
+        console.print("- gercek mikrofon kullanilmadi")
         for warning in result.safety_warnings:
             console.print(f"- warning: {_safe_console_text(warning)}")
 
@@ -1396,7 +1400,7 @@ def ai_voice(
         for warning in result.tts_result.warnings:
             console.print(f"- warning: {_safe_console_text(warning)}")
 
-    console.print("[bold]Execution[/bold]: none")
+    console.print("[bold]Execution[/bold]: gercek islem yapilmadi")
 
 
 def _conversation_response_payload(response) -> dict[str, object] | None:
@@ -1598,3 +1602,114 @@ def ai_demo(
     console.print("")
     for rec in report.recommendations:
         console.print(f"  • {rec}")
+def ai_hardening(
+    project: str,
+    latency: bool = False,
+    safety: bool = False,
+    run_all: bool = False,
+    as_json: bool = False,
+    as_markdown: bool = False,
+    no_write: bool = False,
+    output: str | None = None,
+) -> None:
+    from pathlib import Path
+
+    from app.paths import get_atlas_root
+    from app.quality.latency import run_latency_suite
+    from app.quality.models import HardeningReport
+    from app.quality.report import build_json, build_markdown, validate_output_path, write_report
+    from app.quality.safety import run_safety_suite
+
+    console = Console()
+
+    selected_modes: list[str] = []
+    if run_all or safety:
+        selected_modes.append("safety")
+    if run_all or latency:
+        selected_modes.append("latency")
+    if not selected_modes:
+        console.print("[red]En az bir mod secmelisin: --safety, --latency veya --all.[/red]")
+        raise typer.Exit(1)
+
+    safety_report = run_safety_suite(project) if "safety" in selected_modes else None
+    latency_report = run_latency_suite(project) if "latency" in selected_modes else None
+
+    recommendations: list[str] = []
+    if safety_report is not None:
+        recommendations.extend(safety_report.recommendations)
+    if latency_report is not None:
+        recommendations.extend(latency_report.recommendations)
+    recommendations.append("Hardening komutu yalnizca deterministic preview modullerini olcer; gercek execution acmaz.")
+
+    report = HardeningReport(
+        project_name=project,
+        modes=selected_modes,
+        safety_report=safety_report,
+        latency_report=latency_report,
+        recommendations=recommendations,
+        metadata={"no_write": no_write},
+    )
+
+    atlas_root = get_atlas_root()
+
+    if as_json:
+        payload = build_json(report)
+        if output and not no_write:
+            out_path = Path(output)
+            if not out_path.is_absolute():
+                out_path = atlas_root / output
+            try:
+                validate_output_path(out_path, atlas_root)
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/red]")
+                raise typer.Exit(1) from exc
+            write_report(report, out_path, as_markdown=False)
+            console.print(f"[green]Report written to: {out_path}[/green]")
+            return
+        typer.echo(payload)
+        return
+
+    if as_markdown:
+        markdown = build_markdown(report)
+        if output and not no_write:
+            out_path = Path(output)
+            if not out_path.is_absolute():
+                out_path = atlas_root / output
+            try:
+                validate_output_path(out_path, atlas_root)
+            except ValueError as exc:
+                console.print(f"[red]{exc}[/red]")
+                raise typer.Exit(1) from exc
+            write_report(report, out_path, as_markdown=True)
+            console.print(f"[green]Report written to: {out_path}[/green]")
+            return
+        typer.echo(markdown)
+        return
+
+    console.print(f"[bold]ATLAS Hardening[/bold] - Project: {project}")
+    console.print(f"Modes: {', '.join(selected_modes)}")
+    if safety_report is not None:
+        console.print("")
+        console.print("[bold]Safety[/bold]")
+        console.print(f"Checks: {safety_report.total_checks}  Passed: {safety_report.passed}  Failed: {safety_report.failed}")
+        for check in safety_report.checks:
+            badge = "[green]PASS[/green]" if check.passed else "[red]FAIL[/red]"
+            console.print(f"  {badge} {check.command_surface}")
+            for warning in check.warnings[:2]:
+                console.print(f"       [yellow]warn[/yellow]: {_safe_console_text(warning)}")
+    if latency_report is not None:
+        console.print("")
+        console.print("[bold]Latency[/bold]")
+        console.print(
+            f"Measurements: {latency_report.total_measurements}  Passed: {latency_report.passed}  Failed: {latency_report.failed}"
+        )
+        for measurement in latency_report.measurements:
+            badge = "[green]PASS[/green]" if measurement.passed else "[red]FAIL[/red]"
+            console.print(
+                f"  {badge} {measurement.command_surface} -> {measurement.duration_ms}ms "
+                f"(threshold {measurement.threshold_ms}ms)"
+            )
+            for warning in measurement.warnings[:2]:
+                console.print(f"       [yellow]warn[/yellow]: {_safe_console_text(warning)}")
+    console.print("")
+    console.print("Not: Bu komut preview-only hardening akisidir; gercek islem yapilmadi.")

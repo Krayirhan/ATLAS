@@ -15,7 +15,8 @@ def test_ai_reminder_create_exit_code_zero(tmp_path, monkeypatch) -> None:
         ["ai", "reminder", "--project", "ATLAS", "Bana 20 dakika sonra su icmeyi hatirlat"],
     )
     assert result.exit_code == 0, result.output
-    assert "onay bekliyor" in result.output.lower()
+    assert "onay gerekiyor" in result.output.lower()
+    assert "hatırlatıcı" in result.output.lower()
 
 
 def test_ai_reminder_list_exit_code_zero(tmp_path, monkeypatch) -> None:
@@ -26,7 +27,7 @@ def test_ai_reminder_list_exit_code_zero(tmp_path, monkeypatch) -> None:
     runner.invoke(app, ["ai", "reminder", "--project", "ATLAS", "Bana 20 dakika sonra su icmeyi hatirlat"])
     result = runner.invoke(app, ["ai", "reminder", "--project", "ATLAS", "--list"])
     assert result.exit_code == 0, result.output
-    assert "Hatirlaticilar:" in result.output
+    assert "Hatırlatıcı taslakları:" in result.output
 
 
 def test_ai_reminder_json_outputs_valid_json(tmp_path, monkeypatch) -> None:

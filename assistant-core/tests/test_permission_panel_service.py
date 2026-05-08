@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from app.actions.types import ActionSource
 from app.panel.models import PanelItemStatus, PanelItemType, PanelOperationStatus
+from app.panel.policy import utcnow
 from app.panel.service import PermissionPanelService
 from app.panel.store import InMemoryPanelStore
 import app.personal_assistant.store as personal_assistant_store
@@ -82,13 +85,41 @@ def test_deny_cancel_update_status() -> None:
     assert cancelled.item.status is PanelItemStatus.CANCELLED
 
 
+def test_expired_item_cannot_be_approved() -> None:
+    service = build_service()
+    created = service.submit_text("Salon isigini ac")
+    created.item.expires_at = utcnow() - timedelta(seconds=5)
+    service.store.update(created.item)
+    approved = service.approve_item(created.item.item_id)
+    assert approved.status is PanelOperationStatus.BLOCKED
+    assert "süresi doldu" in approved.message.lower()
+
+
+def test_cancelled_item_cannot_be_approved() -> None:
+    service = build_service()
+    created = service.submit_text("Chrome'u ac")
+    service.cancel_item(created.item.item_id)
+    approved = service.approve_item(created.item.item_id)
+    assert approved.status is PanelOperationStatus.BLOCKED
+    assert "approve edilemez" in approved.message.lower()
+
+
+def test_denied_item_cannot_be_approved() -> None:
+    service = build_service()
+    created = service.submit_text("Salon isigini ac", source=ActionSource.TEXT)
+    service.deny_item(created.item.item_id)
+    approved = service.approve_item(created.item.item_id)
+    assert approved.status is PanelOperationStatus.BLOCKED
+    assert "reddedilen" in approved.message.lower()
+
+
 def test_submit_reminder_confirmation_item(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(personal_assistant_store, "_default_store_path", lambda: tmp_path / "personal-assistant.json")
     personal_assistant_store._global_store = None
     service = build_service()
     result = service.submit_text("Bana 20 dakika sonra su icmeyi hatirlat")
     assert result.item.item_type is PanelItemType.CONFIRMATION_REQUIRED
-    assert "Reminder" in result.item.title
+    assert "Hatırlatıcı" in result.item.title
 
 
 def test_approve_reminder_item_does_not_schedule_real_reminder(tmp_path, monkeypatch) -> None:

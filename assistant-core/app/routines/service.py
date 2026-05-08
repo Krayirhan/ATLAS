@@ -44,7 +44,7 @@ class RoutineService:
 
     def format_response(self, result) -> str:
         if result is None:
-            return "Rutin anlasilamadi veya desteklenmiyor."
+            return "Rutin anlasilamadi veya desteklenmiyor. Gercek islem yapilmadi."
         if isinstance(result, list):
             lines = [f"- {routine.display_name} ({len(routine.steps)} adim)" for routine in result]
             return "Kullanilabilir rutinler:\n" + "\n".join(lines)
@@ -52,11 +52,12 @@ class RoutineService:
             lines = [
                 f"Rutin onizleme: {result.routine_name}",
                 f"Risk: {result.risk_level}",
-                f"Onay gerekli: {'evet' if result.requires_confirmation else 'hayir'}",
-                f"Engelli: {'evet' if result.blocked else 'hayir'}",
+                f"Onay gerekiyor: {'evet' if result.requires_confirmation else 'hayir'}",
+                f"Engellendi: {'evet' if result.blocked else 'hayir'}",
             ]
             for step in result.steps:
                 lines.append(f"- {step.label} ({step.action_type})")
+            lines.append("Not: Bu sadece onizlemedir; gercek islem yapilmadi.")
             return "\n".join(lines)
         if isinstance(result, RoutineResult):
             if result.status == RoutineStatus.BLOCKED:

@@ -8,6 +8,7 @@ from app.conversation.loop import ConversationLoop
 from app.conversation.models import ConversationResponse, ConversationResponseType
 from app.home.service import HomeControlService
 from app.panel.models import (
+    ConfirmationTimeoutPolicy,
     PanelDecision,
     PanelDecisionType,
     PanelItemStatus,
@@ -17,7 +18,7 @@ from app.panel.models import (
     PermissionPanelItem,
     PermissionPanelState,
 )
-from app.panel.policy import can_approve, default_expiry, sanitize_text, sanitize_value
+from app.panel.policy import build_timeout_policy, can_approve, sanitize_text, sanitize_value
 from app.panel.store import InMemoryPanelStore, LocalJsonPanelStore
 
 
@@ -36,6 +37,9 @@ class PermissionPanelService:
         self.store = store or LocalJsonPanelStore()
         self.loop = ConversationLoop()
         self.home_service = HomeControlService()
+
+    def _timeout_policy(self) -> ConfirmationTimeoutPolicy:
+        return build_timeout_policy()
 
     def create_from_conversation(self, response: ConversationResponse) -> PermissionPanelItem | None:
         response_type = response.response_type
@@ -104,6 +108,8 @@ class PermissionPanelService:
             home_plan, _ = self.home_service.preview_plan(response.user_message, source=ActionSource(source))
             home_plan = _to_dict(home_plan)
 
+        timeout_policy = self._timeout_policy()
+
         return PermissionPanelItem(
             item_id=f"panel-{uuid4().hex[:12]}",
             item_type=item_type,
@@ -128,12 +134,14 @@ class PermissionPanelService:
             permission_decision=permission_decision,
             pc_plan=_to_dict(response.pc_plan),
             home_plan=home_plan,
-            expires_at=default_expiry(),
+            expires_at=timeout_policy.expires_at,
+            timeout_policy=timeout_policy,
             audit_metadata=sanitize_value(response.audit_metadata),
             metadata=sanitize_value(response.metadata),
         )
 
     def create_from_home_plan(self, home_plan, *, user_message: str = "") -> PermissionPanelItem:
+        timeout_policy = self._timeout_policy()
         return PermissionPanelItem(
             item_id=f"panel-{uuid4().hex[:12]}",
             item_type=PanelItemType.CONFIRMATION_REQUIRED if home_plan.requires_confirmation else PanelItemType.ACTION_PREVIEW,
@@ -150,11 +158,13 @@ class PermissionPanelService:
             blocked_reason=sanitize_text(home_plan.blocked_reason),
             preview_payload={"summary": sanitize_text(home_plan.summary)},
             home_plan=_to_dict(home_plan),
-            expires_at=default_expiry(),
+            expires_at=timeout_policy.expires_at,
+            timeout_policy=timeout_policy,
             audit_metadata=sanitize_value(home_plan.audit_metadata),
         )
 
     def create_from_pc_plan(self, pc_plan, *, user_message: str = "") -> PermissionPanelItem:
+        timeout_policy = self._timeout_policy()
         return PermissionPanelItem(
             item_id=f"panel-{uuid4().hex[:12]}",
             item_type=PanelItemType.CONFIRMATION_REQUIRED if pc_plan.requires_confirmation else PanelItemType.ACTION_PREVIEW,
@@ -170,11 +180,13 @@ class PermissionPanelService:
             blocked_reason=sanitize_text(pc_plan.blocked_reason),
             preview_payload={"summary": sanitize_text(pc_plan.summary)},
             pc_plan=_to_dict(pc_plan),
-            expires_at=default_expiry(),
+            expires_at=timeout_policy.expires_at,
+            timeout_policy=timeout_policy,
             audit_metadata=sanitize_value(pc_plan.audit_metadata),
         )
 
     def create_from_routine_preview(self, routine_preview, *, user_message: str = "") -> PermissionPanelItem:
+        timeout_policy = self._timeout_policy()
         return PermissionPanelItem(
             item_id=f"panel-{uuid4().hex[:12]}",
             item_type=PanelItemType.CONFIRMATION_REQUIRED if routine_preview.requires_confirmation else PanelItemType.ACTION_PREVIEW,
@@ -190,7 +202,8 @@ class PermissionPanelService:
             blocked_reason=sanitize_text(routine_preview.blocked_reason or ""),
             warnings=[sanitize_text(item) for item in routine_preview.warnings],
             routine_preview=_to_dict(routine_preview),
-            expires_at=default_expiry(),
+            expires_at=timeout_policy.expires_at,
+            timeout_policy=timeout_policy,
             audit_metadata=sanitize_value(routine_preview.audit_metadata),
         )
 
@@ -200,13 +213,13 @@ class PermissionPanelService:
         if item is None:
             return PanelOperationResult(
                 status=PanelOperationStatus.SKIPPED,
-                message="Bu cevap panel kuyruuna alinmadi.",
+                message="Bu cevap panel kuyruğuna alınmadı. Gerçek işlem yapılmadı.",
                 metadata={"response_type": response.response_type.value},
             )
         self.store.add(item)
         return PanelOperationResult(
             status=PanelOperationStatus.CREATED,
-            message="Panel ogesi olusturuldu. Bu sadece onizlemedir, islem calistirilmadi.",
+            message="Panel öğesi oluşturuldu. Bu sadece önizlemedir; gerçek işlem yapılmadı.",
             item=item,
             metadata={"response_type": response.response_type.value},
         )
@@ -247,7 +260,7 @@ class PermissionPanelService:
         updated = self.store.approve(item_id, decision)
         return PanelOperationResult(
             status=PanelOperationStatus.APPROVED,
-            message="Panel ogesi approved_preview durumuna alindi. Gercek execution baslatilmadi.",
+            message="Panel öğesi approved_preview durumuna alındı. Onay kaydedildi ama gerçek işlem başlatılmadı.",
             item=updated,
             decision=decision,
         )
@@ -269,7 +282,7 @@ class PermissionPanelService:
         updated = self.store.deny(item_id, decision)
         return PanelOperationResult(
             status=PanelOperationStatus.DENIED,
-            message="Panel ogesi deny durumuna alindi. Gercek execution yok.",
+            message="Panel öğesi reddedildi. Gerçek işlem yapılmadı.",
             item=updated,
             decision=decision,
         )
@@ -291,7 +304,7 @@ class PermissionPanelService:
         updated = self.store.cancel(item_id, decision)
         return PanelOperationResult(
             status=PanelOperationStatus.CANCELLED,
-            message="Panel ogesi iptal edildi. Gercek execution yok.",
+            message="Panel öğesi iptal edildi. Gerçek işlem yapılmadı.",
             item=updated,
             decision=decision,
         )

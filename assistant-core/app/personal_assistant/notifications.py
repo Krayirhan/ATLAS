@@ -27,7 +27,7 @@ class NotificationService:
         if not allowed:
             return NotificationOperationResult(
                 status=NotificationStatus.BLOCKED,
-                message="Notification preview blocked.",
+                message="Bildirim önizlemesi güvenlik nedeniyle engellendi. Gerçek OS notification gönderilmedi.",
                 warnings=warnings,
                 audit_metadata={
                     "blocked_reason": blocked_reason,
@@ -50,7 +50,7 @@ class NotificationService:
         return NotificationOperationResult(
             status=NotificationStatus.PREVIEW,
             notification=notification,
-            message="Notification preview hazirlandi. Gercek OS notification yok.",
+            message="Bildirim önizlemesi hazırlandı. Gerçek OS notification gönderilmedi.",
             warnings=warnings,
             audit_metadata={
                 "execution_attempted": False,

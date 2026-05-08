@@ -1,0 +1,143 @@
+# Sprint 51 - Safety / Latency / UX Hardening
+
+## Sprint 51 Purpose
+
+Sprint 51 hardens the Sprint 50 preview demo into a clearer and safer V1 demo baseline without opening real execution.
+
+## Safety Invariant List
+
+The following must remain `false` across demo and preview surfaces:
+
+- `execution_attempted`
+- `physical_device_touched`
+- `network_used`
+- `microphone_used`
+- `wake_word_used`
+- `audio_retained`
+- `external_calendar_used`
+- `os_notification_sent`
+- `credential_accessed`
+- `shell_used`
+
+Covered surfaces:
+
+- demo scenarios
+- chat / PC preview
+- voice pipeline
+- home preview
+- panel submit / approve
+- reminder
+- calendar
+- routine
+- device flow
+- notification preview
+
+## Latency Budget
+
+Targets:
+
+- deterministic local CLI surface: under `1500 ms`
+- mock voice surface: under `2500 ms`
+- heavier `ai demo --all --no-write`: under `7000 ms`
+
+Measured surfaces:
+
+- `ai chat "Chrome'u aç"`
+- `ai voice --mock-transcript "Salon ışığını aç"`
+- `ai routine "Çalışma modunu başlat"`
+- `ai reminder "Bana 20 dakika sonra su içmeyi hatırlat"`
+- `ai calendar "Yarın 10'a toplantı ekle"`
+- `ai panel --submit "Salon ışığını aç"`
+- `ai home-preview "Salon ışığını aç"`
+- `ai demo --all --no-write`
+
+## Hardening CLI Usage
+
+```powershell
+python -m app.cli ai hardening --project ATLAS --safety
+python -m app.cli ai hardening --project ATLAS --latency
+python -m app.cli ai hardening --project ATLAS --all --json
+python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
+python -m app.cli ai hardening --project ATLAS --all --markdown --output workspace/outputs/hardening/sprint-51-hardening.md
+```
+
+Rules:
+
+- no real execution
+- no path traversal outside `workspace/outputs/hardening/`
+- deterministic preview modules only
+
+## Confirmation Timeout / Cancel Policy
+
+Panel items now use an explicit timeout model:
+
+- `default_timeout_seconds`
+- `expires_at`
+
+Approval rules:
+
+- expired item cannot be approved
+- cancelled item cannot be approved
+- denied item cannot be approved
+- blocked item cannot be approved
+- clarification-required item cannot be approved
+- approve records state only
+
+## Voice Confirmation Safety
+
+- medium/high voice requests require explicit confirmation wording
+- high-risk voice requests do not accept a short `evet` as sufficient
+- low-confidence transcript goes to clarification
+- response may explicitly say `Sesli komut olarak algilandi`
+- real microphone remains disabled
+
+## CLI Turkish UX Rules
+
+The user-facing CLI should prefer wording that makes preview status obvious:
+
+- `onizleme`
+- `gercek islem yapilmadi`
+- `onay gerekiyor`
+- `engellendi`
+- `belirsiz hedef`
+- `hatirlatici taslagi`
+- `takvim taslagi`
+- `mock ses akisi`
+- `gercek mikrofon kullanilmadi`
+
+## Generated Artifact Policy
+
+- `workspace/outputs/demo/` for demo artifacts
+- `workspace/outputs/hardening/` for hardening artifacts
+- `workspace/outputs/reports/` for generated reports
+- `workspace/state/*.json` for local runtime state
+
+These are local artifacts. New generated outputs should not be committed as Sprint 51 source deliverables.
+
+## What Remains Non-Executable
+
+- real PC execution
+- real home execution
+- real scheduler
+- real OS notification
+- real external calendar API
+- real microphone capture
+- wake word / always-listening
+- shell / terminal executor
+
+## V1 Readiness Criteria
+
+Sprint 51 considers ATLAS V1-demo-ready when:
+
+- safety invariant suite passes
+- latency report can be generated
+- hardening CLI works
+- panel approval stays non-executing
+- voice safety wording is explicit
+- preview vs execution distinction is visible to the user
+
+## Sprint 52 Dependency
+
+Sprint 52 is **Safe Execution Gate / Low-Risk PC Execution Planning**.
+
+Sprint 52 must add only a bounded execution gate for a small low-risk PC allowlist. High-risk, home, scheduler, calendar write, shell, and microphone boundaries stay closed.

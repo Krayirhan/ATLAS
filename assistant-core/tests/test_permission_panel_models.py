@@ -1,4 +1,5 @@
 from app.panel.models import (
+    ConfirmationTimeoutPolicy,
     PanelDecision,
     PanelDecisionType,
     PanelItemStatus,
@@ -28,6 +29,16 @@ def test_panel_decision_builds() -> None:
         user_confirmed=True,
     )
     assert decision.execution_attempted is False
+
+
+def test_confirmation_timeout_policy_builds() -> None:
+    from datetime import datetime, timezone
+
+    policy = ConfirmationTimeoutPolicy(
+        default_timeout_seconds=1800,
+        expires_at=datetime.now(timezone.utc),
+    )
+    assert policy.default_timeout_seconds == 1800
 
 
 def test_permission_panel_state_builds() -> None:

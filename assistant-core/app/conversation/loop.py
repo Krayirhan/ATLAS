@@ -234,7 +234,7 @@ class ConversationLoop:
                     "status": result.status.value,
                     "target": reminder.title if reminder is not None else "",
                     "risk_level": risk_level,
-                    "panel_title": "Reminder preview" if result.operation is ReminderOperation.CREATE else "Reminder local state",
+                    "panel_title": "Hatırlatıcı taslağı" if result.operation is ReminderOperation.CREATE else "Hatırlatıcı local durumu",
                     "panel_summary": message,
                 },
             }
@@ -292,7 +292,7 @@ class ConversationLoop:
                 "status": result.status.value,
                 "target": draft.title if draft is not None else result.query.date_text if result.query is not None else "",
                 "risk_level": risk_level,
-                "panel_title": "Calendar draft preview" if result.operation is CalendarOperation.DRAFT_EVENT else "Calendar query preview",
+                "panel_title": "Takvim taslağı" if result.operation is CalendarOperation.DRAFT_EVENT else "Takvim önizlemesi",
                 "panel_summary": message,
             },
         }

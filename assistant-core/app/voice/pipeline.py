@@ -7,7 +7,13 @@ from app.conversation.loop import ConversationLoop
 from app.conversation.models import ConversationResponse, ConversationResponseType
 from app.voice.contracts import STTAdapter, TTSAdapter
 from app.voice.models import SpeechInput, TTSRequest, VoicePipelineRequest, VoicePipelineResult
-from app.voice.policy import build_low_confidence_message, requires_clarification, should_accept_transcript, voice_safety_metadata
+from app.voice.policy import (
+    apply_runtime_voice_safety,
+    build_low_confidence_message,
+    requires_clarification,
+    should_accept_transcript,
+    voice_safety_metadata,
+)
 
 
 class VoicePipeline:
@@ -64,6 +70,7 @@ class VoicePipeline:
             session_id=session_id,
             source=ActionSource.VOICE,
         )
+        response = apply_runtime_voice_safety(response)
         response.metadata["voice_source"] = request.source.value
         response.metadata["transcript_confidence"] = transcript.confidence
         tts_result = self._build_tts_result(request, response.assistant_message)

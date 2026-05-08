@@ -26,7 +26,7 @@ class CalendarService:
             return CalendarOperationResult(
                 status=CalendarStatus.UNSUPPORTED,
                 operation=CalendarOperation.QUERY,
-                message="Calendar query anlasilamadi.",
+                message="Takvim sorgusu anlaşılamadı. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False, "external_calendar_used": False},
             )
 
@@ -47,8 +47,8 @@ class CalendarService:
         decision = self.policy.calendar_query_decision(query, source=source, raw_text=text)
         drafts = _filter_drafts(self.store.list_calendar_drafts(), range_start, range_end)
         message = (
-            "Local takvim preview sonucu hazir. "
-            "Harici calendar entegrasyonu kapali; yalnizca local draftlar gosterildi."
+            "Takvim önizlemesi hazır. "
+            "Harici calendar entegrasyonu kapali; yalnizca local takvim taslaklari gosterildi."
         )
         if drafts:
             message += f" {len(drafts)} local draft eslesti."
@@ -74,7 +74,7 @@ class CalendarService:
             return CalendarOperationResult(
                 status=CalendarStatus.UNSUPPORTED,
                 operation=CalendarOperation.DRAFT_EVENT,
-                message="Calendar draft istegi anlasilamadi.",
+                message="Takvim taslağı isteği anlaşılamadı. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False, "external_calendar_used": False},
             )
 
@@ -85,7 +85,7 @@ class CalendarService:
             return CalendarOperationResult(
                 status=CalendarStatus.BLOCKED,
                 operation=CalendarOperation.DRAFT_EVENT,
-                message="Calendar draft istegi guvenlik nedeniyle blocked.",
+                message="Takvim taslağı isteği güvenlik nedeniyle engellendi. Gerçek işlem yapılmadı.",
                 warnings=warnings,
                 blocked_reason=blocked_reason,
                 audit_metadata={"execution_attempted": False, "external_calendar_used": False},
@@ -113,8 +113,8 @@ class CalendarService:
             operation=CalendarOperation.DRAFT_EVENT,
             event_draft=draft,
             message=(
-                "Calendar event draft local preview olarak kaydedildi ve onay bekliyor. "
-                "Harici takvime yazilmadi."
+                "Takvim taslağı local önizleme olarak kaydedildi. "
+                "Onay gerekiyor. Harici takvime yazılmadı."
             ),
             warnings=warnings + list(decision.warnings),
             audit_metadata={
@@ -130,7 +130,7 @@ class CalendarService:
             status=CalendarStatus.LISTED,
             operation=CalendarOperation.LIST_LOCAL,
             event_drafts=drafts,
-            message="Local calendar draftlari listelendi." if drafts else "Local calendar draft yok.",
+            message="Local takvim taslaklari listelendi." if drafts else "Local takvim taslağı yok.",
             audit_metadata={"execution_attempted": False, "external_calendar_used": False, "count": len(drafts)},
         )
 
@@ -140,7 +140,7 @@ class CalendarService:
             return CalendarOperationResult(
                 status=CalendarStatus.NOT_FOUND,
                 operation=CalendarOperation.CANCEL_DRAFT,
-                message="Calendar draft bulunamadi.",
+                message="Takvim taslağı bulunamadı. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False, "external_calendar_used": False},
             )
 
@@ -149,7 +149,7 @@ class CalendarService:
             status=CalendarStatus.CANCELLED,
             operation=CalendarOperation.CANCEL_DRAFT,
             event_draft=cancelled,
-            message="Calendar draft local kayittan iptal edildi. Harici takvim yazimi yoktu.",
+            message="Takvim taslağı local kayıttan iptal edildi. Harici takvim yazımı yoktu.",
             audit_metadata={
                 "execution_attempted": False,
                 "external_calendar_used": False,
@@ -166,7 +166,7 @@ class CalendarService:
         if result.operation is CalendarOperation.LIST_LOCAL:
             if not result.event_drafts:
                 return result.message
-            lines = ["Calendar draftlari:"]
+            lines = ["Takvim taslakları:"]
             for draft in result.event_drafts:
                 lines.append(f"- {draft.event_id} | {draft.status.value} | {draft.title} | {draft.start_text or 'zaman yok'}")
             return "\n".join(lines)

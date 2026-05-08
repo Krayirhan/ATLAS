@@ -207,7 +207,17 @@ class PermissionManager:
                 "Acik calismalar, gizlilik veya fiziksel ortam etkilenebilir. Devam etmemi acikca onayliyor musun?"
             )
         if action.source is ActionSource.VOICE:
-            return f"Sesli komut olarak algiladim. Sunu yapmak istedigini onayliyor musun: {base}"
+            if action.risk_level is RiskLevel.HIGH:
+                return (
+                    "Sesli komut olarak algilandi. Yuksek riskli voice isteginde kisa bir 'evet' yeterli degildir. "
+                    "Hedefi ve islemi acikca tekrar eden net bir onay gerekir. "
+                    f"{base}"
+                )
+            return (
+                "Sesli komut olarak algilandi. Bu voice istegi icin acik onay gerekiyor; "
+                "kisa bir 'evet' yerine hedefi ve islemi belirten net bir onay kullan. "
+                f"{base}"
+            )
         return base
 
     def _blocked_prompt(self, reason: str) -> str:

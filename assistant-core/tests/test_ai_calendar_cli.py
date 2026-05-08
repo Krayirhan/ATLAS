@@ -15,7 +15,7 @@ def test_ai_calendar_query_exit_code_zero(tmp_path, monkeypatch) -> None:
         ["ai", "calendar", "--project", "ATLAS", "Bugun takvimimde ne var?"],
     )
     assert result.exit_code == 0, result.output
-    assert "Local takvim preview" in result.output
+    assert "Takvim önizlemesi" in result.output
 
 
 def test_ai_calendar_draft_exit_code_zero(tmp_path, monkeypatch) -> None:
@@ -27,7 +27,8 @@ def test_ai_calendar_draft_exit_code_zero(tmp_path, monkeypatch) -> None:
         ["ai", "calendar", "--project", "ATLAS", "Yarin 10a toplanti ekle"],
     )
     assert result.exit_code == 0, result.output
-    assert "onay bekliyor" in result.output.lower()
+    assert "onay gerekiyor" in result.output.lower()
+    assert "takvim taslağı" in result.output.lower()
 
 
 def test_ai_calendar_json_outputs_valid_json(tmp_path, monkeypatch) -> None:

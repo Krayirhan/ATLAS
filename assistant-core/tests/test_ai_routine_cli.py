@@ -17,7 +17,7 @@ def test_cli_ai_routine_list():
 def test_cli_ai_routine_run():
     result = runner.invoke(app, ["ai", "routine", "--project", "ATLAS", "Çalışma modunu başlat"])
     assert result.exit_code == 0
-    assert "CONFIRMATION REQUIRED" in result.stdout
+    assert "ONAY GEREKIYOR" in result.stdout
 
 
 def test_cli_ai_routine_show_preview():

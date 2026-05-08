@@ -96,8 +96,8 @@ class DeviceActionPlanner:
 
         decision = self.permission_manager.decide(action)
         summary = (
-            f"{resolution.device.display_name} icin {action.action_type.value} action'i preview edildi. "
-            "Gercek home control execution henuz yok."
+            f"{resolution.device.display_name} icin {action.action_type.value} onizlemesi hazirlandi. "
+            "Onay gerekiyor; gercek home control execution henuz yok."
         )
         return plan_from_resolution(
             action=action,

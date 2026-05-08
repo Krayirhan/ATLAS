@@ -115,6 +115,19 @@ def test_run_all_safety_flags_all_false(runner: DemoRunner):
     report = runner.run_all()
     violations = report.safety_summary.get("violations", [])
     assert violations == [], f"Safety violations found: {violations}"
+    for result in report.results:
+        assert set(result.safety_flags.keys()) == {
+            "execution_attempted",
+            "physical_device_touched",
+            "network_used",
+            "microphone_used",
+            "wake_word_used",
+            "audio_retained",
+            "external_calendar_used",
+            "os_notification_sent",
+            "credential_accessed",
+            "shell_used",
+        }
 
 
 def test_run_all_report_summary(runner: DemoRunner):

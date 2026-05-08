@@ -2,178 +2,96 @@
 
 ## Product Vision
 
-ATLAS is a local-first personal AI assistant foundation for Windows. It is designed to understand voice and text commands, use Ollama as the default local LLM runtime, and safely manage personal computer actions, personal knowledge, routines, and device or home automation actions through an explicit permission and approval model.
+ATLAS is a local-first personal AI assistant foundation for Windows. It is built around safe text and future voice interaction, explicit permission handling, preview-first action planning, and bounded local state.
 
-ATLAS is not primarily a developer assistant. The current developer-oriented agents remain valuable as a devtools/supporting subsystem, but the main product direction is now the personal control assistant architecture.
+ATLAS is not a real execution assistant yet. The current product line is a demonstrable V1 preview/control plane.
 
 ## Current Status
 
 | Item | Value |
 |---|---|
-| Product direction | Personal control assistant foundation |
-| Release baseline | V1 RC - GO for the existing local control plane |
-| Sprint focus | Sprint 49 - Notification / Reminder / Calendar Assistant completed; Sprint 50 next |
+| Release baseline | V1 RC - GO for preview-only assistant flows |
+| Current sprint | Sprint 51 - Safety / Latency / UX Hardening completed |
 | Root | `E:\ATLAS` |
 | Assistant core | `E:\ATLAS\assistant-core` |
 | Knowledge base | `E:\ATLAS\workspace\knowledge-base\ATLAS` |
-| Default LLM provider | `ollama` |
-| Test command | `python -m pytest -q` from `assistant-core` |
-| Health command | `python -m app.cli doctor --full` |
+| Default provider | `ollama` |
+| Validation | `python -m pytest -q`, `python -m app.cli doctor --full` |
 
-The existing V1 control plane is technically healthy: config validation, project registry, safety policy, MCP config generation, bounded AI context, read-only agents, doctor, tests, and release audit are in place. Sprint 49 now adds local reminder/calendar/notification preview flows, confirmation-aware panel integration, and dedicated reminder/calendar CLI surfaces without enabling background execution.
+Sprint 50 brought the end-to-end personal assistant demo together. Sprint 51 hardens that demo with a central safety invariant suite, latency reporting, a new `ai hardening` CLI, stricter panel timeout/cancel behavior, stronger voice confirmation copy, and clearer Turkish preview UX.
 
-The missing product layers are real microphone capture, real local STT/TTS engines, ActionRouter, real home control adapter execution, desktop tray runtime, durable scheduling, real OS notification delivery, external calendar sync, and mobile bridge.
+## What Works Now
 
-## Core Architecture
+- Text-first conversation preview through `ai chat`
+- Mock voice preview through `ai voice`
+- PC preview planning through `ai pc-preview`
+- Device and home preview flows through `ai device` and `ai home-preview`
+- Reminder draft, calendar draft/query preview, and notification preview flows
+- Permission panel backend through `ai panel`
+- End-to-end demo runner through `ai demo`
+- Hardening audit surface through `ai hardening`
+- Read-only agent layer: `MainAgent`, `ToolApprovalAgent`, `SecurityAuditorAgent`, `DocumentationAgent`, `PlannerAgent`, `ProjectQAAgent`, `MemoryAgent`
 
-ATLAS now separates the project into three tracks:
+## Sprint 51 Highlights
 
-1. **Core assistant foundation**
-   - local LLM runtime
-   - bounded context loading
-   - main assistant orchestration
-   - action approval foundation
-   - security audit foundation
-   - local configuration and audit
+- Safety invariants are validated centrally:
+  `execution_attempted`, `physical_device_touched`, `network_used`, `microphone_used`, `wake_word_used`, `audio_retained`, `external_calendar_used`, `os_notification_sent`, `credential_accessed`, `shell_used`
+- `python -m app.cli ai hardening --project ATLAS` supports:
+  `--safety`, `--latency`, `--all`, `--json`, `--markdown`, `--no-write`, `--output`
+- Latency budgets exist for:
+  `ai chat`, `ai voice`, `ai routine`, `ai reminder`, `ai calendar`, `ai panel`, `ai home-preview`, `ai demo --all`
+- Permission panel runtime now has explicit confirmation timeout policy and blocks approve on expired/cancelled/denied/blocked/clarification items.
+- Voice runtime stays mock-only, keeps `execution_attempted=false`, and uses stricter confirmation wording for risky voice requests.
+- CLI copy now emphasizes `onizleme`, `onay gerekiyor`, `engellendi`, `belirsiz hedef`, `hatirlatici taslagi`, `takvim taslagi`, `mock ses akisi`, and `gercek islem yapilmadi`.
 
-2. **Personal control assistant product track**
-   - voice and text interaction
-   - intent understanding
-   - action routing
-   - permission and confirmation UX
-   - Windows PC control
-   - routines
-   - personal memory
-   - reminders, notification copy, and calendar drafts
-   - home/device automation
+## Key Commands
 
-3. **Parked devtools subsystem**
-   - read-only code review
-   - documentation audit
-   - report synthesis
-   - repo hygiene ideas
-   - coding automation ideas
+```powershell
+cd E:\ATLAS\assistant-core
 
-## Assistant Runtime Layers
+python -m pytest -q
+python -m app.cli doctor --full
+python -m app.cli config validate
+python -m app.cli project validate ATLAS
 
-Target runtime flow:
-
-```text
-User input
-  -> ConversationLoop
-  -> IntentRouter
-  -> MainAgent
-  -> CommandUnderstandingAgent
-  -> ActionRouter
-  -> PermissionManager
-  -> Adapter
-  -> Result/Audit
-  -> TTS/UI response
+python -m app.cli ai demo --project ATLAS --all --show-safety
+python -m app.cli ai hardening --project ATLAS --all --markdown --no-write
+python -m app.cli ai chat --project ATLAS "Chrome'u aç"
+python -m app.cli ai voice --project ATLAS --mock-transcript "Salon ışığını aç" --show-safety
+python -m app.cli ai panel --project ATLAS --submit "Salon ışığını aç"
 ```
 
-Target layers:
+## Execution Boundary
 
-| Layer | Responsibility |
-|---|---|
-| Interaction Layer | Text, push-to-talk voice, future wake word, future desktop/mobile UI |
-| AI Reasoning Layer | Ollama-backed reasoning, bounded prompt/context |
-| Memory Layer | Personal preferences, routines, device aliases, safe command history |
-| Intent/Action Layer | Intent schema, action schema, skill registry, action router |
-| Permission Layer | Risk classification, preview, confirmation, block rules |
-| Adapter Layer | PC control, browser, media, files, future home/device adapters |
-| Audit Layer | Action result, decision trail, security review evidence |
-| UI Layer | Future tray, permission panel, logs, settings, routine editor |
+These remain out of scope in Sprint 51:
 
-## Safety & Permission Model
+- No real Chrome/app opening
+- No real folder opening
+- No real Home Assistant or MQTT runtime
+- No physical device state change
+- No real OS notification delivery
+- No real external calendar API
+- No real microphone capture
+- No wake word / always-listening
+- No background scheduler / daemon
+- No shell / terminal executor
+- No credential or `.env` reading
 
-ATLAS remains security-first. The personal assistant must follow this sequence:
+## Artifact Policy
 
-```text
-understand -> preview -> classify risk -> ask approval if needed -> execute only allowed action -> audit result
-```
+- Demo reports belong under `workspace/outputs/demo/`
+- Hardening reports belong under `workspace/outputs/hardening/`
+- Generated V1/report artifacts stay under `workspace/outputs/reports/`
+- Local runtime state stays under `workspace/state/*.json`
+- Generated artifacts should not be committed as new Sprint 51 outputs
 
-Baseline rules:
-
-- No full-disk MCP exposure.
-- No `.env`, private key, SSH key, keystore, browser profile, or raw secret source reading.
-- No `D:` writes as ATLAS policy stance.
-- No unrestricted terminal execution.
-- No git push or production deployment automation in the assistant path.
-- Medium and high risk actions require explicit confirmation.
-- Blocked actions must not execute.
-- Voice commands must be treated as potentially misheard until confidence and confirmation rules exist.
-
-## Existing AI/Agent Core
-
-These modules are preserved as core or foundation infrastructure:
-
-- `app/ai`: local LLM runtime, Ollama provider, mock provider, context loader, prompt composer, AI service.
-- `app/actions`: Sprint 37 intent/action/risk/result contracts, Sprint 38 PermissionManager, and Sprint 39 deterministic IntentRouter preview flow; no execution or adapter code.
-- `MemoryAgent`: project-memory foundation; will evolve toward personal memory.
-- `ProjectQAAgent`: project QA foundation; will evolve toward personal knowledge QA.
-- `PlannerAgent`: planning foundation; will be repositioned as routine/task planning.
-- `MainAgent`: current deterministic coordinator; will become the assistant coordination layer around intent/action routing.
-- `ToolApprovalAgent`: devtools command/tool preview foundation.
-- `PermissionManager`: personal action preview, confirmation, block, clarification, and audit metadata foundation.
-- `IntentRouter`: deterministic text-to-intent and intent-to-action-candidate preview foundation.
-- `SecurityAuditorAgent`: security audit foundation; will expand to PC/home/privacy risk checks.
-
-All current agents remain read-only. They do not write files, run terminal commands, call MCP tools, or produce approval tokens.
-
-## Parked DevTools Subsystem
-
-The following work is not deleted, but it is no longer on the main product path:
-
-| Item | New status | Reason |
-|---|---|---|
-| `CodeReviewerAgent` | Parked devtools support | Useful for repo quality, not personal assistant runtime |
-| `DocumentationAgent` | Supporting knowledge hygiene | Useful for KB/README consistency, not core user workflow |
-| `ReportAgent` idea/current work | Parked reporting support | Helpful for audits, not a user-facing control assistant layer |
-| Git hygiene | Deferred | Repo maintenance, not assistant capability |
-| CodeBuilder/BugFix/Refactor ideas | Parked | Developer automation would pull ATLAS away from the personal control assistant goal |
-
-Developer-oriented automation must not become the default roadmap again unless explicitly approved in a later devtools track.
-
-## New Roadmap
-
-| Sprint | Focus |
-|---|---|
-| Sprint 36 | Product Realignment & Assistant Architecture |
-| Sprint 37 | Action Architecture & Intent Schema - completed contract |
-| Sprint 38 | PermissionManager & Action Approval Flow - completed decision engine |
-| Sprint 39 | IntentRouter MVP - completed deterministic preview routing |
-| Sprint 40 | PC Control Adapter MVP - completed |
-| Sprint 41 | ConversationLoop MVP - completed |
-| Sprint 42 | Personal Memory & Preferences - completed |
-| Sprint 43 | RoutineEngine MVP - completed |
-| Sprint 44 | Voice Core Architecture - completed |
-| Sprint 45 | STT/TTS MVP - completed |
-| Sprint 46 | DeviceRegistry + Room Model - completed |
-| Sprint 47 | Home Control Adapter Design - completed |
-| Sprint 48 | Desktop Tray / Permission Panel - completed |
-| Sprint 49 | Notification / Reminder / Calendar Assistant - completed |
-| Sprint 50 | End-to-End Personal Assistant Demo |
-| Sprint 51 | Safety / Latency / UX Hardening |
-
-## What Is Not Implemented Yet
-
-- Voice layer
-- Speech-to-text engine runtime
-- Text-to-speech engine runtime
-- Wake word runtime
-- ActionRouter
-- SkillRegistry
-- Real home control adapter runtime
-- Real OS notification runtime
-- Background reminder scheduler / daemon
-- Real external calendar adapter runtime
-- Desktop tray runtime
-- Always-listening opt-in model
-- Mobile companion bridge
+Historical tracked report artifacts already exist under `workspace/outputs/reports/`; Sprint 51 keeps them as history but treats new generated outputs as local artifacts.
 
 ## Next Sprint
 
-Sprint 50 should be **End-to-End Personal Assistant Demo**. It should combine text, optional mock voice, reminder/calendar preview, panel confirmation visibility, and safe PC/routine preview flows into one coherent demo path.
+Sprint 52 is **Safe Execution Gate / Low-Risk PC Execution Planning**.
+
+The next step is not broad execution. The next step is a tightly bounded execution gate for a small, explicit low-risk PC allowlist, with audit, rollback expectations, and unchanged blocked/high-risk boundaries.
 
 ## Repo
 

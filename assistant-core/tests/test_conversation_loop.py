@@ -115,7 +115,7 @@ def test_conversation_loop_reminder_list(tmp_path, monkeypatch):
     loop.handle_text("Bana 20 dakika sonra su icmeyi hatirlat", project_name="ATLAS")
     response = loop.handle_text("Hatirlaticilarimi goster", project_name="ATLAS")
     assert response.response_type == ConversationResponseType.ANSWER
-    assert "Hatirlaticilar:" in response.assistant_message
+    assert "Hatırlatıcı taslakları:" in response.assistant_message
 
 
 def test_conversation_loop_calendar_query(tmp_path, monkeypatch):
@@ -125,6 +125,7 @@ def test_conversation_loop_calendar_query(tmp_path, monkeypatch):
     response = loop.handle_text("Bugun takvimimde ne var?", project_name="ATLAS")
     assert response.response_type == ConversationResponseType.ACTION_PREVIEW
     assert "Harici calendar entegrasyonu kapali" in response.assistant_message
+    assert "Takvim önizlemesi" in response.assistant_message
 
 
 def test_conversation_loop_calendar_draft(tmp_path, monkeypatch):

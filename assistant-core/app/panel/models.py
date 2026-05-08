@@ -51,6 +51,11 @@ class PanelDecision(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class ConfirmationTimeoutPolicy(BaseModel):
+    default_timeout_seconds: int
+    expires_at: datetime
+
+
 class PermissionPanelItem(BaseModel):
     item_id: str
     item_type: PanelItemType
@@ -74,6 +79,7 @@ class PermissionPanelItem(BaseModel):
     routine_preview: dict[str, Any] | None = None
     created_at: datetime = Field(default_factory=_utcnow)
     expires_at: datetime | None = None
+    timeout_policy: ConfirmationTimeoutPolicy | None = None
     audit_metadata: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
     last_decision: PanelDecision | None = None

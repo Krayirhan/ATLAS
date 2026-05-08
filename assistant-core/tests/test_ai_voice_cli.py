@@ -48,6 +48,8 @@ def test_ai_voice_show_safety() -> None:
     )
     assert result.exit_code == 0, result.output
     assert "audio_retained: False" in result.output
+    assert "mock ses akisi" in result.output.lower()
+    assert "gercek mikrofon kullanilmadi" in result.output.lower()
 
 
 def test_ai_voice_speak_shows_mock_tts() -> None:

@@ -56,6 +56,8 @@ def test_voice_pipeline_device_turn_on_requires_confirmation() -> None:
     result = pipeline.handle(VoicePipelineRequest(project_name="ATLAS", mock_transcript="Salon ışığını aç"))
     assert result.conversation_response is not None
     assert result.conversation_response.response_type == ConversationResponseType.CONFIRMATION_REQUIRED
+    assert "Sesli komut olarak algilandi." in result.conversation_response.assistant_message
+    assert any("confirmation gerekiyor" in warning for warning in result.conversation_response.warnings)
 
 
 def test_voice_pipeline_ambiguous_requires_clarification() -> None:
@@ -92,3 +94,25 @@ def test_voice_pipeline_audio_path_without_real_stt_is_safe_error() -> None:
     assert result.conversation_response is not None
     assert result.conversation_response.response_type == ConversationResponseType.ERROR
     assert result.execution_attempted is False
+
+
+def test_voice_pipeline_low_confidence_requires_clarification_message() -> None:
+    pipeline = VoicePipeline(MockSTTAdapter(), MockTTSAdapter())
+    result = pipeline.handle(
+        VoicePipelineRequest(
+            project_name="ATLAS",
+            mock_transcript="Chrome'u ac",
+            metadata={"confidence": 0.40},
+        )
+    )
+    assert result.conversation_response is not None
+    assert result.conversation_response.response_type == ConversationResponseType.CLARIFICATION
+    assert "guven dusuk" in result.conversation_response.assistant_message.lower()
+
+
+def test_voice_pipeline_high_risk_short_yes_not_allowed() -> None:
+    pipeline = VoicePipeline(MockSTTAdapter(), MockTTSAdapter())
+    result = pipeline.handle(VoicePipelineRequest(project_name="ATLAS", mock_transcript="Bilgisayari kapat"))
+    assert result.conversation_response is not None
+    assert result.conversation_response.response_type == ConversationResponseType.CONFIRMATION_REQUIRED
+    assert any("kisa 'evet'" in warning for warning in result.conversation_response.warnings)

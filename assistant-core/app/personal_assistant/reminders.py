@@ -40,7 +40,7 @@ class ReminderService:
             return ReminderOperationResult(
                 status=ReminderResultStatus.INVALID,
                 operation=ReminderOperation.CREATE,
-                message="Reminder create istegi anlasilamadi.",
+                message="Hatırlatıcı isteği anlaşılamadı. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False},
             )
 
@@ -51,7 +51,7 @@ class ReminderService:
             return ReminderOperationResult(
                 status=ReminderResultStatus.BLOCKED,
                 operation=ReminderOperation.CREATE,
-                message="Reminder istegi guvenlik nedeniyle blocked.",
+                message="Hatırlatıcı isteği güvenlik nedeniyle engellendi. Gerçek işlem yapılmadı.",
                 warnings=warnings,
                 blocked_reason=blocked_reason,
                 audit_metadata={
@@ -88,7 +88,7 @@ class ReminderService:
         self.store.add_reminder(reminder)
 
         notification_result = self.notification_service.build_notification_preview(
-            title="Hatirlatma preview",
+            title="Hatırlatıcı taslağı önizlemesi",
             body=f"{reminder.title} - {due_at_text or 'zaman bilgisi belirsiz'}",
             channel=NotificationChannel.CLI,
             source=source,
@@ -107,8 +107,8 @@ class ReminderService:
             operation=ReminderOperation.CREATE,
             reminder=reminder,
             message=(
-                "Hatirlatici local preview olarak kaydedildi ve onay bekliyor. "
-                "Gercek scheduler veya OS notification yok."
+                "Hatırlatıcı taslağı local önizleme olarak kaydedildi. "
+                "Onay gerekiyor. Gerçek scheduler veya OS notification çalıştırılmadı."
             ),
             warnings=warnings + notification_result.warnings,
             audit_metadata=audit_metadata,
@@ -116,7 +116,7 @@ class ReminderService:
 
     def list_reminders(self) -> ReminderOperationResult:
         reminders = self.store.list_reminders()
-        message = "Kayitli hatirlatici yok." if not reminders else f"{len(reminders)} local hatirlatici listelendi."
+        message = "Kayitli hatirlatici yok." if not reminders else f"{len(reminders)} local hatirlatici taslagi listelendi."
         return ReminderOperationResult(
             status=ReminderResultStatus.LISTED,
             operation=ReminderOperation.LIST,
@@ -131,7 +131,7 @@ class ReminderService:
             return ReminderOperationResult(
                 status=ReminderResultStatus.NOT_FOUND,
                 operation=ReminderOperation.CANCEL,
-                message="Hatirlatici bulunamadi.",
+                message="Hatırlatıcı taslağı bulunamadı. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False},
             )
 
@@ -140,7 +140,7 @@ class ReminderService:
             status=ReminderResultStatus.CANCELLED,
             operation=ReminderOperation.CANCEL,
             reminder=cancelled,
-            message="Hatirlatici local kayittan iptal edildi. Gercek scheduler yoktu.",
+            message="Hatırlatıcı taslağı local kayıttan iptal edildi. Gerçek scheduler yoktu.",
             audit_metadata={
                 "execution_attempted": False,
                 "scheduler_enabled": False,
@@ -154,7 +154,7 @@ class ReminderService:
             return ReminderOperationResult(
                 status=ReminderResultStatus.INVALID,
                 operation=ReminderOperation.PREVIEW,
-                message="Reminder preview icin create benzeri bir metin gerekli.",
+                message="Hatırlatıcı önizlemesi için create benzeri bir metin gerekli. Gerçek işlem yapılmadı.",
                 audit_metadata={"execution_attempted": False},
             )
         reminder_text = str(payload.get("reminder_text", "")).strip()
@@ -178,7 +178,7 @@ class ReminderService:
             status=ReminderResultStatus.PREVIEW,
             operation=ReminderOperation.PREVIEW,
             reminder=reminder,
-            message="Reminder preview hazirlandi. Gercek alarm kurulmaz.",
+            message="Hatırlatıcı taslağı önizlemesi hazırlandı. Gerçek alarm kurulmadı.",
             audit_metadata={"execution_attempted": False, "scheduler_enabled": False},
         )
 
@@ -186,13 +186,13 @@ class ReminderService:
         if result.status is ReminderResultStatus.LISTED:
             if not result.reminders:
                 return result.message
-            lines = ["Hatirlaticilar:"]
+            lines = ["Hatırlatıcı taslakları:"]
             for reminder in result.reminders:
                 due_text = reminder.due_at_text or "zaman yok"
                 lines.append(
                     f"- {reminder.reminder_id} | {reminder.status.value} | {reminder.title} | {due_text}"
                 )
-            lines.append("Not: Gercek scheduler veya OS notification yok.")
+            lines.append("Not: Bu liste yalnızca local önizleme taslaklarını gösterir; gerçek scheduler veya OS notification yok.")
             return "\n".join(lines)
         if result.reminder is not None:
             due_text = result.reminder.due_at_text or "zaman bilgisi belirsiz"

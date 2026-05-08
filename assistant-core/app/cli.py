@@ -7,7 +7,7 @@ from pathlib import Path
 import typer
 
 from app.commands.command import command_check, command_preview
-from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_demo, ai_device, ai_doctor, ai_docs_audit, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
+from app.commands.ai import ai_approval_command, ai_ask, ai_ask_agent, ai_calendar, ai_chat, ai_demo, ai_device, ai_doctor, ai_docs_audit, ai_hardening, ai_home_preview, ai_intent_preview, ai_main, ai_memory, ai_notification_preview, ai_panel, ai_pc_preview, ai_plan, ai_reminder, ai_review, ai_security_audit, ai_voice, ai_warmup
 from app.commands.config import validate_configs
 from app.commands.context import context_build, context_show_plan
 from app.commands.doctor import doctor
@@ -770,6 +770,29 @@ def _ai_demo(
         output=output,
         show_safety=show_safety,
         no_write=no_write,
+    )
+
+
+@ai.command("hardening")
+def _ai_hardening(
+    project: str = typer.Option(..., "--project"),
+    latency: bool = typer.Option(False, "--latency"),
+    safety: bool = typer.Option(False, "--safety"),
+    run_all: bool = typer.Option(False, "--all"),
+    as_json: bool = typer.Option(False, "--json"),
+    as_markdown: bool = typer.Option(False, "--markdown"),
+    no_write: bool = typer.Option(False, "--no-write"),
+    output: str | None = typer.Option(None, "--output", help="Write report to file (workspace/outputs/hardening/)"),
+) -> None:
+    ai_hardening(
+        project=project,
+        latency=latency,
+        safety=safety,
+        run_all=run_all,
+        as_json=as_json,
+        as_markdown=as_markdown,
+        no_write=no_write,
+        output=output,
     )
 
 

@@ -108,7 +108,7 @@ class RoutineEngine:
             return RoutinePreview(
                 routine_id="unknown",
                 routine_name=name_or_alias,
-                summary="Bilinmeyen rutin.",
+                summary="Bilinmeyen rutin. Gerçek işlem yapılmadı.",
                 steps=[],
                 risk_level="unknown",
                 requires_confirmation=False,
@@ -172,7 +172,7 @@ class RoutineEngine:
                 status=RoutineStatus.BLOCKED,
                 executed=False,
                 dry_run=True,
-                message=f"Rutin engellendi: {preview.blocked_reason}",
+                message=f"Rutin engellendi: {preview.blocked_reason}. Gerçek işlem yapılmadı.",
                 step_results=step_results,
                 blocked_reason=preview.blocked_reason,
                 audit_metadata={"execution_attempted": False, "routine_id": preview.routine_id, "status": "blocked"},
@@ -184,7 +184,10 @@ class RoutineEngine:
                 status=RoutineStatus.AWAITING_CONFIRMATION,
                 executed=False,
                 dry_run=True,
-                message=f"'{preview.routine_name}' rutini onay bekliyor. Risk seviyesi: {preview.risk_level}.",
+                message=(
+                    f"'{preview.routine_name}' rutini önizlemede onay bekliyor. "
+                    f"Risk seviyesi: {preview.risk_level}. Gerçek işlem yapılmadı."
+                ),
                 step_results=step_results,
                 audit_metadata={
                     "execution_attempted": False,
@@ -198,7 +201,7 @@ class RoutineEngine:
             status=RoutineStatus.PREVIEWED,
             executed=False,
             dry_run=True,
-            message=f"'{preview.routine_name}' rutini guvenli. Dry-run modunda calistirilabilir.",
+            message=f"'{preview.routine_name}' rutini önizlemede güvenli. Gerçek işlem yapılmadı.",
             step_results=step_results,
             audit_metadata={"execution_attempted": False, "routine_id": preview.routine_id, "status": "previewed"},
         )
